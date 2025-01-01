@@ -1,4 +1,4 @@
-package Yeogigallae_BackEnd;
+package com.umc.yeogi_gal_lae;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
