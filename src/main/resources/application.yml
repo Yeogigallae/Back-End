@@ -16,3 +16,8 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+  springdoc:
+    api-docs:
+      enabled: true
+    swagger-ui:
+      enabled: true
