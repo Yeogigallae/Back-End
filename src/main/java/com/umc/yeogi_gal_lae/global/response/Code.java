@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.global.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -23,9 +24,26 @@ public enum Code {
     MEMBER_LOGIN_SESSION_EXPIRED("ATH-004", "Auth session expired."),
 
 
-    SERVER_ERROR("SEV-999", "Check the server.");
+    SERVER_ERROR("SEV-999", "Check the server."),
+
+    // User Success
+    USER_FETCH_OK("USER_200", "유저 정보 조회 성공");
+
 
     private final String code;
     private final String message;
+
+    Code(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 
 }

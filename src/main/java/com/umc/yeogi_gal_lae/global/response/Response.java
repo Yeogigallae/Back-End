@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -43,4 +44,11 @@ public class Response<T> {
         return response;
     }
 
+    public static <T> Response<T> of(Code code, T data) {
+        Response<T> response = new Response<>();
+        response.code = code.getCode();
+        response.message = code.getMessage();
+        response.data = data;
+        return response;
+    }
 }
