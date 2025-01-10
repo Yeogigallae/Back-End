@@ -3,7 +3,7 @@ package com.umc.yeogi_gal_lae.global.config;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.jwt.JwtAuthenticationFilter;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
-import com.umc.yeogi_gal_lae.global.oauth.handler.OAuth2LoginSuccessHandler;
+import com.umc.yeogi_gal_lae.global.oauth.handle.OAuth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOAuth2UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
