@@ -23,7 +23,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication)  {
        try {
-           CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal()
+           CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+
+           String accessToken = JwtService.createAccessToken(oAuth2User.getEmail());
+           String refreshToken = JwtService.createRefreshToken();
        }
     }
 }
