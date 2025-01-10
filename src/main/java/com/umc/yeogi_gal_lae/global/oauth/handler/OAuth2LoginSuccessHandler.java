@@ -1,9 +1,8 @@
-package com.umc.yeogi_gal_lae.global.oauth.handle;
+package com.umc.yeogi_gal_lae.global.oauth.handler;
 
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication)  {
        try {
-           CustomOAuth2
+           CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal()
        }
     }
 }

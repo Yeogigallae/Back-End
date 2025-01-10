@@ -26,8 +26,10 @@ public enum Code {
 
     SERVER_ERROR("SEV-999", "Check the server."),
 
-    // User Success
-    USER_FETCH_OK("USER_200", "유저 정보 조회 성공");
+    // User
+    USER_FETCH_OK("USER_200", "유저 정보 조회 성공"),
+    USER_NOT_FOUND("USER_401", "로그인 정보가 없습니다."),
+    ;
 
 
     private final String code;

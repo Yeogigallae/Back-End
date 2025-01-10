@@ -4,4 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class OAuthAttributes {
+
+    private final String nameAtri
 }
