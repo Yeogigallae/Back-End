@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@AllArgsConstructor
+
 public enum Code {
 
     OK("COM-000", "Ok."),
@@ -29,6 +29,16 @@ public enum Code {
     // User
     USER_FETCH_OK("USER_200", "유저 정보 조회 성공"),
     USER_NOT_FOUND("USER_401", "로그인 정보가 없습니다."),
+
+    // Token Success
+    TOKEN_REISSUE_OK("TOKEN_200", "토큰 재발급 성공"),
+
+    // User Error
+    USER_NOT_AUTHENTICATED("USER_403", "로그인 하지 않았습니다."),
+
+    // Token Error
+    INVALID_REFRESH_TOKEN("TOKEN_401", "리프레시 토큰이 유효하지 않습니다."),
+
     ;
 
 

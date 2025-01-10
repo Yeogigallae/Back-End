@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.global.jwt.service;
 
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -73,6 +74,13 @@ public class JwtService {
                 .compact();
     }
 
+    public String reIssueRefreshToken(User user) {
+        String reIssuedRefreshToken = this.createRefreshToken();
+        user.updateRefreshToken(reIssuedRefreshToken);
+        userRepository.saveAndFlush(user);
+        return reIssuedRefreshToken;
+    }
+
     public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -96,13 +104,13 @@ public class JwtService {
         }
     }
 
-    public Optional<String> extractEmail(String accessToken) {
+    public String extractEmail(String accessToken) {
         Claims claims = decodeAccessToken(accessToken);
         if (claims != null) {
             String email = claims.get("email", String.class);
-            return Optional.of(email);
+            return email;
         }
-        return Optional.empty();
+        return null;
     }
 
     private Claims decodeAccessToken(String accessToken) {

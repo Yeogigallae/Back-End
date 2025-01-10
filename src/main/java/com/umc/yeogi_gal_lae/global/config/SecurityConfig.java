@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.global.config;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.jwt.JwtAuthenticationFilter;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
+import com.umc.yeogi_gal_lae.global.oauth.handle.OAuth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.OAuth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOAuth2UserService;
 import java.util.List;
@@ -57,23 +58,26 @@ public class SecurityConfig {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(requests -> requests
-                        .antMatchers(
-                                "/v3/api-docs/**",
-                                "/oauth2/**",
-                                "/oauth2/authorization/kakao",
-                                "/index.html",
-                                "/swagger/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui/index.html/**",
-                                "/api-docs/**",
-                                "/signup.html",
-                                "/api/v1/reissue"
-                        ).permitAll()
-                        .antMatchers("/admin/**").hasRole("ADMIN")
-                        .antMatchers("/user/**").hasRole("USER")
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests(requests ->
+                        requests.anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
+//                .authorizeHttpRequests(requests -> requests
+//                        .antMatchers(
+//                                "/v3/api-docs/**",
+//                                "/oauth2/**",
+//                                "/oauth2/authorization/kakao",
+//                                "/index.html",
+//                                "/swagger/**",
+//                                "/swagger-ui/**",
+//                                "/swagger-ui/index.html/**",
+//                                "/api-docs/**",
+//                                "/signup.html",
+//                                "/api/v1/reissue"
+//                        ).permitAll()
+//                        .antMatchers("/admin/**").hasRole("ADMIN")
+//                        .antMatchers("/user/**").hasRole("USER")
+//                        .anyRequest().authenticated()
+//                )
                 .oauth2Login(oauth2Login -> oauth2Login
                         .loginPage("/login")
                         .userInfoEndpoint(endpoint -> endpoint

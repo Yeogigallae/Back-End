@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
     @Id
@@ -22,7 +22,7 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "username")

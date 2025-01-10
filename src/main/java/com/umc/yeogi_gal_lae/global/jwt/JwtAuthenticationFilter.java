@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.info("유효한 Access Token이 발견되었습니다: {}", accessToken);
 
                     // Access Token에서 이메일 추출
-                    String email = jwtService.extractEmail(accessToken).orElse(null);
+                    String email = jwtService.extractEmail(accessToken);
                     if (email != null) {
                         log.info("이메일이 추출되었습니다: {}", email);
 
