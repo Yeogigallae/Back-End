@@ -17,15 +17,17 @@ public class CustomOAuth2User implements OAuth2User {
     private String nameAttributeKey;
     private String name;
     private String email;
+    private String profileImage;
 
     @Builder
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities, Map<String, Object> attributes,
-                            String nameAttributeKey, String name, String email) {
+                            String nameAttributeKey, String name, String email, String profileImage) {
         this.authorities = authorities;
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
         this.email = email;
+        this.profileImage = profileImage;
     }
 
     @Override
@@ -33,11 +35,6 @@ public class CustomOAuth2User implements OAuth2User {
         return attributes;
     }
 
-    /**
-     * 이메일을 반환합니다.
-     *
-     * @return 사용자 이메일
-     */
     public String getEmail() {
         return email;
     }
@@ -46,4 +43,5 @@ public class CustomOAuth2User implements OAuth2User {
     public String getName() {
         return name;
     }
+
 }

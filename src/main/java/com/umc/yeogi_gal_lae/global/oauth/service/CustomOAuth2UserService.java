@@ -49,7 +49,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             throw new OAuth2AuthenticationException("이메일 정보가 누락되었습니다.");
         }
 
+        String profileImage = oAuthAttributes.getProfileImage();
+
         log.info("소셜 로그인 사용자 이메일: {}", email);
+        log.info("소셜 로그인 사용자 프로필 이미지: {}", profileImage);
 
         // 사용자 조회 및 생성 (존재하지 않으면 생성)
         User user = userRepository.findByEmail(email)
@@ -58,13 +61,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     return userService.createUser(oAuthAttributes, email);
                 });
 
-        // CustomOAuth2User 객체 생성 및 반환 (socialType 제거)
+        // CustomOAuth2User 객체 생성 및 반환
         return CustomOAuth2User.builder()
                 .authorities(Collections.emptyList())
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .name(oAuthAttributes.getName())
                 .email(email)
+                .profileImage(profileImage)
                 .build();
     }
 }

@@ -42,7 +42,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173")); // 프론트엔드 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Set-Cookie")); // 필요 시 추가
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

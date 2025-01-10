@@ -34,11 +34,12 @@ public class UserService {
 
     // 소셜 로그인 사용자 생성 메서드
     public User createUser(OAuthAttributes oAuthAttributes, String email) {
-        OAuth2UserInfo userInfo = oAuthAttributes.getOAuth2UserInfo();
+        String profileImage = oAuthAttributes.getProfileImage();
 
         User user = User.builder()
                 .email(email)
-                .profileImage(userInfo.getProfileImage())
+                .profileImage(profileImage)
+                .refreshToken(null)
                 .build();
 
         return userRepository.save(user);
@@ -90,6 +91,16 @@ public class UserService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    public void updateRefreshToken(User user, String refreshToken) {
+        user.updateRefreshToken(refreshToken);
+        userRepository.save(user);
+    }
+
+    public String generateRefreshToken() {
+        // Refresh Token 생성 로직 (예: UUID, JWT 등)
+        return java.util.UUID.randomUUID().toString();
     }
 
 }
