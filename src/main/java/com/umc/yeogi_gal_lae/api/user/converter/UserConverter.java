@@ -6,6 +6,8 @@ import com.umc.yeogi_gal_lae.api.user.dto.response.UserInfoResponse;
 
 public class UserConverter {
     public static UserInfoResponse ofUserInfoResponse(User user) {
+        if (user == null) return null;
+
         return UserInfoResponse.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())

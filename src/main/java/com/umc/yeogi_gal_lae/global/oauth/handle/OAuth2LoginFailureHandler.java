@@ -20,7 +20,7 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException, ServletException {
+                                        AuthenticationException exception) throws IOException {
         log.error("OAuth2 로그인 실패: {}", exception.getMessage());
 
         // 에러 응답 데이터 설정

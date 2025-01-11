@@ -49,6 +49,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                 .email(email)
                                 .username(nickname)
                                 .profileImage(profileImage)
+                                .accessToken(accessToken)
                                 .refreshToken(refreshToken)
                                 .build();
                         return userRepository.save(newUser);

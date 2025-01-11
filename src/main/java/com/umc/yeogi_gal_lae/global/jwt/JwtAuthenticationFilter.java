@@ -72,19 +72,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * DB에서 찾은 사용자로 Spring Security Context에 인증 정보 저장
      */
     private void saveAuthentication(User user) {
-        // principal = user.getEmail()
+        // 1) UserDetails 객체 생성
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password("N/A")
                 .build();
 
+        // 2) UsernamePasswordAuthenticationToken의 첫 번째 파라미터(Principal)에 userDetails 넣기
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
+                        userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("사용자 인증 정보가 저장되었습니다: userId={}, email={}", user.getId(), user.getEmail());
     }
 }

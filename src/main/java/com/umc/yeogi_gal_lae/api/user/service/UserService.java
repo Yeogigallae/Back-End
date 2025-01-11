@@ -46,7 +46,9 @@ public class UserService {
         User savedUser = userRepository.save(newUser);
 
         // 4) 저장 완료 후 로그: userId 확인
-        log.info("New user saved. userId={}, email={}", savedUser.getId(), savedUser.getEmail());
+        log.info("New user saved. userId={}, email={}, profileImage={}",
+                savedUser.getId(), savedUser.getEmail(), savedUser.getProfileImage());
+
         return savedUser;
     }
 
@@ -56,8 +58,12 @@ public class UserService {
      */
     public User getUser() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        // 유저 정보 조회
-        return userRepository.findByEmail(userDetails.getUsername())
+        if (userDetails == null) {
+            throw new BusinessException(USER_NOT_FOUND);
+        }
+        String email = userDetails.getUsername();
+        // DB에서 사용자 조회
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 
