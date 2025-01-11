@@ -1,120 +1,77 @@
 package com.umc.yeogi_gal_lae.api.user.service;
 
-import static com.umc.yeogi_gal_lae.global.response.Code.INVALID_REFRESH_TOKEN;
-import static com.umc.yeogi_gal_lae.global.response.Code.USER_NOT_AUTHENTICATED;
-import static com.umc.yeogi_gal_lae.global.response.Code.USER_NOT_FOUND;
-
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.exception.BusinessException;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
-import com.umc.yeogi_gal_lae.global.oauth.OAuthAttributes;
-import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOAuth2User;
-import lombok.AccessLevel;
+import com.umc.yeogi_gal_lae.global.response.Code;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserService {
-
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public User createUser(OAuthAttributes attrs, String email) {
-        // 1) 로깅: 어떤 이메일 / 닉네임으로 유저를 생성하려고 하는지
-        log.info("createUser() called with email={} nickname={} profileImage={}",
-                email, attrs.getName(), attrs.getProfileImage());
-
-        // 2) 엔티티 빌드
-        User newUser = User.builder()
-                .email(email)
-                .username(attrs.getName())      // 카카오/구글의 닉네임 -> DB username
-                .profileImage(attrs.getProfileImage())
-                .build();
-
-        // 3) 실제 DB 저장
-        User savedUser = userRepository.save(newUser);
-
-        // 4) 저장 완료 후 로그: userId 확인
-        log.info("New user saved. userId={}, email={}, profileImage={}",
-                savedUser.getId(), savedUser.getEmail(), savedUser.getProfileImage());
-
-        return savedUser;
-    }
-
     /**
-     * 현재 인증된 사용자를 반환
-     * (예: SecurityContext에서 email 추출 후 findByEmail)
+     * 현재 로그인한 사용자 정보를 가져온다고 가정한 예시 메서드
+     * - 실제로는 SecurityContext에서 email 을 꺼내거나,
+     *   @AuthenticationPrincipal UserDetails 를 이용하는 등 다양하게 구현 가능
      */
     public User getUser() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userDetails == null) {
-            throw new BusinessException(USER_NOT_FOUND);
-        }
-        String email = userDetails.getUsername();
-        // DB에서 사용자 조회
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        // 예: (가정) SecurityContextHolder 에서 인증 정보 꺼내기
+        String currentUserEmail = jwtService.getCurrentUserEmail()
+                .orElseThrow(() -> new BusinessException(Code.USER_NOT_FOUND)); // 예시 예외
+
+        return userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new BusinessException(Code.USER_NOT_FOUND));
     }
-
-
 
     /**
-     * 액세스 토큰과 리프레시 토큰을 재발급하는 메서드
-     *
-     * @param accessToken 기존 액세스 토큰
-     * @param refreshToken 기존 리프레시 토큰
-     * @return 새로운 JWT 토큰
+     * AccessToken 재발급
+     * @param accessToken  만료된(또는 만료 직전) AccessToken
+     * @param refreshToken 유효한 RefreshToken
+     * @return 새롭게 발급된 accessToken, refreshToken
      */
-    @Transactional
     public JwtToken reissueToken(String accessToken, String refreshToken) {
-        // Refresh Token 검증
-        if (!jwtService.isTokenValid(refreshToken)) {
-            throw new BusinessException(INVALID_REFRESH_TOKEN);
+        // 1) refreshToken 이 유효한지 체크 (jwt 만료 여부)
+        if (!jwtService.validateToken(refreshToken)) {
+            log.error("[UserService] Refresh Token is invalid or expired");
+            throw new BusinessException(Code.INVALID_REFRESH_TOKEN); // 예시
         }
 
-        String email = jwtService.extractEmail(accessToken); // 이메일 추출 메서드
-
-        if (email == null || email.isEmpty()) {
-            throw new BusinessException(USER_NOT_AUTHENTICATED);
+        // 2) refreshToken 에서 email 추출
+        String email = jwtService.getEmailFromToken(refreshToken);
+        if (email == null) {
+            throw new BusinessException(Code.INVALID_REFRESH_TOKEN);
         }
 
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new BusinessException(USER_NOT_AUTHENTICATED);
+        // 3) DB에서 유저 조회 & 저장된 refreshToken 과 일치하는지 확인
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            throw new BusinessException(Code.USER_NOT_FOUND);
+        }
+        User user = userOptional.get();
+
+        if (!refreshToken.equals(user.getRefreshToken())) {
+            throw new BusinessException(Code.INVALID_REFRESH_TOKEN);
         }
 
-        User user = userOpt.get();
-        String userRefreshToken = user.getRefreshToken();
+        // 4) 새 토큰 발급
+        JwtToken newTokens = jwtService.createJwtToken(email);
 
-        // DB에 리프레시 토큰 없을 경우 (로그아웃 상태)
-        if (userRefreshToken == null || !userRefreshToken.equals(refreshToken)) {
-            throw new BusinessException(USER_NOT_AUTHENTICATED);
-        }
-
-        // 새로운 Access Token 생성
-        String newAccessToken = jwtService.createAccessToken(email);
-        // 새로운 Refresh Token 재발급
-        String newRefreshToken = jwtService.reIssueRefreshToken(user);
-
-        // 업데이트된 리프레시 토큰을 DB에 저장
-        user.updateRefreshToken(newRefreshToken);
+        // 5) DB 업데이트 (Access/Refresh 토큰 최신화)
+        user.setAccessToken(newTokens.getAccessToken());
+        user.setRefreshToken(newTokens.getRefreshToken());
         userRepository.save(user);
 
-        return JwtToken.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .build();
+        return newTokens;
     }
-
 }

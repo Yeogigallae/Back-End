@@ -1,22 +1,23 @@
 package com.umc.yeogi_gal_lae.global.jwt;
 
-import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
+import com.umc.yeogi_gal_lae.global.exception.BusinessException;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
+import com.umc.yeogi_gal_lae.global.response.Code;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.*;
-import org.springframework.security.core.authority.mapping.*;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,67 +25,78 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final List<String> excludeUrlPatterns;
 
-    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        log.info("checkAccessTokenAndAuthentication() 호출");
+        String requestURI = request.getRequestURI();
 
-        // 1) 쿠키나 헤더에서 Access Token 추출
-        Optional<String> accessTokenOpt = jwtService.extractAccessTokenFromCookie(request);
-        if (accessTokenOpt.isPresent()) {
-            String accessToken = accessTokenOpt.get();
-            log.info("Access Token이 쿠키에서 추출되었습니다: {}", accessToken);
-
-            // 2) 토큰 검증
-            if (jwtService.isTokenValid(accessToken)) {
-                log.info("유효한 Access Token이 발견되었습니다: {}", accessToken);
-
-                // 3) 이메일 추출
-                String email = jwtService.extractEmail(accessToken);
-                log.info("이메일이 추출되었습니다: {}", email);
-
-                // 4) DB에서 email로 사용자 조회
-                userRepository.findByEmail(email).ifPresentOrElse(user -> {
-                    log.info("DB에서 사용자 발견: userId={}, email={}", user.getId(), user.getEmail());
-                    saveAuthentication(user);
-                }, () -> {
-                    // 여기서 예외를 던지는 대신, 그냥 인증 없이 패스
-                    log.info("DB에서 email={} 사용자 없음 → 아직 미생성 사용자로 간주, 인증 미적용", email);
-                });
-            } else {
-                log.warn("Access Token이 유효하지 않습니다: {}", accessToken);
+        // Exclude the URLs from filter
+        for (String pattern : excludeUrlPatterns) {
+            if (pathMatcher.match(pattern, requestURI)) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        } else {
-            log.warn("쿠키에서 Access Token을 찾을 수 없습니다.");
         }
 
-        // 필터 체인 계속
+        try {
+            // Authorization 헤더에서 토큰 추출
+            String header = request.getHeader("Authorization");
+
+            if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
+                log.warn("JWT 토큰이 존재하지 않거나 Bearer로 시작하지 않습니다.");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // Bearer 제거
+            String token = header.substring(7);
+            log.debug("Extracted JWT Token: {}", token);
+
+            // 토큰 유효성 검증
+            if (jwtService.validateToken(token)) {
+                String email = jwtService.getEmailFromToken(token);
+                log.debug("Extracted Email from Token: {}", email);
+
+                if (email != null) {
+                    // DB에서 유저 조회
+                    var userOptional = userRepository.findByEmail(email);
+                    if (userOptional.isPresent()) {
+                        var user = userOptional.get();
+
+                        // 인증 토큰 생성
+                        UsernamePasswordAuthenticationToken authenticationToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        user, null, List.of() // 권한 리스트가 필요하다면 추가
+                                );
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                        // SecurityContext에 인증 정보 설정
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        log.info("SecurityContext에 인증 정보를 설정했습니다. 사용자: {}", email);
+                    } else {
+                        log.warn("이메일 {}를 가진 사용자를 DB에서 찾을 수 없습니다.", email);
+                        throw new BusinessException(Code.USER_NOT_FOUND);
+                    }
+                }
+            } else {
+                log.warn("유효하지 않은 JWT 토큰입니다.");
+            }
+        } catch (BusinessException ex) {
+            log.error("BusinessException 발생: {}", ex.getMessage());
+            // 필요 시, 에러 응답을 설정할 수 있습니다.
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+            return; // 필터 체인 진행 중지
+        } catch (Exception ex) {
+            log.error("JWT 인증 필터 중 오류 발생: {}", ex.getMessage());
+            // 필요 시, 에러 응답을 설정할 수 있습니다.
+        }
+
         filterChain.doFilter(request, response);
-    }
-
-    /**
-     * DB에서 찾은 사용자로 Spring Security Context에 인증 정보 저장
-     */
-    private void saveAuthentication(User user) {
-        // 1) UserDetails 객체 생성
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password("N/A")
-                .build();
-
-        // 2) UsernamePasswordAuthenticationToken의 첫 번째 파라미터(Principal)에 userDetails 넣기
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

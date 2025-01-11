@@ -1,83 +1,120 @@
 package com.umc.yeogi_gal_lae.global.jwt.service;
 
-import com.umc.yeogi_gal_lae.api.user.domain.User;
-import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
-import io.jsonwebtoken.Claims;
+import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
-@RequiredArgsConstructor
 @Getter
 @Slf4j
 public class JwtService {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    private final Key secretKey;
+    private final long accessTokenValidTime;   // ms
+    private final long refreshTokenValidTime;  // ms
+
     @Value("${jwt.secret}")
-    private String secretKey;
+    private String secretKeyString;
 
-    @Value("${jwt.access.expiration}")
-    private Long accessTokenExpirationPeriod;
-
-    @Value("${jwt.refresh.expiration}")
-    private Long refreshTokenExpirationPeriod;
-
-    @Value("${jwt.refresh.header}")
-    private String refreshHeader;
-
-    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
-    private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String EMAIL_CLAIM = "email";
-    private static final String BEARER = "Bearer";
-
-    private final UserRepository userRepository;
-
-    private Key key;
-
-    @PostConstruct
-    public void init() {
-        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token-validity}") long accessValidTime,
+            @Value("${jwt.refresh-token-validity}") long refreshValidTime
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.secretKeyString = secret;
+        this.accessTokenValidTime = accessValidTime;
+        this.refreshTokenValidTime = refreshValidTime;
     }
 
-    // accessToken 생성 메소드
-    public String createAccessToken(String email) {
-        Date now = new Date();
-        return Jwts.builder()
-                .setSubject(ACCESS_TOKEN_SUBJECT)
-                .setExpiration(new Date(now.getTime() + accessTokenExpirationPeriod))
-                .claim(EMAIL_CLAIM, email)
-                .signWith(key, SignatureAlgorithm.HS256)
+    // JWT 생성
+    public JwtToken createJwtToken(String email) {
+        long now = System.currentTimeMillis();
+
+        // Access Token
+        String accessToken = Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + accessTokenValidTime))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
-    }
 
-    public String createRefreshToken() {
-        Date now = new Date();
-        return Jwts.builder()
-                .setSubject(REFRESH_TOKEN_SUBJECT)
-                .setExpiration(new Date(now.getTime() + refreshTokenExpirationPeriod))
-                .signWith(key, SignatureAlgorithm.HS256)
+        // Refresh Token
+        String refreshToken = Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + refreshTokenValidTime))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+
+        return new JwtToken(accessToken, refreshToken);
     }
 
-    public String reIssueRefreshToken(User user) {
-        String reIssuedRefreshToken = this.createRefreshToken();
-        user.updateRefreshToken(reIssuedRefreshToken);
-        userRepository.saveAndFlush(user);
-        return reIssuedRefreshToken;
+    // 헤더 값에서 "Bearer " 접두어를 필터링 + 제거하여 실제 토큰만 반환
+    public Optional<String> extractBearerToken(String headerValue) {
+        return Optional.ofNullable(headerValue)
+                .filter(h -> h.startsWith(BEARER_PREFIX)) // "Bearer "로 시작하는지
+                .map(h -> h.substring(BEARER_PREFIX.length())); // "Bearer " 제거
     }
 
+    // 토큰에서 email 추출
+    public String getEmailFromToken(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (Exception e) {
+            log.error("[JwtService] 토큰 파싱 실패: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    // 토큰 유효성 검증
+    public boolean validateToken(String token) {
+        try {
+            // parserBuilder + secretKey 로 검증
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            log.warn("[JwtService] 유효하지 않은 토큰: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    // SecurityContextHolder에서 현재 인증된 사용자의 email 꺼내기
+    public Optional<String> getCurrentUserEmail() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            return Optional.empty();
+        }
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // 예: principal 이 UserDetails 타입이라면...
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return Optional.ofNullable(userDetails.getUsername());
+        }
+        return Optional.empty();
+    }
+
+    // 쿠키에서 Access Token 추출
     public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -90,33 +127,4 @@ public class JwtService {
         log.warn("Access Token이 쿠키에서 발견되지 않았습니다.");
         return Optional.empty();
     }
-
-    public boolean isTokenValid(String token) {
-        try {
-            Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
-            return false;
-        }
-    }
-
-    public String extractEmail(String accessToken) {
-        Claims claims = decodeAccessToken(accessToken);
-        if (claims != null) {
-            String email = claims.get("email", String.class);
-            return email;
-        }
-        return null;
-    }
-
-    private Claims decodeAccessToken(String accessToken) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(accessToken)
-                .getBody();
-    }
-
-
 }

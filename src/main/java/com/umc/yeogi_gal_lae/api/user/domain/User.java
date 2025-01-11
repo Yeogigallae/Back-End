@@ -12,13 +12,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "users")
 @Builder
 @AllArgsConstructor
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,9 +41,5 @@ public class User extends BaseEntity {
 
     @Column(name = "refresh_token")
     private String refreshToken;
-
-    public void updateRefreshToken(String newRefreshToken) {
-        this.refreshToken = newRefreshToken;
-    }
 
 }
