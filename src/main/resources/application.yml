@@ -6,7 +6,7 @@ spring:
       default: dev # 기본 프로필로 dev 설정
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
     generate-ddl: false
     properties:
