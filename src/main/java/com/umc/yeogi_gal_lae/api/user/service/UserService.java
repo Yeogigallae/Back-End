@@ -10,6 +10,7 @@ import com.umc.yeogi_gal_lae.global.exception.BusinessException;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import com.umc.yeogi_gal_lae.global.oauth.OAuthAttributes;
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOAuth2User;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,40 +30,38 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    /**
-     * 소셜 로그인 사용자 생성 메서드
-     *
-     * @param oAuthAttributes OAuth2 제공자로부터 받은 사용자 정보
-     * @param email 사용자 이메일
-     * @return 생성된 사용자 엔티티
-     */
-    public User createUser(OAuthAttributes oAuthAttributes, String email) {
-        // 직접 이메일과 프로필 이미지를 가져옴
-        String profileImage = oAuthAttributes.getProfileImage();
+    public User createUser(OAuthAttributes attrs, String email) {
+        // 1) 로깅: 어떤 이메일 / 닉네임으로 유저를 생성하려고 하는지
+        log.info("createUser() called with email={} nickname={} profileImage={}",
+                email, attrs.getName(), attrs.getProfileImage());
 
-        User user = User.builder()
+        // 2) 엔티티 빌드
+        User newUser = User.builder()
                 .email(email)
-                .profileImage(profileImage)
+                .username(attrs.getName())      // 카카오/구글의 닉네임 -> DB username
+                .profileImage(attrs.getProfileImage())
                 .build();
 
-        return userRepository.save(user);
+        // 3) 실제 DB 저장
+        User savedUser = userRepository.save(newUser);
+
+        // 4) 저장 완료 후 로그: userId 확인
+        log.info("New user saved. userId={}, email={}", savedUser.getId(), savedUser.getEmail());
+        return savedUser;
     }
 
     /**
-     * 현재 인증된 사용자의 정보를 가져오는 메서드
-     *
-     * @return 사용자 엔티티
+     * 현재 인증된 사용자를 반환
+     * (예: SecurityContext에서 email 추출 후 findByEmail)
      */
     public User getUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof UserDetails)) {
-            throw new BusinessException(USER_NOT_FOUND);
-        }
-        UserDetails userDetails = (UserDetails) principal;
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // 유저 정보 조회
         return userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
+
+
 
     /**
      * 액세스 토큰과 리프레시 토큰을 재발급하는 메서드

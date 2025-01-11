@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @Entity
 @Table(name = "users")
+@Builder
+@AllArgsConstructor
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
     @Id
@@ -36,15 +39,6 @@ public class User extends BaseEntity {
 
     @Column(name = "refresh_token")
     private String refreshToken;
-
-    @Builder
-    public User(String email, String username, String profileImage, String accessToken, String refreshToken){
-        this.email = email;
-        this.username = username;
-        this.profileImage = profileImage;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-    }
 
     public void updateRefreshToken(String newRefreshToken) {
         this.refreshToken = newRefreshToken;

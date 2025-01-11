@@ -28,66 +28,70 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+                                        Authentication authentication) {
         log.info("OAuth2 Login 성공!");
 
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        try {
+            CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+            String email = oAuth2User.getEmail();
+            String nickname = oAuth2User.getUsername(); // CustomOAuth2User에서 nickname 리턴
+            String profileImage = oAuth2User.getProfileImage();
 
-        String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
-        String refreshToken = jwtService.createRefreshToken();
+            // JWT 생성
+            String accessToken = jwtService.createAccessToken(email);
+            String refreshToken = jwtService.createRefreshToken();
 
-        // 이메일로 사용자가 이미 있는지 확인
-        User user = userRepository.findByEmail(oAuth2User.getEmail())
-                .orElseGet(() -> {
-                    // 신규 사용자 생성
-                    User newUser = User.builder()
-                            .email(oAuth2User.getEmail())
-                            .profileImage(oAuth2User.getProfileImage())
-                            .refreshToken(refreshToken)
-                            .build();
-                    return userRepository.save(newUser);
-                });
+            // DB에 user 저장 또는 업데이트
+            User user = userRepository.findByEmail(email)
+                    .orElseGet(() -> {
+                        // 새로운 유저 생성
+                        User newUser = User.builder()
+                                .email(email)
+                                .username(nickname)
+                                .profileImage(profileImage)
+                                .refreshToken(refreshToken)
+                                .build();
+                        return userRepository.save(newUser);
+                    });
 
-        // 기존 사용자의 Refresh Token 업데이트
-        if (user.getRefreshToken() != null) {
-            user.updateRefreshToken(refreshToken);
-            userRepository.saveAndFlush(user);
+            // 이미 존재하는 유저라면 refreshToken 업데이트
+            if (!refreshToken.equals(user.getRefreshToken())) {
+                user.updateRefreshToken(refreshToken);
+                userRepository.saveAndFlush(user);
+            }
+
+            // 쿠키에 accessToken, refreshToken 저장
+            addTokenCookies(response, accessToken, refreshToken);
+
+            // 로그인 성공 후 리다이렉트
+            String redirectUrl = "http://localhost:5173"; // 프론트엔드 주소
+            response.sendRedirect(redirectUrl);
+
+        } catch (Exception e) {
+            log.error("OAuth2 Login 실패", e);
+            throw new RuntimeException(e);
         }
-
-        // Access Token과 Refresh Token을 쿠키에 설정
-        addTokenCookies(response, accessToken, refreshToken);
-
-        // 로그인 성공 후 리다이렉트
-        String redirectUrl = "http://localhost:5173"; // 프론트엔드 URL로 변경
-        response.sendRedirect(redirectUrl);
     }
 
-    /**
-     * Access Token과 Refresh Token을 쿠키에 설정합니다.
-     *
-     * @param response     HTTP 응답 객체
-     * @param accessToken  생성된 Access Token
-     * @param refreshToken 생성된 Refresh Token
-     */
     private void addTokenCookies(HttpServletResponse response, String accessToken, String refreshToken) {
         log.info("Setting AccessToken and RefreshToken cookies");
 
-        // Access Token 쿠키 생성
-        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(secure); // 환경에 따라 설정
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(60 * 60); // 1시간
+        // Access Token 쿠키
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(secure);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(60 * 60); // 1시간
+        // SameSite 속성은 아래 SameSiteFilter에서 처리하거나, 수동으로 붙일 수도 있음
 
-        // Refresh Token 쿠키 생성
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(secure); // 환경에 따라 설정
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
+        // Refresh Token 쿠키
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(secure);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
 
-        // 응답에 쿠키 추가
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
     }
 }

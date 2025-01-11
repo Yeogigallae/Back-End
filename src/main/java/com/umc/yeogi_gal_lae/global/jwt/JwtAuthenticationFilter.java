@@ -5,84 +5,86 @@ import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
+import org.springframework.security.core.*;
+import org.springframework.security.core.authority.mapping.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@RequiredArgsConstructor
+import java.io.IOException;
+import java.util.Optional;
+
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
-        checkAccessTokenAndAuthentication(request, response, filterChain);
-    }
 
-    // 요청에서 Access Token을 추출하고, 토큰의 유효성을 검증한 후,
-    // 유효한 토큰일 경우 해당 사용자의 인증 정보를 SecurityContext에 저장합니다.
-    public void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                                  FilterChain filterChain) throws ServletException, IOException {
         log.info("checkAccessTokenAndAuthentication() 호출");
 
-        // 요청의 쿠키에서 Access Token 추출
-        jwtService.extractAccessTokenFromCookie(request)
-                .filter(jwtService::isTokenValid) // 토큰의 유효성 검증
-                .ifPresent(accessToken -> {
-                    log.info("유효한 Access Token이 발견되었습니다: {}", accessToken);
+        // 1) 쿠키나 헤더에서 Access Token 추출
+        Optional<String> accessTokenOpt = jwtService.extractAccessTokenFromCookie(request);
+        if (accessTokenOpt.isPresent()) {
+            String accessToken = accessTokenOpt.get();
+            log.info("Access Token이 쿠키에서 추출되었습니다: {}", accessToken);
 
-                    // Access Token에서 이메일 추출
-                    String email = jwtService.extractEmail(accessToken);
-                    if (email != null) {
-                        log.info("이메일이 추출되었습니다: {}", email);
+            // 2) 토큰 검증
+            if (jwtService.isTokenValid(accessToken)) {
+                log.info("유효한 Access Token이 발견되었습니다: {}", accessToken);
 
-                        // 이메일을 기반으로 사용자 정보 조회
-                        userRepository.findByUsername(email)
-                                .ifPresent(user -> {
-                                    log.info("사용자 정보가 발견되었습니다: {}", user);
-                                    saveAuthentication(user); // 인증 정보 저장
-                                    log.info("사용자 인증 정보가 저장되었습니다: {}", user);
-                                });
-                    } else {
-                        log.warn("이메일 추출 실패.");
-                    }
+                // 3) 이메일 추출
+                String email = jwtService.extractEmail(accessToken);
+                log.info("이메일이 추출되었습니다: {}", email);
+
+                // 4) DB에서 email로 사용자 조회
+                userRepository.findByEmail(email).ifPresentOrElse(user -> {
+                    log.info("DB에서 사용자 발견: userId={}, email={}", user.getId(), user.getEmail());
+                    saveAuthentication(user);
+                }, () -> {
+                    // 여기서 예외를 던지는 대신, 그냥 인증 없이 패스
+                    log.info("DB에서 email={} 사용자 없음 → 아직 미생성 사용자로 간주, 인증 미적용", email);
                 });
+            } else {
+                log.warn("Access Token이 유효하지 않습니다: {}", accessToken);
+            }
+        } else {
+            log.warn("쿠키에서 Access Token을 찾을 수 없습니다.");
+        }
 
-        // 다음 필터로 요청 전달
+        // 필터 체인 계속
         filterChain.doFilter(request, response);
     }
 
     /**
-     * 사용자 정보를 기반으로 Authentication 객체를 생성하고, 이를 SecurityContext에 설정합니다.
-     * @param user 인증할 사용자 객체
+     * DB에서 찾은 사용자로 Spring Security Context에 인증 정보 저장
      */
-    public void saveAuthentication(User user) {
-        // Spring Security의 UserDetails 객체 생성
-        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
+    private void saveAuthentication(User user) {
+        // principal = user.getEmail()
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
-                .password("") // 소셜 로그인은 비밀번호가 필요 없으므로 빈 문자열 설정
+                .password("N/A")
                 .build();
 
-        // Authentication 객체 생성
         Authentication authentication =
-                new UsernamePasswordAuthenticationToken(userDetailsUser, null,
-                        authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
-        // SecurityContext에 Authentication 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("사용자 인증 정보가 저장되었습니다: userId={}, email={}", user.getId(), user.getEmail());
     }
 }

@@ -10,11 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -27,48 +25,53 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // Default OAuth2UserService를 사용하여 OAuth2User 로드
+        // 1) Spring Security에서 기본 User 로드
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        // OAuth2 로그인 시 키(PK)가 되는 값 (카카오의 경우 "id")
+        // 2) registrationId, userNameAttributeName
+        String registrationId = userRequest.getClientRegistration().getRegistrationId(); // "kakao", "google"
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails()
                 .getUserInfoEndpoint()
-                .getUserNameAttributeName();
+                .getUserNameAttributeName(); // "id" or "sub"
 
-        // 소셜 로그인에서 API가 제공하는 userInfo의 Json 값(유저 정보들)
+        // 3) attributes
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        OAuthAttributes oAuthAttributes = OAuthAttributes.of(registrationId, userNameAttributeName, attributes);
+        // 4) OAuthAttributes 파싱
+        OAuthAttributes oAuthAttrs = OAuthAttributes.of(registrationId, userNameAttributeName, attributes);
 
-        // 이메일 추출
-        String email = oAuthAttributes.getEmail();
+        // 5) 이메일 null 체크
+        String email = oAuthAttrs.getEmail();
         if (email == null || email.isEmpty()) {
-            throw new OAuth2AuthenticationException("이메일 정보가 누락되었습니다.");
+            OAuth2Error oauth2Error = new OAuth2Error(
+                    OAuth2ErrorCodes.INVALID_REQUEST,
+                    "이메일 정보가 누락되었습니다.",
+                    null
+            );
+            throw new OAuth2AuthenticationException(oauth2Error, "이메일 정보가 누락되었습니다.");
         }
 
-        String profileImage = oAuthAttributes.getProfileImage();
+        log.info("소셜 로그인 Provider: {}", registrationId);
+        log.info("소셜 로그인 사용자 email={} nickname={} profileImage={}",
+                email, oAuthAttrs.getName(), oAuthAttrs.getProfileImage());
 
-        log.info("소셜 로그인 사용자 이메일: {}", email);
-        log.info("소셜 로그인 사용자 프로필 이미지: {}", profileImage);
-
-        // 사용자 조회 및 생성 (존재하지 않으면 생성)
+        // 6) DB 조회 or 새로 저장
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     log.info("새로운 소셜 로그인 사용자 생성: {}", email);
-                    return userService.createUser(oAuthAttributes, email);
+                    // userService.createUser(...) 내부에서 save(...) 후 로그 찍힘
+                    return userService.createUser(oAuthAttrs, email);
                 });
 
-        // CustomOAuth2User 객체 생성 및 반환
+        // 7) CustomOAuth2User 생성
         return CustomOAuth2User.builder()
-                .authorities(Collections.emptyList())
-                .attributes(attributes)
-                .nameAttributeKey(userNameAttributeName)
-                .name(oAuthAttributes.getName())
+                .oAuth2User(oAuth2User)
                 .email(email)
-                .profileImage(profileImage)
+                .nickname(oAuthAttrs.getName())
+                .profileImage(oAuthAttrs.getProfileImage())
+                .authorities(oAuth2User.getAuthorities()) // Builder에 authorities 필드 있어야 오류X
                 .build();
     }
 }
