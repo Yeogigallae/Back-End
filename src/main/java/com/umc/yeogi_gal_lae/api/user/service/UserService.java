@@ -26,13 +26,23 @@ public class UserService {
      *   @AuthenticationPrincipal UserDetails 를 이용하는 등 다양하게 구현 가능
      */
     public User getUser() {
-        // 예: (가정) SecurityContextHolder 에서 인증 정보 꺼내기
+        // SecurityContextHolder에서 이메일 가져오기
         String currentUserEmail = jwtService.getCurrentUserEmail()
-                .orElseThrow(() -> new BusinessException(Code.USER_NOT_FOUND)); // 예시 예외
+                .orElseThrow(() -> {
+                    log.error("현재 인증된 사용자 이메일을 가져오지 못했습니다.");
+                    return new BusinessException(Code.USER_NOT_FOUND);
+                });
 
+        log.info("현재 인증된 사용자 이메일: {}", currentUserEmail);
+
+        // 이메일로 유저 조회
         return userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new BusinessException(Code.USER_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("이메일 {}에 해당하는 사용자를 찾을 수 없습니다.", currentUserEmail);
+                    return new BusinessException(Code.USER_NOT_FOUND);
+                });
     }
+
 
     /**
      * AccessToken 재발급

@@ -10,6 +10,7 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
@@ -103,16 +104,23 @@ public class JwtService {
 
     // SecurityContextHolder에서 현재 인증된 사용자의 email 꺼내기
     public Optional<String> getCurrentUserEmail() {
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        // 예: principal 이 UserDetails 타입이라면...
-        if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
-            return Optional.ofNullable(userDetails.getUsername());
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof String email) {
+            return Optional.of(email); // 이메일이 String으로 저장된 경우
+        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return Optional.of(userDetails.getUsername()); // UserDetails에서 가져오기
         }
-        return Optional.empty();
+
+        return Optional.empty(); // 다른 타입인 경우
     }
+
 
     // 쿠키에서 Access Token 추출
     public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
