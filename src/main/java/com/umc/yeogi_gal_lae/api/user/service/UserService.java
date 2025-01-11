@@ -5,23 +5,20 @@ import static com.umc.yeogi_gal_lae.global.response.Code.USER_NOT_AUTHENTICATED;
 import static com.umc.yeogi_gal_lae.global.response.Code.USER_NOT_FOUND;
 
 import com.umc.yeogi_gal_lae.api.user.domain.User;
-import com.umc.yeogi_gal_lae.api.user.dto.request.SignUpRequest;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.exception.BusinessException;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import com.umc.yeogi_gal_lae.global.oauth.OAuthAttributes;
-import com.umc.yeogi_gal_lae.global.oauth.oauth2user.OAuth2UserInfo;
-import java.util.Map;
-import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,26 +29,48 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    // 소셜 로그인 사용자 생성 메서드
+    /**
+     * 소셜 로그인 사용자 생성 메서드
+     *
+     * @param oAuthAttributes OAuth2 제공자로부터 받은 사용자 정보
+     * @param email 사용자 이메일
+     * @return 생성된 사용자 엔티티
+     */
     public User createUser(OAuthAttributes oAuthAttributes, String email) {
+        // 직접 이메일과 프로필 이미지를 가져옴
         String profileImage = oAuthAttributes.getProfileImage();
 
         User user = User.builder()
                 .email(email)
                 .profileImage(profileImage)
-                .refreshToken(null)
                 .build();
 
         return userRepository.save(user);
     }
 
+    /**
+     * 현재 인증된 사용자의 정보를 가져오는 메서드
+     *
+     * @return 사용자 엔티티
+     */
     public User getUser() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof UserDetails)) {
+            throw new BusinessException(USER_NOT_FOUND);
+        }
+        UserDetails userDetails = (UserDetails) principal;
         // 유저 정보 조회
         return userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 
+    /**
+     * 액세스 토큰과 리프레시 토큰을 재발급하는 메서드
+     *
+     * @param accessToken 기존 액세스 토큰
+     * @param refreshToken 기존 리프레시 토큰
+     * @return 새로운 JWT 토큰
+     */
     @Transactional
     public JwtToken reissueToken(String accessToken, String refreshToken) {
         // Refresh Token 검증
@@ -91,16 +110,6 @@ public class UserService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
-    }
-
-    public void updateRefreshToken(User user, String refreshToken) {
-        user.updateRefreshToken(refreshToken);
-        userRepository.save(user);
-    }
-
-    public String generateRefreshToken() {
-        // Refresh Token 생성 로직 (예: UUID, JWT 등)
-        return java.util.UUID.randomUUID().toString();
     }
 
 }

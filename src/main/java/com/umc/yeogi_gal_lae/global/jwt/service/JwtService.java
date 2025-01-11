@@ -34,16 +34,13 @@ public class JwtService {
     @Value("${jwt.refresh.expiration}")
     private Long refreshTokenExpirationPeriod;
 
-    @Value("{jwt.access.header}")
-    private String accessHeader;
-
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
 
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
-    private static final String BEARER = "Bearer ";
+    private static final String BEARER = "Bearer";
 
     private final UserRepository userRepository;
 

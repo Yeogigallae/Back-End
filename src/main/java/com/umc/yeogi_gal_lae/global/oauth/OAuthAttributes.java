@@ -1,47 +1,114 @@
 package com.umc.yeogi_gal_lae.global.oauth;
 
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.KakaoOAuth2UserInfo;
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.OAuth2UserInfo;
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.OAuth2UserInfoUtil;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * OAuthAttributes 클래스는 OAuth2User로부터 받은 사용자 정보를 기반으로 사용자 객체를 생성하는 역할을 합니다.
+ * 현재는 카카오 소셜 로그인만 지원하도록 구현되었습니다.
+ */
 @Getter
+@Slf4j
 public class OAuthAttributes {
-    private Map<String, Object> attributes;
-    private String nameAttributeKey;
-    private String name;
-    private String email;
-    private String profileImage;
+
+    private final String nameAttributeKey; // OAuth2 로그인 시 키(PK) 필드 값
+    private final OAuth2UserInfo oauth2UserInfo; // 카카오 로그인 유저 정보(유저네임, 이메일, 프로필이미지)
 
     @Builder
-    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String profileImage) {
-        this.attributes = attributes;
+    public OAuthAttributes(String nameAttributeKey, OAuth2UserInfo oauth2UserInfo) {
         this.nameAttributeKey = nameAttributeKey;
-        this.name = name;
-        this.email = email;
-        this.profileImage = profileImage;
+        this.oauth2UserInfo = oauth2UserInfo;
     }
 
-    public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
-        if ("kakao".equals(registrationId)) {
+    /**
+     * OAuth2User에서 반환하는 사용자 정보를 기반으로 OAuthAttributes 객체를 생성합니다.
+     *
+     * @param registrationId OAuth2 클라이언트 등록 ID (여기서는 "kakao"만 지원)
+     * @param userNameAttributeName 사용자 정보에서 키로 사용할 필드 이름
+     * @param attributes OAuth2 제공자로부터 받은 사용자 정보 Map
+     * @return OAuthAttributes 객체
+     */
+    public static OAuthAttributes of(String registrationId, String userNameAttributeName,
+                                     Map<String, Object> attributes) {
+        if ("kakao".equalsIgnoreCase(registrationId)) {
             return ofKakao(userNameAttributeName, attributes);
         }
-        // 다른 소셜 로그인 제공자에 대한 처리 추가 가능
-        throw new IllegalArgumentException("Unsupported registrationId: " + registrationId);
+        throw new IllegalArgumentException("지원되지 않는 registrationId: " + registrationId);
     }
 
+    /**
+     * 카카오 OAuth2UserInfo를 기반으로 OAuthAttributes 객체를 생성합니다.
+     *
+     * @param userNameAttributeName 사용자 정보에서 키로 사용할 필드 이름
+     * @param attributes OAuth2 제공자로부터 받은 사용자 정보 Map
+     * @return OAuthAttributes 객체
+     */
     private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        String email = (String) OAuth2UserInfoUtil.getNestedAttribute(attributes, "kakao_account", "email")
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .orElseThrow(() -> new IllegalArgumentException("카카오 제공자로부터 이메일 정보를 받을 수 없습니다."));
 
-        String email = (String) kakaoAccount.get("email");
-        String profileImage = (String) profile.get("profile_image_url"); // Kakao API의 프로필 이미지 URL 키
+        String name = (String) OAuth2UserInfoUtil.getNestedAttribute(attributes, "properties", "nickname")
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .orElse((String) OAuth2UserInfoUtil.getNestedAttribute(attributes, "kakao_account", "profile", "nickname")
+                        .filter(String.class::isInstance)
+                        .map(String.class::cast)
+                        .orElse("Unknown"));
+
+        String profileImage = (String) OAuth2UserInfoUtil.getNestedAttribute(attributes, "kakao_account", "profile", "profile_image_url")
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .orElse((String) OAuth2UserInfoUtil.getNestedAttribute(attributes, "properties", "profile_image")
+                        .filter(String.class::isInstance)
+                        .map(String.class::cast)
+                        .orElse("default_profile_image_url"));
 
         return OAuthAttributes.builder()
-                .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
-                .name((String) profile.get("nickname")) // Kakao API의 닉네임 키
-                .email(email)
-                .profileImage(profileImage)
+                .oauth2UserInfo(new KakaoOAuth2UserInfo(email, name, profileImage))
                 .build();
+    }
+
+    /**
+     * 사용자 이메일을 반환합니다.
+     *
+     * @return 사용자 이메일
+     */
+    public String getEmail() {
+        return oauth2UserInfo.getEmail();
+    }
+
+    /**
+     * 사용자 이름을 반환합니다.
+     *
+     * @return 사용자 이름
+     */
+    public String getName() {
+        return oauth2UserInfo.getName();
+    }
+
+    /**
+     * 사용자 프로필 이미지를 반환합니다.
+     *
+     * @return 사용자 프로필 이미지 URL
+     */
+    public String getProfileImage() {
+        return oauth2UserInfo.getProfileImage();
+    }
+
+    /**
+     * OAuth2UserInfo 객체를 반환합니다.
+     *
+     * @return OAuth2UserInfo 객체
+     */
+    public OAuth2UserInfo getOauth2UserInfo() {
+        return oauth2UserInfo;
     }
 }
