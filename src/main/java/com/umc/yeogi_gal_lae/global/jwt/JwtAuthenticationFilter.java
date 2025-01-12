@@ -37,13 +37,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
-            log.warn("JWT 토큰이 존재하지 않거나 Bearer로 시작하지 않습니다.");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = header.substring(7);
-        log.debug("JWT 토큰 추출: {}", token);
 
         try {
             if (jwtService.validateToken(token)) {
