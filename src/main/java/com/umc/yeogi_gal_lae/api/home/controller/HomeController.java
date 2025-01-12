@@ -28,6 +28,8 @@ public class HomeController {
     private final TripPlanService tripPlanService;
     private final HomeService homeService;
     private final HomeResponseMapper homeResponseMapper;
+    private final TripPlanService tripPlanService;
+    private final HomeService homeService;
 //    private final NotificationService notificationService;
 
     /**
@@ -63,6 +65,7 @@ public class HomeController {
      */
     @Operation(summary = "투표 중인 방 목록 조회",
             description = "사용자가 참여 중인 투표 방의 남은 시간과 수, 방 이름, 장소, 투표 완료 인원을 반환합니다.")
+            description = "사용자가 참여 중인 투표 방의 남은 시간, 방 이름, 장소, 투표 완료 인원을 반환합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공적으로 투표 중인 방 목록을 반환함"),
             @ApiResponse(responseCode = "404", description = "투표 중인 방이 없음"),
@@ -73,6 +76,20 @@ public class HomeController {
         List<Map<String, Object>> rooms = homeService.getActiveVoteRooms(userId);
 
         Map<String, Object> response = homeResponseMapper.mapActiveVoteRoomsToResponse(rooms);
+        List<VoteResponse.VoteDTO> votes = homeservice.getUserVotes(userId);
+
+        List<Map<String, Object>> rooms = votes.stream().map(vote -> {
+            Map<String, Object> voteInfo = new HashMap<>();
+            voteInfo.put("roomName", vote.getName()); // 방 이름
+            voteInfo.put("location", "투표 장소"); // 장소 (데이터가 있을 경우 교체 필요)
+//            voteInfo.put("remainingTime", calculateRemainingTime(vote.getId())); // 남은 투표 시간 계산
+            voteInfo.put("completedParticipants", vote.getCount()); // 투표 완료 인원
+            return voteInfo;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", votes.size()); // 투표 중인 방 개수
+        response.put("rooms", rooms);
 
         return ResponseEntity.ok(response);
     }
@@ -86,6 +103,7 @@ public class HomeController {
      */
     @Operation(summary = "예정된 여행 목록 조회",
             description = "사용자의 예정된 여행 계획의 방 이름과 수, 장소, 투표 시작 및 종료 시간을 반환합니다.")
+            description = "사용자의 예정된 여행 계획의 방 이름, 장소, 투표 시작 및 종료 시간을 반환합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공적으로 예정된 여행 목록을 반환함"),
             @ApiResponse(responseCode = "404", description = "예정된 여행이 없음"),
@@ -96,6 +114,18 @@ public class HomeController {
         List<TripPlan> plannedTrips = tripPlanService.getUserPlannedTrips(userId);
 
         Map<String, Object> response = homeResponseMapper.mapPlannedTripsToResponse(plannedTrips);
+        List<Map<String, Object>> trips = plannedTrips.stream().map(trip -> {
+            Map<String, Object> tripInfo = new HashMap<>();
+            tripInfo.put("roomName", trip.getName()); // 방 이름
+            tripInfo.put("location", trip.getLocation()); // 장소
+            tripInfo.put("startTime", trip.getStartDate()); // 투표 시작 시간
+            tripInfo.put("endTime", trip.getEndDate()); // 투표 종료 시간
+            return tripInfo;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", plannedTrips.size()); // 예정된 방 개수
+        response.put("trips", trips);
 
         return ResponseEntity.ok(response);
     }
@@ -128,5 +158,3 @@ public class HomeController {
 
         return ResponseEntity.ok(response);
     }
-
-}
