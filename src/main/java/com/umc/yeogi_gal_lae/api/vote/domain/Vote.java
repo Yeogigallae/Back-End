@@ -1,8 +1,12 @@
 package com.umc.yeogi_gal_lae.api.vote.domain;
 
 
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Builder
 @Getter  @Setter
@@ -15,21 +19,14 @@ public class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // @ManyToOne(fetch = FetchType.LAZY) // User 와 N:1 관계
-    // @JoinColumn(name = "user_id", nullable = false) // User 테이블의 id와 매핑
-    // private User user;
+    @OneToMany(mappedBy = "vote", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<User> users;
 
-    // @OneToOne(fetch = FetchType.LAZY) // TripPlan 과 1:1 관계
-    // @JoinColumn(name = "trip_plan_id", nullable = false) // TripPlan 테이블의 id와 매핑
-    // private TripPlan tripPlan;
-
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tripPlan_id", nullable = false)
+    private TripPlan tripPlan;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VoteType type;       // 투표 타입
-
-    public enum VoteType {
-        GOOD, BAD
-    }
-
+    private VoteType type;
 }
