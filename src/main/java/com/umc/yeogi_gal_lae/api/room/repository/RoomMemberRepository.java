@@ -1,7 +1,7 @@
-package com.umc.yeogi_gal_lae.domain.room.repository;
+package com.umc.yeogi_gal_lae.api.room.repository;
 
-import com.umc.yeogi_gal_lae.domain.room.domain.RoomMember;
-import com.umc.yeogi_gal_lae.domain.room.domain.RoomMemberId;
+import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
+import com.umc.yeogi_gal_lae.api.room.domain.RoomMemberId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

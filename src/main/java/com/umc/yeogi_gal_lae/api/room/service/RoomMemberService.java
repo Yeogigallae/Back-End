@@ -1,10 +1,10 @@
-package com.umc.yeogi_gal_lae.domain.room.service;
+package com.umc.yeogi_gal_lae.api.room.service;
 
-import com.umc.yeogi_gal_lae.domain.room.domain.Room;
-import com.umc.yeogi_gal_lae.domain.room.domain.RoomMember;
-import com.umc.yeogi_gal_lae.domain.room.domain.RoomMemberId;
-import com.umc.yeogi_gal_lae.domain.room.repository.RoomMemberRepository;
-import com.umc.yeogi_gal_lae.domain.room.repository.RoomRepository;
+import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
+import com.umc.yeogi_gal_lae.api.room.domain.RoomMemberId;
+import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
+import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

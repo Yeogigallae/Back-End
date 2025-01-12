@@ -1,11 +1,9 @@
-package com.umc.yeogi_gal_lae.domain.room.controller;
+package com.umc.yeogi_gal_lae.api.room.controller;
 
-import com.umc.yeogi_gal_lae.domain.room.dto.CreateRoomRequest;
-import com.umc.yeogi_gal_lae.domain.room.dto.RoomDto;
-import com.umc.yeogi_gal_lae.domain.room.service.RoomService;
+import com.umc.yeogi_gal_lae.api.room.dto.CreateRoomRequest;
+import com.umc.yeogi_gal_lae.api.room.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
