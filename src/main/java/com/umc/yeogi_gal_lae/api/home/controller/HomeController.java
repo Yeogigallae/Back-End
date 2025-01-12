@@ -1,9 +1,9 @@
-package com.umc.yeogi_gal_lae.api.user.controller;
+package com.umc.yeogi_gal_lae.api.home.controller;
 
+import com.umc.yeogi_gal_lae.api.home.service.HomeService;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.service.TripPlanService;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
-import com.umc.yeogi_gal_lae.api.vote.service.VoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeController {
     private final TripPlanService tripPlanService;
-    private final VoteService voteService;
+    private final HomeService homeService;
 //    private final NotificationService notificationService;
 
     /**
@@ -34,22 +34,22 @@ public class HomeController {
      * @param userId 사용자 ID
      * @return 알림 확인 여부 (boolean)
      */
-    @Operation(summary = "알림 확인 여부 조회",
-            description = "사용자가 모든 알림을 확인했는지 여부를 반환합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 알림 확인 여부를 반환함"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생")
-    })
-    @GetMapping("/{userId}/notifications-status")
-    public ResponseEntity<Map<String, Boolean>> getNotificationStatus(@PathVariable Long userId) {
-//        boolean allRead = notificationService.checkAllNotificationsRead(userId);
-//
-//        Map<String, Boolean> response = new HashMap<>();
-//        response.put("allRead", allRead);
-//
-//        return ResponseEntity.ok(response);
-//    }
+//    @Operation(summary = "알림 확인 여부 조회",
+//            description = "사용자가 모든 알림을 확인했는지 여부를 반환합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공적으로 알림 확인 여부를 반환함"),
+//            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+//            @ApiResponse(responseCode = "500", description = "서버 오류 발생")
+//    })
+//    @GetMapping("/{userId}/notifications-status")
+////    public ResponseEntity<Map<String, Boolean>> getNotificationStatus(@PathVariable Long userId) {
+////        boolean allRead = notificationService.checkAllNotificationsRead(userId);
+////
+////        Map<String, Boolean> response = new HashMap<>();
+////        response.put("allRead", allRead);
+////
+////        return ResponseEntity.ok(response);
+////    }
 
     /**
      * 투표 중인 방 목록 조회 API.
@@ -67,7 +67,7 @@ public class HomeController {
     })
     @GetMapping("/{userId}/votes")
     public ResponseEntity<Map<String, Object>> getActiveVoteRooms(@PathVariable Long userId) {
-        List<VoteResponse.VoteDTO> votes = voteService.getUserVotes(userId);
+        List<VoteResponse.VoteDTO> votes = homeservice.getUserVotes(userId);
 
         List<Map<String, Object>> rooms = votes.stream().map(vote -> {
             Map<String, Object> voteInfo = new HashMap<>();
