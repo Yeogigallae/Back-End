@@ -1,6 +1,6 @@
-package com.umc.yeogi_gal_lae.domain.room.repository;
+package com.umc.yeogi_gal_lae.api.room.repository;
 
-import com.umc.yeogi_gal_lae.domain.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

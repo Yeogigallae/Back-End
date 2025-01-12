@@ -1,5 +1,5 @@
 
-package com.umc.yeogi_gal_lae.domain.room.dto;
+package com.umc.yeogi_gal_lae.api.room.dto;
 
 import lombok.Data;
 

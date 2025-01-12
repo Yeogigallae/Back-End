@@ -1,4 +1,4 @@
-package com.umc.yeogi_gal_lae.domain.room.domain;
+package com.umc.yeogi_gal_lae.api.room.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
