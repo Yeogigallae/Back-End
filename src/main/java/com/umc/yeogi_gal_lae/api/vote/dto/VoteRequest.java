@@ -11,10 +11,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VoteRequest {
-    @NotNull(message = "투표한 userId")
+    @NotNull(message = "투표한 사용자의 Id")
     private final Long userId;
 
-    @NotNull(message = "투표한 userName")
+    @NotNull(message = "투표한 사용자의 이름")
     private final String userName;
 
     @NotNull(message = "투표에 해당하는 여행 계획 Id")
