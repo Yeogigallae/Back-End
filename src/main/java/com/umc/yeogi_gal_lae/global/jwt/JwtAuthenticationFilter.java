@@ -1,9 +1,7 @@
 package com.umc.yeogi_gal_lae.global.jwt;
 
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
-import com.umc.yeogi_gal_lae.global.exception.BusinessException;
 import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
-import com.umc.yeogi_gal_lae.global.response.Code;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j

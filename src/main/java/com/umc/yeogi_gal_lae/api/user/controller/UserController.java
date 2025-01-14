@@ -1,13 +1,11 @@
 package com.umc.yeogi_gal_lae.api.user.controller;
 
-import static com.umc.yeogi_gal_lae.global.response.Code.USER_FETCH_OK;
-import static com.umc.yeogi_gal_lae.global.response.Code.TOKEN_REISSUE_OK;
-
 import com.umc.yeogi_gal_lae.api.user.converter.UserConverter;
 import com.umc.yeogi_gal_lae.api.user.dto.response.UserInfoResponse;
 import com.umc.yeogi_gal_lae.api.user.service.UserService;
+import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
-import com.umc.yeogi_gal_lae.global.response.Response;
+import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +34,7 @@ public class UserController {
         var user = userService.getUser();
         // User -> UserInfoResponse 로 변환
         UserInfoResponse result = UserConverter.ofUserInfoResponse(user);
-        return Response.of(USER_FETCH_OK, result);
+        return Response.of(SuccessCode.USER_FETCH_OK, result);
     }
 
     @Operation(summary = "액세스 토큰 재발급")
@@ -51,7 +49,7 @@ public class UserController {
         response.setHeader("Access-Token", result.getAccessToken());
         response.setHeader("Refresh-Token", result.getRefreshToken());
 
-        return Response.of(TOKEN_REISSUE_OK, null);
+        return Response.of(SuccessCode.TOKEN_REISSUE_OK, null);
     }
 }
 
