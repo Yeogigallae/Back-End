@@ -1,4 +1,4 @@
-package com.umc.yeogi_gal_lae.global.response;
+package com.umc.yeogi_gal_lae.global.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,9 +36,7 @@ public enum Code {
     USER_NOT_AUTHENTICATED("USER_403", "로그인 하지 않았습니다."),
 
     // Token Error
-    INVALID_REFRESH_TOKEN("TOKEN_401", "리프레시 토큰이 유효하지 않습니다.")
-
-    ;
+    INVALID_REFRESH_TOKEN("TOKEN_401", "리프레시 토큰이 유효하지 않습니다.");
 
     private final String code;
     private final String message;
