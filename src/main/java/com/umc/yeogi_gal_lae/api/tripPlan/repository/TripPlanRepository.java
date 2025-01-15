@@ -25,4 +25,7 @@ public interface TripPlanRepository extends JpaRepository<TripPlan, Long> {
      */
     @Query("SELECT t FROM TripPlan t WHERE t.user.id = :userId AND t.endDate < CURRENT_DATE")
     List<TripPlan> findCompletedTripsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT t FROM TripPlan t WHERE t.user.id = :userId AND t.startDate > CURRENT_DATE")
+    List<TripPlan> findPlannedTripsByUserId(@Param("userId") Long userId);
 }
