@@ -27,4 +27,11 @@ public class Response<T> {
                 status.getReason().getMessage(),
                 result);
     }
+
+    public static <T> Response<T> ok(BaseStatus status) {
+        return new Response(status.getReason().getStatus(),
+                status.getReason().getCode(),
+                status.getReason().getMessage(),
+                null);
+    }
 }
