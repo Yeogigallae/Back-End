@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     private String refreshToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vote_id", nullable = false)
+    @JoinColumn(name = "vote_id", nullable = true)
     private Vote vote;
 
 }
