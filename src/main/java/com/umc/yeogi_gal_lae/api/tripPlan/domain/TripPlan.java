@@ -41,6 +41,6 @@ public class TripPlan {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "tripPlan", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "tripPlan", fetch = FetchType.LAZY , cascade = CascadeType.ALL)
     private Vote vote;
 }
