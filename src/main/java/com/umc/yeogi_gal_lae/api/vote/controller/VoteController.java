@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -38,11 +38,11 @@ public class VoteController {
             description = "여행 계획에 대한 투표 결과를 타입에 따라 구분하여 반환 합니다." +
                           "사용자가 투표한 Type 에 해당하는 항목에 사용자의 id 와 name 이 포함 되어 반환됩니다.")
     @GetMapping("/vote/results")
-    public Response<VoteResponse> getVoteResults(
+    public Response<List<VoteResponse>> getVoteResults(
             @RequestParam @NotNull(message = "사용자 ID는 필수입니다.") Long userId,
             @RequestParam @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
 
-        VoteResponse response = voteService.getVoteResults(userId, tripId);
+        List<VoteResponse> response = voteService.getVoteResults(userId, tripId);
 
         return Response.of(SuccessCode.OK, response);
     }
