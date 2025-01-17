@@ -50,6 +50,11 @@ public class SecurityConfig {
                 // CSRF 비활성화 (H2 콘솔 사용을 위해)
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/**")
+                        .ignoringRequestMatchers((request ->
+                                "POST".equalsIgnoreCase(request.getMethod()) ||
+                                "PUT".equalsIgnoreCase(request.getMethod()) ||
+                                "DELETE".equalsIgnoreCase(request.getMethod()))
+                        )
                 )
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
