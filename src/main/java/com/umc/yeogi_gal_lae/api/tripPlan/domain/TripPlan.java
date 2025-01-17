@@ -21,7 +21,7 @@ public class TripPlan {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     private String description;
 
     @Enumerated(EnumType.STRING)

@@ -3,7 +3,6 @@ package com.umc.yeogi_gal_lae.api.user.domain;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +38,7 @@ public class User extends BaseEntity {
     private String refreshToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vote_id", nullable = true)
+    @JoinColumn(name = "vote_id")
     private Vote vote;
 
 }
