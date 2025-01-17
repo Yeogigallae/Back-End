@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.global.common.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.umc.yeogi_gal_lae.global.common.status.BaseStatus;
+import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,5 +27,21 @@ public class Response<T> {
                 status.getReason().getCode(),
                 status.getReason().getMessage(),
                 result);
+    }
+
+    // 생성자 추가: result 없이 동작
+    public Response(HttpStatus httpStatus, String code, String message) {
+        this.httpStatus = httpStatus;
+        this.code = code;
+        this.message = message;
+        this.result = null;
+    }
+
+    public static <T> Response<T> of(ErrorCode errorCode) {
+        return new Response<>(
+                errorCode.getHttpStatus(),
+                errorCode.getCode(),
+                errorCode.getMessage()
+        );
     }
 }
