@@ -4,6 +4,7 @@ import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
+import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 
@@ -28,78 +29,54 @@ public class VoteService {
     private final TripPlanRepository tripPlanRepository;
 
     @Transactional
-    public void createVote(VoteRequest request){
+    public Long createVote(VoteRequest request){
 
-        User user = userRepository.findById(request.getUserId()).orElse(null);
-        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElse(null);
+        User user = userRepository.findById(request.getUserId()).orElseThrow(()-> new IllegalArgumentException("User not found"));
+        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new IllegalArgumentException("Trip not found"));
 
-        Vote vote = voteRepository.findByTripPlanId(Objects.requireNonNull(tripPlan).getId())      // DB 에 Vote 객체가 있다면,
+        Vote vote = voteRepository.findByTripPlanId(tripPlan.getId())      // DB 에 Vote 객체가 있다면,
                 .orElseGet(() -> Vote.builder()         // 없다면, Vote 객체 생성
                         .tripPlan(tripPlan)
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
-                        .users(new ArrayList<>())     // 사용자 리스트 생성
                         .build());
 
         // 중복 투표 방지 (Entity 간의 관계 설정이기에, Entity 레벨에서 관리하도록 구현)
-        // => JPA 가 변경 내용 자동 반영하므로 Repository 언급 불필요
-        if(!vote.getUsers().contains(user)){
-            vote.getUsers().add(user);
-            Objects.requireNonNull(user).setVote(vote);
+        // => JPA 가 변경 내용 자동 반영하므로 Repository 불필요
+        if(user.getVote()==null || !user.getVote().equals(vote)){
+            user.setVote(vote);
+            userRepository.save(user);     // 변경 사항 저장
         }
 
-        voteRepository.save(vote);
+        return voteRepository.save(vote).getId();
     }
 
-    public VoteResponse getVoteResults(Long userId, Long tripId){
+    public List<VoteResponse> getVoteResults(Long userId, Long tripId){
 
         if (!userRepository.existsById(userId)) {throw new EntityNotFoundException("사용자를 찾을 수 없습니다."); }
         if (!tripPlanRepository.existsById(tripId)) { throw new EntityNotFoundException("여행 계획을 찾을 수 없습니다.");}
 
-        List<Vote> votes = voteRepository.findVoteByUserAndTripPlan(userId, tripId);  // 특정 여행 계획의 모든 투표 조회
+        // 투표에 해당하는 여행 계획에 포함된 '모든' User 정보 배열에 담기
+        List<User> users = userRepository.findUsersByVoteTripPlanId(tripId);
 
-        // 위의 결과(votes) 입력 받은 userId 와 같은 것 필터링 => 현재 접속한 사용자에 대한 투표 데이터
-        // 현재 접속자의 id 값만 필요하기에, findFirst 사용
-        Optional<User> userVote = votes.stream()
-                .flatMap(vote -> vote.getUsers().stream())   // 2차원 배열 -> 단일 원소 배열 ( [Vote[User]] )
+        // 현재 접속한 사용자에 대한 투표 데이터
+        Optional<User> userVote = users.stream()
                 .filter(user -> user.getId().equals(userId))
                 .findFirst();
 
         // 투표 데이터를 type 이름 기준('GOOD ','BAD')으로 그룹화, 타입 당 투표 수 계산
-        Map<String, Long> groupedVotes = votes.stream()
+        // {"GOOD": 3, "BAD": 2}
+        Map<String, Long> groupedVotes = users.stream()
+                .filter(user -> user.getVote() != null)      // 투표한 데이터만 카운팅
+                .map(user -> user.getVote().getType().name())
                 .collect(Collectors.groupingBy(
-                        vote -> vote.getType().name(),
+                        typeName -> typeName,
                         Collectors.counting())
                 );
 
-        // 'GOOD' 타입 응답 (없으면 null)
-        VoteResponse.VoteDTO goodResponse = VoteResponse.VoteDTO.builder()
-                .userId( userVote.filter(user -> user.getVote().getType().name().equals("GOOD"))
-                        .map(User :: getId)    // 현재 사용자가 'GOOD' 에 투표했으면 ID 포함
-                        .orElse(null))
-                .userName(userVote.filter(user -> user.getVote().getType().name().equals("GOOD"))
-                        .map(User :: getUsername)   // 현재 사용자가 'GOOD' 에 투표했으면 Name 포함
-                        .orElse(null))
-                .type("GOOD")
-                .count(groupedVotes.getOrDefault("GOOD", 0L).intValue())  // 정수로 변환하여 저장
-                .build();
 
+        VoteResponse goodResponse = VoteConverter.convert("GOOD", userVote.orElse(null), groupedVotes);
+        VoteResponse badResponse = VoteConverter.convert("BAD", userVote.orElse(null), groupedVotes);
 
-        // 'BAD' 타입 응답 (없으면 null)
-        VoteResponse.VoteDTO badResponse = VoteResponse.VoteDTO.builder()
-                .userId(userVote.filter(user -> user.getVote().getType().name().equals("BAD"))
-                        .map(User :: getId)    // 현재 사용자가 'BAD' 에 투표했으면 ID 포함
-                        .orElse(null))
-                .userName(userVote.filter(user -> user.getVote().getType().name().equals("BAD"))
-                        .map(User :: getUsername)   // 현재 사용자가 'BAD' 에 투표했으면 Name 포함
-                        .orElse(null))
-                .type("BAD")
-                .count(groupedVotes.getOrDefault("BAD", 0L).intValue())
-                .build();
-
-        return VoteResponse.builder()
-                .code("SUCCESS")
-                .message("투표 결과를 성공적으로 조회했습니다.")
-                .data(List.of(goodResponse, badResponse))
-                .build();
+        return List.of(goodResponse, badResponse);
     }
 }
