@@ -1,14 +1,19 @@
 package com.umc.yeogi_gal_lae.api.vote.controller;
 
+import com.umc.yeogi_gal_lae.api.user.service.UserService;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.service.VoteService;
+import com.umc.yeogi_gal_lae.global.common.response.Code;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
+import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +27,23 @@ public class VoteController {
 
     @Autowired
     private final VoteService voteService;
+    private final UserService userService;
 
-    @Operation(summary = "투표 API", description = "특정 사용자의 투표 요청 입니다.")
+    @Operation(summary = "투표 API", description = "현재 사용자의 투표 요청 입니다.")
     @PostMapping("/vote")
-    public Response<Long> createVote(@RequestBody VoteRequest voteRequest) {
+    public Response<Long> createVote(@RequestBody VoteRequest voteRequest, Authentication authentication) {
+        if(authentication == null || !authentication.isAuthenticated()) { return Response.of(ErrorCode.UNAUTHORIZED); }
 
+        // 현재 사용자 정보 가져오기
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        Long userId = userService.findUserIdByUsername(username);
+
+        voteRequest.setUserId(userId);
+        voteRequest.setUserName(username);
+
+        // 투표 생성
         Long VoteId = voteService.createVote(voteRequest);
-
         return Response.of(SuccessCode.CREATED, VoteId);
     }
 

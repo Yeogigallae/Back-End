@@ -5,15 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 @Builder
-@Getter
-@Setter
+@Getter @Setter
 public class VoteRequest {
-    @NotNull(message = "투표한 사용자의 Id")
+
+    @JsonIgnore    // 클라이언트에서 받지 않음
     private Long userId;
 
-    @NotNull(message = "투표한 사용자의 이름")
+    @JsonIgnore
     private String userName;
 
     @NotNull(message = "투표에 해당하는 여행 계획 Id")

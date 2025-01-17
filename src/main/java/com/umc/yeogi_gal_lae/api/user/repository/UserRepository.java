@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 투표 이력에 상관 없이 현재 여행 계획에 해당하는 user 가져오기
     @Query("SELECT u FROM User u WHERE u.vote IS NULL or u.vote.tripPlan.id = :tripId")
     List<User> findUsersByVoteTripPlanId(@Param("tripId") Long tripId);
+
+    Optional<User> findByUsername(String username);
 }
