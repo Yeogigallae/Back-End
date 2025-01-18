@@ -11,11 +11,8 @@ import net.minidev.json.annotate.JsonIgnore;
 @Getter @Setter
 public class VoteRequest {
 
-    @JsonIgnore    // 클라이언트에서 받지 않음
-    private Long userId;
-
-    @JsonIgnore
-    private String userName;
+    @JsonIgnore      // 클라이언트에서 받지 않음.
+    private String userEmail;
 
     @NotNull(message = "투표에 해당하는 여행 계획 Id")
     private Long tripId;

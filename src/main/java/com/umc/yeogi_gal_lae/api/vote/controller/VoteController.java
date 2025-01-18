@@ -1,18 +1,16 @@
 package com.umc.yeogi_gal_lae.api.vote.controller;
 
-import com.umc.yeogi_gal_lae.api.user.service.UserService;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.service.VoteService;
-import com.umc.yeogi_gal_lae.global.common.response.Code;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
-import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,26 +21,28 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class VoteController {
 
     @Autowired
     private final VoteService voteService;
-    private final UserService userService;
 
     @Operation(summary = "투표 API", description = "현재 사용자의 투표 요청 입니다.")
     @PostMapping("/vote")
-    public Response<Long> createVote(@RequestBody VoteRequest voteRequest, Authentication authentication) {
-        if(authentication == null || !authentication.isAuthenticated()) { return Response.of(ErrorCode.UNAUTHORIZED); }
+    public Response<Long> createVote(@RequestBody VoteRequest voteRequest) {
 
-        // 현재 사용자 정보 가져오기
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        Long userId = userService.findUserIdByUsername(username);
+        // 현재 인증된 사용자 정보 가져오기
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        voteRequest.setUserId(userId);
-        voteRequest.setUserName(username);
+        String userEmail;
+        try {
+            userEmail = ((UserDetails) principal).getUsername();
+        } catch (ClassCastException e) {
+            userEmail = principal.toString();
+        }
 
-        // 투표 생성
+        voteRequest.setUserEmail(userEmail);
+        voteService.createVote(voteRequest);
         Long VoteId = voteService.createVote(voteRequest);
         return Response.of(SuccessCode.CREATED, VoteId);
     }
