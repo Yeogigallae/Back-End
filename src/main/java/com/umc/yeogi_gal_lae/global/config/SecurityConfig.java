@@ -51,6 +51,7 @@ public class SecurityConfig {
         http
                 // CSRF 비활성화 (H2 콘솔 사용을 위해)
                 .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/vote/**")
                         .ignoringRequestMatchers("/h2-console/**")
                         .ignoringRequestMatchers((request ->
                                 "POST".equalsIgnoreCase(request.getMethod()) ||
@@ -71,7 +72,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // URL 접근 정책 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/vote/**").hasRole("USER")   // Authentication 객체 사용
                         // H2 콘솔 및 Swagger 등 허용
                         .requestMatchers(excludedPaths).permitAll()
                         // 그 외 /api/** 경로는 인증 필요
