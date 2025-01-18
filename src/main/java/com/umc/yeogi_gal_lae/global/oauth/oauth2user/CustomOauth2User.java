@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Map;
 
 @Getter
-@Setter
 @ToString
 public class CustomOauth2User extends DefaultOAuth2User {
 

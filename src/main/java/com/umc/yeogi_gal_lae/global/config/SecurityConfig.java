@@ -6,19 +6,22 @@ import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,68 +36,53 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        // Define the paths that should be excluded from JwtAuthenticationFilter
-        String[] excludedPaths = {
-                "/h2-console/**", // H2 Console
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/oauth2/**",
-                "/oauth2/authorization/**",
-                "/login/**",
-                "/signup/**"
-        };
-
         http
-                // CSRF 비활성화 (H2 콘솔 사용을 위해)
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
+                .httpBasic(HttpBasicConfigurer::disable)
+                .sessionManagement(configurer -> configurer
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // CORS 설정
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 세션 사용 안 함 (STATELESS)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 프레임 옵션 설정 (H2 콘솔 사용을 위해)
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions
-                                .sameOrigin()
-                        )
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/api/v1/resumes/search").hasRole("ADMIN") // resume
+//                        .requestMatchers("/api/v1/resumes/**").hasAnyRole("ADMIN", "REGULAR") // resume
+//                        .anyRequest().permitAll()
+//                )
+                .authorizeHttpRequests(requests ->
+                        requests.anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
-                // HTTP Basic 인증 비활성
-                .httpBasic(httpBasic -> httpBasic.disable())
-                // URL 접근 정책 설정
-                .authorizeHttpRequests(auth -> auth
-                        // H2 콘솔 및 Swagger 등 허용
-                        .requestMatchers(excludedPaths).permitAll()
-                        // 그 외 /api/** 경로는 인증 필요
-                        .requestMatchers("/api/**").authenticated()
-                        // 기타 모든 요청은 허용 (필요시 수정)
-                        .anyRequest().permitAll()
-                )
-                // OAuth2 로그인 설정
+//          .authorizeHttpRequests(authorize -> authorize
+//                  .requestMatchers(
+//                          "/v3/api-docs/**",
+//                          "/oauth2/**",
+//                          "/oauth2/authorization/google",
+//                          "/index.html",
+//                          "/swagger/**",
+//                          "/swagger-ui/**",
+//                          "/swagger-ui/index.html/**",
+//                          "/api-docs/**",
+//                          "/signup.html",
+//                          "/api/v1/reissue"
+//                  ).permitAll()
+//                  .anyRequest().authenticated()
+//          )
+                // 로그아웃 성공 시 / 주소로 이동
+//          .logout((logoutConfig) -> logoutConfig.logoutSuccessUrl("/"))
                 .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(endpoint -> endpoint.userService(customOauth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                );
-
-        // JwtAuthenticationFilter를 Jwt 필터로 등록하되, excludedPaths는 제외
-        http.addFilterBefore(
-                jwtAuthenticationFilter(),
-                UsernamePasswordAuthenticationFilter.class
-        );
-
+                        .userInfoEndpoint(endpoint -> endpoint
+                                .userService(customOauth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler) // 2.
+                        .failureHandler(oAuth2LoginFailureHandler) // 3.
+                )
+//          .exceptionHandling(authenticationManager ->authenticationManager
+//                  .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+//                  .accessDeniedHandler(jwtAccessDeniedHandler)
+//          )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userRepository),
+                        UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        // Define paths to exclude from the filter
-        List<String> excludeUrlPatterns = List.of("/h2-console/**");
-
-        return new JwtAuthenticationFilter(jwtService, userRepository, excludeUrlPatterns);
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -104,10 +92,15 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization", "Refresh-Token", "Content-Disposition", "Set-Cookie"));
+        config.setExposedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public RedirectStrategy redirectStrategy() {
+        return new DefaultRedirectStrategy(); // 기본 리다이렉트 전략 사용
     }
 }
