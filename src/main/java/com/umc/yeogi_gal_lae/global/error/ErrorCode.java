@@ -30,6 +30,10 @@ public enum ErrorCode implements BaseStatus {
     // Place Error
     PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE_404", "장소를 찾을 수 없습니다."),
 
+    // Room Error
+    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "ROOM_404", "룸을 찾을 수 없습니다."),
+
+    INVALID_PLACE_FOR_ROOM(HttpStatus.BAD_REQUEST, "ROOM_400", "룸에 속하지 않은 장소입니다."),
     ;
 
     private final HttpStatus httpStatus;
