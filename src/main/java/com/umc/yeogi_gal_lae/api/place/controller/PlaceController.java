@@ -60,6 +60,4 @@ public class PlaceController {
         return Response.of(SuccessCode.OK, response);
 
     }
-
-    // 추가적인 예외 처리기를 여기에 추가할 수 있습니다.
 }
