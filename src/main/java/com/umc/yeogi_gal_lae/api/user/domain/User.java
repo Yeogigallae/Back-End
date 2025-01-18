@@ -1,12 +1,8 @@
 package com.umc.yeogi_gal_lae.api.user.domain;
 
+import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,5 +37,9 @@ public class User extends BaseEntity {
 
     @Column(name = "refresh_token")
     private String refreshToken;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vote_id", nullable = false)
+    private Vote vote;
 
 }

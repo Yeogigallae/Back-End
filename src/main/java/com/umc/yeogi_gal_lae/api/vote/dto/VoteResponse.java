@@ -8,7 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class VoteResponse<T> {
+public class VoteResponse {
 
     private String code;
     private String message;
@@ -19,9 +19,9 @@ public class VoteResponse<T> {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class VoteDTO{
-        private String id;        // 사용자 ID (userId)
-        private String name;      // 사용자 이름 (userName)
-        private String type;      // 투표 타입 (good, bad)
-        private Integer count;    // 투표 수
+        private Long userId;      // 현재 접속 중인 유저가 투표한 type 에만 Id와 Name 포함하여 반환
+        private String userName;
+        private String type;      // GOOD or BAD
+        private Integer count;
     }
 }
