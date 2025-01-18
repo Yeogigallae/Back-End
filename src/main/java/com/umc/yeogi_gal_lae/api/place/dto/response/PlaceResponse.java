@@ -12,6 +12,7 @@ import lombok.ToString;
 public class PlaceResponse {
 
     private Long placeId;
+    private Long roomId;
     private String placeName;
     private String address;
     private Double lat;
