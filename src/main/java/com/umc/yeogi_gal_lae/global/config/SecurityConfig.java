@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -62,14 +64,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 프레임 옵션 설정 (H2 콘솔 사용을 위해)
                 .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions
-                                .sameOrigin()
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin
                         )
                 )
                 // HTTP Basic 인증 비활성
-                .httpBasic(httpBasic -> httpBasic.disable())
+                .httpBasic(AbstractHttpConfigurer::disable)
                 // URL 접근 정책 설정
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/vote/**").hasRole("USER")   // Authentication 객체 사용
                         // H2 콘솔 및 Swagger 등 허용
                         .requestMatchers(excludedPaths).permitAll()
                         // 그 외 /api/** 경로는 인증 필요
