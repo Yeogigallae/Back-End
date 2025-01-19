@@ -1,7 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

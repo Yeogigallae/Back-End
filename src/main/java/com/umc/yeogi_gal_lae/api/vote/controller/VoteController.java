@@ -33,7 +33,6 @@ public class VoteController {
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         voteRequest.setUserEmail(userEmail);
-        voteService.createVote(voteRequest);
 
         Long VoteId = voteService.createVote(voteRequest);
         return Response.of(SuccessCode.CREATED, VoteId);
