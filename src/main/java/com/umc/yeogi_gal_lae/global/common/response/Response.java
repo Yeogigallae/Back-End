@@ -29,6 +29,7 @@ public class Response<T> {
                 result);
     }
 
+
     // 생성자 추가: result 없이 동작
     public Response(HttpStatus httpStatus, String code, String message) {
         this.httpStatus = httpStatus;
@@ -43,5 +44,6 @@ public class Response<T> {
                 errorCode.getCode(),
                 errorCode.getMessage()
         );
+
     }
 }

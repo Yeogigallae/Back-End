@@ -27,6 +27,9 @@ public enum ErrorCode implements BaseStatus {
     // Token Error
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN_401", "리프레시 토큰이 유효하지 않습니다."),
 
+    // Place Error
+    PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE_404", "장소를 찾을 수 없습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
