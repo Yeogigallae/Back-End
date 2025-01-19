@@ -3,8 +3,11 @@ package com.umc.yeogi_gal_lae.api.room.service;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMemberId;
+import com.umc.yeogi_gal_lae.api.room.dto.request.AddRoomMemberRequest;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,40 +21,39 @@ public class RoomMemberService {
 
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository;
-//    private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * 방 멤버 추가
      *
-     * @param roomId 방 ID
-     * @param userId 사용자 ID
+
      * @return 생성된 RoomMember
      */
     @Transactional
-    public RoomMember addMember(Long roomId, Long userId) {
+    public void addMembers(AddRoomMemberRequest request) {
         // 방 확인
-        Optional<Room> roomOptional = roomRepository.findById(roomId);
+        Optional<Room> roomOptional = roomRepository.findById(request.getRoomId());
         if (roomOptional.isEmpty()) {
-            throw new IllegalArgumentException("Room not found with ID: " + roomId);
+            throw new IllegalArgumentException("Room not found with ID: " + request.getRoomId());
         }
-
-//        // 사용자 확인
-//        Optional<User> userOptional = userRepository.findById(userId);
-//        if (userOptional.isEmpty()) {
-//            throw new IllegalArgumentException("User not found with ID: " + userId);
-//        }
-
         Room room = roomOptional.get();
-//        User user = userOptional.get();
 
-        // RoomMember 생성
-        RoomMemberId roomMemberId = new RoomMemberId(roomId, userId);
-        RoomMember roomMember = new RoomMember();
-        roomMember.setId(roomMemberId);
-        roomMember.setRoom(room);
-//        roomMember.setUser(user);
+        // 사용자 확인 및 멤버 추가
+        List<Long> userIds = request.getUserIds();
+        for (Long userId : userIds) {
+            Optional<User> userOptional = userRepository.findById(userId);
+            if (userOptional.isEmpty()) {
+                throw new IllegalArgumentException("User not found with ID: " + userId);
+            }
+            User user = userOptional.get();
 
-        return roomMemberRepository.save(roomMember);
+            // RoomMember 생성
+            RoomMember roomMember = RoomMember.builder()
+                    .room(room)
+                    .user(user)
+                    .build();
+            roomMemberRepository.save(roomMember);
+        }
     }
 
     /**

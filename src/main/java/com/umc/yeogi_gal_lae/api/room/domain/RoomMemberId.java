@@ -3,10 +3,11 @@ package com.umc.yeogi_gal_lae.api.room.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 
-@Data
+@Getter
 @Embeddable
 public class RoomMemberId implements Serializable {
 

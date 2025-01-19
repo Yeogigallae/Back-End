@@ -1,13 +1,16 @@
 package com.umc.yeogi_gal_lae.api.room.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
 @Entity
 @Table(name = "room")
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 생성
+@AllArgsConstructor // 모든 필드를 초기화하는 생성자
+@Builder
 public class Room {
 
     @Id
@@ -23,4 +26,10 @@ public class Room {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomMember> roomMembers; // RoomMember와의 관계
+
+
+    public Room(String name, Long masterId) {
+        this.name = name;
+        this.masterId = masterId;
+    }
 }

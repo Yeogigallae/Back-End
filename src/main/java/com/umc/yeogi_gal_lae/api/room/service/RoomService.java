@@ -1,7 +1,7 @@
 package com.umc.yeogi_gal_lae.api.room.service;
 
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
-import com.umc.yeogi_gal_lae.api.room.dto.CreateRoomRequest;
+import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +19,15 @@ public class RoomService {
     @Transactional
     public void createRoom(CreateRoomRequest request) {
 
-
-        Room room = new Room();
-        room.setName(request.getName());
-        //room.setMasterId();
+        Room room = new Room(request.getName(),request.getMasterId());
 
         Room savedRoom = roomRepository.save(room);
 
-        List<Long> members = request.getMembers();
-        for(Long memberId : members) {
-            RoomMember roomMember = new RoomMember();
-            roomMember.setRoom(savedRoom);
-
-//            roomMember.setUserId(memberId);
-        }
     }
+
+    //시안엔 없는데 방 삭제 기능 필요할 것 같음
+//    @Transactional
+//    public void deleteRoom(){
+//
+//    }
 }
