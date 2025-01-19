@@ -35,14 +35,15 @@ public class VoteController {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         String userEmail;
-        try {
+        if (principal != null && principal.getClass().getName().equals("User")) {    // Principal 의 객체 타입 확인
             userEmail = ((UserDetails) principal).getUsername();
-        } catch (ClassCastException e) {
-            userEmail = principal.toString();
         }
+        else if (principal != null) { userEmail = principal.toString();}
+        else { throw new IllegalArgumentException("현재 인증된 사용자를 찾을 수 없습니다."); }
 
         voteRequest.setUserEmail(userEmail);
         voteService.createVote(voteRequest);
+
         Long VoteId = voteService.createVote(voteRequest);
         return Response.of(SuccessCode.CREATED, VoteId);
     }
@@ -52,13 +53,20 @@ public class VoteController {
             summary = "투표 조회 API",
             description = "여행 계획에 대한 투표 결과를 타입에 따라 구분하여 반환 합니다." +
                           "사용자가 투표한 Type 에 해당하는 항목에 사용자의 id 와 name 이 포함 되어 반환됩니다.")
-    @GetMapping("/vote/results")
-    public Response<List<VoteResponse>> getVoteResults(
-            @RequestParam @NotNull(message = "사용자 ID는 필수입니다.") Long userId,
-            @RequestParam @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
+    @GetMapping("/vote/results/{tripId}")
+    public Response<List<VoteResponse>> getVoteResults(@PathVariable @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
 
-        List<VoteResponse> response = voteService.getVoteResults(userId, tripId);
+        // 현재 인증된 사용자 정보 가져오기
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        String userEmail;
+        if (principal != null && principal.getClass().getName().equals("User")) {    // Principal 의 객체 타입 확인
+            userEmail = ((UserDetails) principal).getUsername();
+        }
+        else if (principal != null) { userEmail = principal.toString();}
+        else { throw new IllegalArgumentException("현재 인증된 사용자를 찾을 수 없습니다."); }
+
+        List<VoteResponse> response = voteService.getVoteResults(userEmail, tripId);
         return Response.of(SuccessCode.OK, response);
     }
 }
