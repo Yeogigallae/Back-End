@@ -25,4 +25,16 @@ public class BusinessException extends RuntimeException {
         this.errors = errors;
         this.errorCode = errorCode;
     }
+
+    public static class UserNotFoundException extends RuntimeException {
+        public UserNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public static class TripNotFoundException extends RuntimeException {
+        public TripNotFoundException(String message) {
+            super(message);
+        }
+    }
 }
