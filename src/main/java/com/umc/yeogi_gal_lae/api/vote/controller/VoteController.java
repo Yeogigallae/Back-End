@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.controller;
 
+import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.service.VoteService;
@@ -10,8 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,15 +30,7 @@ public class VoteController {
     @PostMapping("/vote")
     public Response<Long> createVote(@RequestBody VoteRequest voteRequest) {
 
-        // 현재 인증된 사용자 정보 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal != null && principal.getClass().getName().equals("User")) {    // Principal 의 객체 타입 확인
-            userEmail = ((UserDetails) principal).getUsername();
-        }
-        else if (principal != null) { userEmail = principal.toString();}
-        else { throw new IllegalArgumentException("현재 인증된 사용자를 찾을 수 없습니다."); }
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         voteRequest.setUserEmail(userEmail);
         voteService.createVote(voteRequest);
@@ -56,15 +47,7 @@ public class VoteController {
     @GetMapping("/vote/results/{tripId}")
     public Response<List<VoteResponse>> getVoteResults(@PathVariable @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
 
-        // 현재 인증된 사용자 정보 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal != null && principal.getClass().getName().equals("User")) {    // Principal 의 객체 타입 확인
-            userEmail = ((UserDetails) principal).getUsername();
-        }
-        else if (principal != null) { userEmail = principal.toString();}
-        else { throw new IllegalArgumentException("현재 인증된 사용자를 찾을 수 없습니다."); }
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         List<VoteResponse> response = voteService.getVoteResults(userEmail, tripId);
         return Response.of(SuccessCode.OK, response);
