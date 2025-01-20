@@ -34,7 +34,6 @@ public class VoteController {
 
         voteRequest.setUserEmail(userEmail);
         voteService.createVote(voteRequest);
-
         return Response.of(SuccessCode.VOTE_CREATED_OK);
     }
 
