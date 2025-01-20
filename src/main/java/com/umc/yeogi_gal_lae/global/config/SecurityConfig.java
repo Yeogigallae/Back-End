@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -37,35 +37,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 비활성화 (H2 콘솔 사용을 위해)
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/vote/**")
-                        .ignoringRequestMatchers("/h2-console/**")
-                        .ignoringRequestMatchers((request ->
-                                "POST".equalsIgnoreCase(request.getMethod()) ||
-                                "PUT".equalsIgnoreCase(request.getMethod()) ||
-                                "DELETE".equalsIgnoreCase(request.getMethod()))
-                        )
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
+                .httpBasic(HttpBasicConfigurer::disable)
+                .sessionManagement(configurer -> configurer
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // CORS 설정
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 세션 사용 안 함 (STATELESS)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 프레임 옵션 설정 (H2 콘솔 사용을 위해)
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin
-                        )
-                )
-                // HTTP Basic 인증 비활성
-                .httpBasic(AbstractHttpConfigurer::disable)
-                // URL 접근 정책 설정
-                .authorizeHttpRequests(auth -> auth
-                        // H2 콘솔 및 Swagger 등 허용
-                        .requestMatchers(excludedPaths).permitAll()
-                        // 그 외 /api/** 경로는 인증 필요
-                        .requestMatchers("/api/**").authenticated()
-                        // 기타 모든 요청은 허용 (필요시 수정)
-                        .anyRequest().permitAll()
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/api/v1/resumes/search").hasRole("ADMIN") // resume
+//                        .requestMatchers("/api/v1/resumes/**").hasAnyRole("ADMIN", "REGULAR") // resume
+//                        .anyRequest().permitAll()
+//                )
+                .authorizeHttpRequests(requests ->
+                        requests.anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
 //          .authorizeHttpRequests(authorize -> authorize
 //                  .requestMatchers(

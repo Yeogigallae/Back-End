@@ -36,6 +36,13 @@ public class Response<T> {
                 null);
     }
 
+    public static <T> Response<T> ok(BaseStatus status) {
+        return new Response(status.getReason().getStatus(),
+                status.getReason().getCode(),
+                status.getReason().getMessage(),
+                null);
+    }
+
     // 생성자 추가: result 없이 동작
     public Response(HttpStatus httpStatus, String code, String message) {
         this.httpStatus = httpStatus;
