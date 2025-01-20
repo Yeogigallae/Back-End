@@ -31,7 +31,7 @@ public class VoteService {
     private final TripPlanRepository tripPlanRepository;
 
     @Transactional
-    public Long createVote(VoteRequest request){
+    public void createVote(VoteRequest request){
 
         // 유저 이메일로 검증
         User user = userRepository.findByEmail(request.getUserEmail()).orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
@@ -59,10 +59,9 @@ public class VoteService {
         }
 
         userRepository.save(user);
-        return vote.getId();
     }
 
-    public List<VoteResponse> getVoteResults(String userEmail, Long tripId){
+    public List<VoteResponse.ResultDTO> getVoteResults(String userEmail, Long tripId){
 
         Long userId = userRepository.findByEmail(userEmail)
                 .orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."))
@@ -87,8 +86,8 @@ public class VoteService {
                         Collectors.counting())
                 );
 
-        VoteResponse goodResponse = VoteConverter.convert("GOOD", userVote.orElse(null), groupedVotes);
-        VoteResponse badResponse = VoteConverter.convert("BAD", userVote.orElse(null), groupedVotes);
+        VoteResponse.ResultDTO goodResponse = VoteConverter.convert("GOOD", userVote.orElse(null), groupedVotes);
+        VoteResponse.ResultDTO badResponse = VoteConverter.convert("BAD", userVote.orElse(null), groupedVotes);
 
         return List.of(goodResponse, badResponse);
     }

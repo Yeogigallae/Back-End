@@ -28,14 +28,14 @@ public class VoteController {
 
     @Operation(summary = "투표 API", description = "현재 사용자의 투표 요청 입니다.")
     @PostMapping("/vote")
-    public Response<Long> createVote(@RequestBody VoteRequest voteRequest) {
+    public Response<Void> createVote(@RequestBody VoteRequest voteRequest) {
 
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         voteRequest.setUserEmail(userEmail);
+        voteService.createVote(voteRequest);
 
-        Long VoteId = voteService.createVote(voteRequest);
-        return Response.of(SuccessCode.CREATED, VoteId);
+        return Response.of(SuccessCode.VOTE_CREATED_OK);
     }
 
     @Validated
@@ -48,7 +48,8 @@ public class VoteController {
 
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        List<VoteResponse> response = voteService.getVoteResults(userEmail, tripId);
-        return Response.of(SuccessCode.OK, response);
+        voteService.getVoteResults(userEmail, tripId);
+
+        return Response.of(SuccessCode.VOTE_RESULTS_OK);
     }
 }
