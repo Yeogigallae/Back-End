@@ -41,8 +41,8 @@ public class ErrorResponse {
         this.timestamp = LocalDateTime.now();
         this.httpStatus = errorCode.getHttpStatus();
         this.code = errorCode.getCode();
-        this.errorMessage = errorMessage;
-        this.errors = FieldError.of(field, "", errorMessage);
+        this.errorMessage = field == null ? errorMessage : null; // 필드 오류가 없을 때만 errorMessage 설정
+        this.errors = field == null ? null : FieldError.of(field, "", errorMessage); // 필드 오류가 있으면 errors에 설정
         this.path = path;
     }
 
@@ -80,7 +80,11 @@ public class ErrorResponse {
      * 단일 필드 오류 기반 오류 응답 생성
      */
     public static ErrorResponse of(ErrorCode errorCode, String errorMessage, String field, String path) {
-        return new ErrorResponse(errorCode, errorMessage, field, path);
+        if (field == null) {
+            return new ErrorResponse(errorCode, errorMessage, null, path);
+        } else {
+            return new ErrorResponse(errorCode, null, field, path);
+        }
     }
 
     @Getter
