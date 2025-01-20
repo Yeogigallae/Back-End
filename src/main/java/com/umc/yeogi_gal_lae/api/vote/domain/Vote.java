@@ -2,11 +2,9 @@ package com.umc.yeogi_gal_lae.api.vote.domain;
 
 
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
-import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Builder
 @Getter  @Setter
@@ -14,16 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name="vote")
 @Entity
-public class Vote {
+public class Vote extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "vote", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<User> users;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tripPlan_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "trip_plan_id", nullable = false)
     private TripPlan tripPlan;
 
     @Enumerated(EnumType.STRING)

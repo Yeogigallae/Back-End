@@ -147,4 +147,18 @@ public class GlobalExceptionHandler {
         log.warn("MissingRequestCookieException: {}", e.getMessage());
         return new ResponseEntity<>(response, ErrorCode.INPUT_VALUE_INVALID.getHttpStatus());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException e, HttpServletRequest request) {
+        ErrorResponse response = ErrorResponse.of(
+                ErrorCode.BAD_REQUEST,
+                e.getMessage(),
+                null,
+                request.getRequestURI()
+        );
+        log.warn("IllegalArgumentException: {}", e.getMessage());
+        return new ResponseEntity<>(response, ErrorCode.BAD_REQUEST.getHttpStatus());
+    }
+
 }
