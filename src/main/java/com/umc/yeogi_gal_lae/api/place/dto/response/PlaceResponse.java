@@ -17,4 +17,10 @@ public class PlaceResponse {
     private String address;
     private Double lat;
     private Double lng;
+
+
+    public static class Coordinate {
+        private Double lat;
+        private Double lng;
+    }
 }
