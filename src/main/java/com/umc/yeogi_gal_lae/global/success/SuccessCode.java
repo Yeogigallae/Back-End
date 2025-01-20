@@ -19,10 +19,11 @@ public enum SuccessCode implements BaseStatus {
     TOKEN_REISSUE_OK(HttpStatus.OK, "TOKEN_200", "토큰 재발급 성공"),
     USER_LOGOUT_OK(HttpStatus.OK, "USER_200", "유저 로그아웃 성공"),
 
-    // Place Success
-    PLACE_ADD_OK(HttpStatus.OK, "PLACE_200", "여행 장소 등록 성공."),
-    PLACE_DELETED(HttpStatus.OK, "PLACE_200", "여행 장소 삭제 성공."),
-    PLACES_FETCHED(HttpStatus.OK, "PLACE_201", "여행 장소 전체 조회 성공y.");;
+
+    // Vote Success
+    VOTE_CREATED_OK(HttpStatus.OK, "VOTE_200", "투표 생성에 성공하였습니다."),
+    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

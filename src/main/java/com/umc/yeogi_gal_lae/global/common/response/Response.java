@@ -29,6 +29,12 @@ public class Response<T> {
                 result);
     }
 
+    public static <T> Response<T> of(BaseStatus status) {
+        return new Response<>(status.getReason().getStatus(),
+                status.getReason().getCode(),
+                status.getReason().getMessage(),
+                null);
+    }
 
     // 생성자 추가: result 없이 동작
     public Response(HttpStatus httpStatus, String code, String message) {
@@ -44,6 +50,5 @@ public class Response<T> {
                 errorCode.getCode(),
                 errorCode.getMessage()
         );
-
     }
 }
