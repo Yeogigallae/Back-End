@@ -1,9 +1,11 @@
 package com.umc.yeogi_gal_lae.api.room.service;
 
+import com.umc.yeogi_gal_lae.api.room.converter.RoomMemberConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMemberId;
 import com.umc.yeogi_gal_lae.api.room.dto.request.AddRoomMemberRequest;
+import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
@@ -23,6 +25,7 @@ public class RoomMemberService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
+
     /**
      * 방 멤버 추가
      *
@@ -34,7 +37,7 @@ public class RoomMemberService {
         // 방 확인
         Optional<Room> roomOptional = roomRepository.findById(request.getRoomId());
         if (roomOptional.isEmpty()) {
-            throw new IllegalArgumentException("Room not found with ID: " + request.getRoomId());
+            throw new IllegalArgumentException("해당하는 Room Id가 없습니다. " + request.getRoomId());
         }
         Room room = roomOptional.get();
 
@@ -43,36 +46,38 @@ public class RoomMemberService {
         for (Long userId : userIds) {
             Optional<User> userOptional = userRepository.findById(userId);
             if (userOptional.isEmpty()) {
-                throw new IllegalArgumentException("User not found with ID: " + userId);
+                throw new IllegalArgumentException("해당하는 User Id가 없습니다. " + userId);
             }
             User user = userOptional.get();
 
             // RoomMember 생성
-            RoomMember roomMember = RoomMember.builder()
-                    .room(room)
-                    .user(user)
-                    .build();
+            RoomMember roomMember = RoomMemberConverter.fromRequest(room,user);
             roomMemberRepository.save(roomMember);
         }
     }
 
     /**
      * 방에 있는 멤버 조회
-     *
-     * @param roomId 방 ID
-     * @return 방에 있는 RoomMember 목록
      */
-    public List<RoomMember> getMembersByRoomId(Long roomId) {
-        return roomMemberRepository.findAllByIdRoomId(roomId);
+    public List<RoomMemberResponse> getMembersByRoomId(Long roomId) {
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByIdRoomId(roomId);
+
+        // RoomMember -> RoomMemberResponse 변환 (Converter 사용)
+        return roomMembers.stream()
+                .map(RoomMemberConverter::toResponse)
+                .toList();
     }
 
     /**
      * 특정 사용자가 속한 방 조회
-     *
-     * @param userId 사용자 ID
-     * @return 사용자가 속한 RoomMember 목록
      */
-    public List<RoomMember> getRoomsByUserId(Long userId) {
-        return roomMemberRepository.findAllByIdUserId(userId);
+
+    public List<RoomMemberResponse> getRoomsByUserId(Long userId) {
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByIdUserId(userId);
+
+        // RoomMember -> RoomMemberResponse 변환 (Converter 사용)
+        return roomMembers.stream()
+                .map(RoomMemberConverter::toResponse)
+                .toList();
     }
 }

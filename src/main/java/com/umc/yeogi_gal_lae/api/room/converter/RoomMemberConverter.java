@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RoomMemberConverter {
 
-    public RoomMemberResponse toResponse(RoomMember roomMember) {
+    public static RoomMemberResponse toResponse(RoomMember roomMember) {
         return RoomMemberResponse.builder()
                 .id(roomMember.getId())
                 .roomId(roomMember.getRoom().getId())
@@ -18,7 +18,7 @@ public class RoomMemberConverter {
                 .build();
     }
 
-    public RoomMember fromRequest(Room room, User user) {
+    public static RoomMember fromRequest(Room room, User user) {
         return RoomMember.builder()
                 .room(room)
                 .user(user)
