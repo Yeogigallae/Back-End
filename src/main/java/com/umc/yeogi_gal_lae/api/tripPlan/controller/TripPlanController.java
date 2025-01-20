@@ -1,75 +1,53 @@
 package com.umc.yeogi_gal_lae.api.tripPlan.controller;
 
-import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanRequestDTO;
+import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanRequest;
+import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanResponse;
 import com.umc.yeogi_gal_lae.api.tripPlan.service.TripPlanService;
-import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
+import com.umc.yeogi_gal_lae.global.common.response.Response;
+import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/trip-plans")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class TripPlanController {
 
     private final TripPlanService tripPlanService;
-//    private final VoteService voteService;
-//    private final RoomService roomService;
 
-    /**
-     * 새로운 "코스짜기" 데이터를 특정 방에 공유합니다.
-     *
-     * @param roomId  방 ID
-     * @param request 코스짜기 입력 데이터
-     */
-    @Operation(summary = "코스짜기 데이터 공유", description = "코스짜기 데이터를 특정 방에 공유합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 공유 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-            @ApiResponse(responseCode = "404", description = "방을 찾을 수 없음")
-    })
-    @PostMapping("/{roomId}/share-course")
-    public ResponseEntity<Void> shareCourseData(@PathVariable Long roomId, @RequestBody TripPlanRequestDTO request) {
-//        String message = String.format(
-//                "투표 제한 시간: %s\n장소: %s\n기간: %s ~ %s",
-//                request.getVoteTime(),
-//                request.getLocation(),
-//                request.getStartDate(),
-//                request.getEndDate()
-//        );
-//
-//        roomService.shareDataWithRoom(roomId, message);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "새로운 투표 생성", description = "새로운 투표를 생성합니다.")
+    @PostMapping("/trip-plan/votes")
+    public Response<TripPlanResponse> createVote(@RequestBody TripPlanRequest request) {
+        TripPlanResponse response = tripPlanService.createTripPlan(request);
+        return Response.of(SuccessCode.OK, response);
     }
 
-    /**
-     * 새로운 "투표하기" 데이터를 특정 방에 공유합니다.
-     *
-     * @param roomId  방 ID
-     * @param request 투표하기 입력 데이터
-     */
-    @Operation(summary = "투표하기 데이터 공유", description = "투표하기 데이터를 특정 방에 공유합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 공유 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-            @ApiResponse(responseCode = "404", description = "방을 찾을 수 없음")
-    })
-    @PostMapping("/{roomId}/share-vote")
-    public ResponseEntity<Void> shareVoteData(@PathVariable Long roomId, @RequestBody VoteRequest request) {
-//        String message = String.format(
-//                "투표 제한 시간: %s\n장소: %s\n가격: %s\n기간: %s ~ %s",
-//                request.getVoteTime(),
-//                request.getLocation(),
-//                request.getPrice(),
-//                request.getStartDate(),
-//                request.getEndDate()
-//        );
-//
-//        roomService.shareDataWithRoom(roomId, message);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "투표에 이미지 업로드", description = "특정 투표에 이미지를 업로드합니다.")
+    @PostMapping("/trip-plan/votes/{voteId}/image")
+    public Response<String> uploadVoteImage(@PathVariable Long voteId) {
+        // 이미지 업로드 로직 구현
+        return Response.of(SuccessCode.OK, "이미지 업로드 완료");
+    }
+
+    @Operation(summary = "투표 공유", description = "특정 투표를 방에 공유합니다.")
+    @PostMapping("/trip-plan/votes/{voteId}/share/room/{roomId}")
+    public Response<String> shareVote(@PathVariable Long voteId, @PathVariable Long roomId) {
+        // 투표 공유 로직 구현
+        return Response.of(SuccessCode.OK, "투표 공유 완료");
+    }
+
+    @Operation(summary = "예산 데이터 저장", description = "사용자가 입력한 예산 데이터를 저장합니다.")
+    @PostMapping("/trip-plan/budget")
+    public Response<String> saveBudget(@RequestBody String budgetRequest) {
+        // 예산 저장 로직 구현
+        return Response.of(SuccessCode.OK, "예산 저장 완료");
+    }
+
+    @Operation(summary = "예산 데이터 조회", description = "특정 예산 데이터를 조회합니다.")
+    @GetMapping("/trip-plan/budget/{budgetId}")
+    public Response<String> getBudget(@PathVariable Long budgetId) {
+        // 예산 조회 로직 구현
+        return Response.of(SuccessCode.OK, "예산 데이터 조회 완료");
     }
 }
-
