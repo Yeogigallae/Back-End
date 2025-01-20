@@ -18,14 +18,22 @@ public class RoomController {
 
     @Operation(summary = "방 생성")
     @PostMapping
-    public void createRoom(@RequestBody CreateRoomRequest request) {
-        roomService.createRoom(request);
+    public void createRoom(@RequestBody CreateRoomRequest request,
+                           @RequestHeader("Authorization") String token) {
+        // "Bearer " 제거
+        String jwtToken = token.replace("Bearer ", "");
+        // RoomService에 CreateRoomRequest와 JWT 토큰 전달
+        roomService.createRoom(request, jwtToken);
     }
 
     @Operation(summary = "방 멤버 추가")
-    @PostMapping
-    public void addMember(@RequestBody AddRoomMemberRequest request){
-        roomMemberService.addMembers(request);
+    @PostMapping("/members")
+    public void addMember(@RequestBody AddRoomMemberRequest request,
+                          @RequestHeader("Authorization") String token) {
+        // "Bearer " 제거
+        String jwtToken = token.replace("Bearer ", "");
+        // RoomMemberService에 AddRoomMemberRequest와 JWT 토큰 전달
+        roomMemberService.addMembers(request, jwtToken);
     }
 
 }

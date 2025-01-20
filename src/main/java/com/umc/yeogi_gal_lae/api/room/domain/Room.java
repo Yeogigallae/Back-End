@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.room.domain;
 
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,15 +22,17 @@ public class Room {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY) // User와 다대일 관계 설정
+    @JoinColumn(name = "master", nullable = false) // 외래 키 매핑
     @Column(nullable = false)
-    private Long masterId;
+    private User master;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomMember> roomMembers; // RoomMember와의 관계
 
 
-    public Room(String name, Long masterId) {
+    public Room(String name, User master) {
         this.name = name;
-        this.masterId = masterId;
+        this.master = master;
     }
 }

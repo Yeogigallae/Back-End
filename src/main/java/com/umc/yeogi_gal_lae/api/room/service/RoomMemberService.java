@@ -13,6 +13,7 @@ import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class RoomMemberService {
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
 
     /**
@@ -33,25 +35,39 @@ public class RoomMemberService {
      * @return 생성된 RoomMember
      */
     @Transactional
-    public void addMembers(AddRoomMemberRequest request) {
+    public void addMembers(AddRoomMemberRequest request, String token) {
+        // 1. JWT에서 요청자의 email 추출
+        String requesterEmail = jwtService.getEmailFromToken(token);
+        if (requesterEmail == null) {
+            throw new IllegalArgumentException("유효하지 않은 JWT 토큰입니다.");
+        }
+
+        // 2. 요청자 확인 및 권한 검증
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("요청자를 찾을 수 없습니다: " + requesterEmail));
+
         // 방 확인
         Optional<Room> roomOptional = roomRepository.findById(request.getRoomId());
         if (roomOptional.isEmpty()) {
-            throw new IllegalArgumentException("해당하는 Room Id가 없습니다. " + request.getRoomId());
+            throw new IllegalArgumentException("해당하는 Room Id가 없습니다: " + request.getRoomId());
         }
         Room room = roomOptional.get();
 
-        // 사용자 확인 및 멤버 추가
+        // 방에 대한 권한 확인 (예: 방 생성자인지 확인)
+        if (!room.getMaster().equals(requester)) {
+            throw new IllegalArgumentException("해당 방에 멤버를 추가할 권한이 없습니다.");
+        }
+
+        // 3. 사용자 확인 및 멤버 추가
         List<Long> userIds = request.getUserIds();
         for (Long userId : userIds) {
             Optional<User> userOptional = userRepository.findById(userId);
             if (userOptional.isEmpty()) {
-                throw new IllegalArgumentException("해당하는 User Id가 없습니다. " + userId);
+                throw new IllegalArgumentException("해당하는 User Id가 없습니다: " + userId);
             }
             User user = userOptional.get();
 
-            // RoomMember 생성
-            RoomMember roomMember = RoomMemberConverter.fromRequest(room,user);
+            RoomMember roomMember = RoomMemberConverter.fromRequest(room, user);
             roomMemberRepository.save(roomMember);
         }
     }
