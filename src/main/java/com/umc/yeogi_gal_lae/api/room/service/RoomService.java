@@ -22,7 +22,6 @@ public class RoomService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    @Transactional
     public void createRoom(CreateRoomRequest request, String token) {
 
         // 1. JWT 토큰에서 요청자의 이메일 추출
@@ -39,9 +38,5 @@ public class RoomService {
         Room room = new Room(request.getName(), master); // master를 User 객체로 설정
         roomRepository.save(room);
     }
-    //시안엔 없는데 방 삭제 기능 필요할 것 같음
-//    @Transactional
-//    public void deleteRoom(){
-//
-//    }
+
 }

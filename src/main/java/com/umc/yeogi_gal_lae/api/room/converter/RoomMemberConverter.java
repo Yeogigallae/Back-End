@@ -5,9 +5,7 @@ import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
-import org.springframework.stereotype.Component;
 
-@Component
 public class RoomMemberConverter {
 
     public static RoomMemberResponse toResponse(RoomMember roomMember) {
