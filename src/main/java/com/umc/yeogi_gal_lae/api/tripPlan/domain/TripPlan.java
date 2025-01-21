@@ -2,7 +2,6 @@ package com.umc.yeogi_gal_lae.api.tripPlan.domain;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.types.*;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
-import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +25,7 @@ public class TripPlan extends BaseEntity {
     @Column
     private String description;
 
+    @Column
     private String price;
 
     @Enumerated(EnumType.STRING)
@@ -37,7 +37,7 @@ public class TripPlan extends BaseEntity {
     private TripPlanType tripPlanType; // COURSE, SCHEDULE, BUDGET (여행 계획 생성, 여행 코스 생성, 여행 자본 생성)
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private VoteLimitTime voteLimitTime;
 
     @Enumerated(EnumType.STRING)
@@ -51,6 +51,9 @@ public class TripPlan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column
     private Transportation transportation;
+//
+//    @Column(nullable = false, length = 20)
+//    private String status; // "ONGOING", "PLANNED", "COMPLETED"
 
     @Column(nullable = false, length = 50)
     private String location;
@@ -71,10 +74,11 @@ public class TripPlan extends BaseEntity {
     @Column
     private String groupId; // 그룹 ID
 
+    @Column
+    private String imageUrl; // **이미지 URL 추가**
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "tripPlan", fetch = FetchType.LAZY , cascade = CascadeType.ALL)
-    private Vote vote;
 }
