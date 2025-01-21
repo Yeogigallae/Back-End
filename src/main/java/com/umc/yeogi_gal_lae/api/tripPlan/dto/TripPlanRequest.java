@@ -11,12 +11,16 @@ public class TripPlanRequest {
     private String location; // 여행 장소
     private String startDate;
     private String endDate;
+    private String price;
 
     private TripPlanType tripPlanType; // "COURSE", "SCHEDULE", "BUDGET"
+    private TripType tripType;
     private VoteLimitTime voteLimitTime; // "30분", "60분", "4시간", "6시간"
     private Integer minDays; // 최소 숙박일
     private Integer maxDays; // 최대 숙박일
     private String groupId; // 그룹 ID
+    private String imageUrl; // **이미지 URL 추가**
+    private Long userId; // **유저 ID 추가**
 
     // 이너 클래스 정의
     @Getter
