@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.room.converter;
 
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoominfoResponse;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,14 +12,14 @@ public class RoomConverter {
         return RoominfoResponse.builder()
                 .id(room.getId())
                 .name(room.getName())
-                .masterId(room.getMasterId())
+                .master(room.getMaster())
                 .build();
     }
 
-    public static Room fromRequest(String name, Long masterId) {
+    public static Room fromRequest(String name, User master) {
         return Room.builder()
                 .name(name)
-                .masterId(masterId)
+                .master(master)
                 .build();
     }
 }

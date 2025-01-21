@@ -24,7 +24,6 @@ public class Room {
 
     @ManyToOne(fetch = FetchType.LAZY) // User와 다대일 관계 설정
     @JoinColumn(name = "master", nullable = false) // 외래 키 매핑
-    @Column(nullable = false)
     private User master;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
