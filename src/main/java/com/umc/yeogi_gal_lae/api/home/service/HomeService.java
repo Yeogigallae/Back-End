@@ -1,32 +1,35 @@
-package com.umc.yeogi_gal_lae.api.home.service;
-
-import com.umc.yeogi_gal_lae.api.home.mapper.HomeResponseMapper;
-import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
-import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-
-@Service
-@RequiredArgsConstructor
-public class HomeService {
-
-    private final VoteRepository voteRepository;
-    private final HomeResponseMapper homeResponseMapper;
-
-    /**
-     * 특정 사용자가 참여 중인 투표 목록을 조회합니다.
-     *
-     * @param userId 사용자 ID
-     * @return 사용자가 참여한 투표 목록
-     */
-    public List<Map<String, Object>> getActiveVoteRooms(Long userId) {
-        // 사용자가 참여한 투표 데이터를 가져옵니다.
-        List<Vote> votes = voteRepository.findByUserId(userId);
-
-        // 매퍼를 사용하여 응답 데이터로 변환
-        return homeResponseMapper.mapVotesToResponse(votes);
-    }
-}
+//package com.umc.yeogi_gal_lae.api.home.service;
+//
+//import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
+//import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
+//import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.stereotype.Service;
+//
+//import java.util.List;
+//
+//@Service
+//@RequiredArgsConstructor
+//public class HomeService {
+//
+//    private final UserRepository userRepository;
+//    private final VoteRepository voteRepository;
+//    private final TripPlanRepository tripPlanRepository;
+//
+//    public boolean getNotificationStatus(Long userId) {
+//        return userRepository.existsById(userId);
+//    }
+//
+//    public List<HomeDto.VoteResponse> getOngoingVotes(Long userId) {
+//        return HomeConverter.toVoteResponses(voteRepository.findOngoingVotesByUserId(userId));
+//    }
+//
+//    public List<HomeDto.PlannedTripResponse> getPlannedTrips(Long userId) {
+//        return HomeConverter.toPlannedTripResponses(tripPlanRepository.findPlannedTripsByUserId(userId));
+//    }
+//
+//    public HomeDto.CompletedTripsResponse getCompletedTrips(Long userId) {
+//        return HomeConverter.toCompletedTripsResponse(
+//                tripPlanRepository.findCompletedTripsByUserId(userId));
+//    }
+//}
