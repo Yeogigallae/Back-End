@@ -26,7 +26,10 @@ public enum SuccessCode implements BaseStatus {
 
     // Vote Success
     VOTE_CREATED_OK(HttpStatus.OK, "VOTE_200", "투표 생성에 성공하였습니다."),
-    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다.")
+    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다."),
+
+    // AI Success
+    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다."),
     ;
 
     private final HttpStatus httpStatus;

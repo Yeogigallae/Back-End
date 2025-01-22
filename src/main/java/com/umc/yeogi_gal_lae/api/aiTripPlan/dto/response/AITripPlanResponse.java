@@ -1,15 +1,25 @@
-package com.umc.yeogi_gal_lae.api.aiTripPlan.dto.response;
+package com.umc.yeogi_gal_lae.api.AITripPlan.dto.response;
 
 
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
+@Getter
+@Builder
+@AllArgsConstructor
+@ToString
 public class AITripPlanResponse {
     private Map<String, Day> data;
 
+    @Getter
+    @Builder
     public static class Day {
-        private List<Place> places;
         private String date;
+        private List<Place> places;
     }
 }

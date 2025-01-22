@@ -1,16 +1,29 @@
-package com.umc.yeogi_gal_lae.api.aiTripPlan.dto.request;
+package com.umc.yeogi_gal_lae.api.AITripPlan.dto.request;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+@AllArgsConstructor
 public class OpenAIRequest {
+
     private String model;
     private List<Message> messages;
 
-    public static class Messgae {
+    @Getter
+    @Builder
+    public static class Massage {
         private String role;
         private String content;
+    }
 
-        public Message(String role, String content) {
-            this.role = role;
-            this.content = content;
-        }
+    public static class Usage {
+        private int prompt_tokens;
+        private int completion_tokens;
+        private int total_tokens;
+
     }
 }
