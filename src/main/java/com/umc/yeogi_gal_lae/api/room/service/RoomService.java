@@ -6,9 +6,9 @@ import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 import com.umc.yeogi_gal_lae.api.room.dto.CreateRoomRequest;
 import com.umc.yeogi_gal_lae.api.room.dto.RoomResponse;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
-import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOauth2User;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -51,18 +51,16 @@ public class RoomService {
     private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            // 인증 정보가 없으면 BusinessException 던짐
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         Object principal = authentication.getPrincipal();
-        if (!(principal instanceof CustomOauth2User)) {
-            // CustomOauth2User 아닌 경우 BusinessException 던짐
+        if (!(principal instanceof User)) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
-        CustomOauth2User customOauth2User = (CustomOauth2User) principal;
-        // DB 상 PK를 반환
-        return customOauth2User.getUser().getId();
+        User user = (User) principal;
+        return user.getId();
     }
+
 }
