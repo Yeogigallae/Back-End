@@ -28,41 +28,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-
-        // 1) 헤더 검사
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = header.substring(7);
-
         try {
-            // 2) 토큰 유효성 검사
             if (jwtService.validateToken(token)) {
-                // 3) 토큰에서 email 추출
                 String email = jwtService.getEmailFromToken(token);
                 log.info("토큰에서 추출된 이메일: {}", email);
 
-                // 4) DB에서 User 조회
-                User user = userRepository.findByEmail(email).orElseThrow(() ->
-                        new BusinessException(ErrorCode.USER_NOT_FOUND)
-                );
+                // 1) DB에서 해당 email을 가진 User 찾기
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new BusinessException(
+                                ErrorCode.USER_NOT_FOUND
+                        ));
 
-                // (선택) 권한 정보가 있다면, user.getAuthorities() 등을 가져올 수도 있음.
-                // 여기서는 간단히 빈 Collections.emptyList() 사용.
-                // 혹은 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) 등 가능.
+                // 2) principal을 User로 설정
                 Authentication authentication =
                         new UsernamePasswordAuthenticationToken(
-                                user,                 // principal -> User 엔티티
-                                null,                 // credentials
-                                Collections.emptyList() // authorities
+                                user, // principal → User 엔티티
+                                null,
+                                Collections.emptyList() // 권한 정보 (필요 시 추가)
                         );
 
-                // 5) SecurityContext에 인증 정보 설정
+                // 3) SecurityContext에 인증 정보 등록
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("SecurityContext에 인증 정보를 설정했습니다. 사용자: {}", user.getId());
             } else {
@@ -72,7 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.error("JWT 인증 중 오류 발생: {}", e.getMessage());
         }
 
-        // 6) 다음 필터로 진행
         filterChain.doFilter(request, response);
     }
 }
