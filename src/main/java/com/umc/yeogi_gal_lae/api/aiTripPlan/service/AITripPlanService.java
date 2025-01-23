@@ -1,7 +1,6 @@
 package com.umc.yeogi_gal_lae.api.AITripPlan.service;
 
 import com.umc.yeogi_gal_lae.api.AITripPlan.dto.response.AITripPlanResponse;
-import com.umc.yeogi_gal_lae.api.place.converter.PlaceConverter;
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
 import com.umc.yeogi_gal_lae.api.place.dto.response.PlaceResponse;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
@@ -13,16 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class AITripPlanService {
 
     private final RoomRepository roomRepository;
     private final OpenAIConfig openAIConfig;
+
+    public AITripPlanService(RoomRepository roomRepository, OpenAIConfig openAIConfig) {
+        this.roomRepository = roomRepository;
+        this.openAIConfig = openAIConfig;
+    }
 
     /**
      * 특정 Room에 속한 모든 Place를 기반으로 여행 일정 생성
@@ -44,7 +46,7 @@ public class AITripPlanService {
 
         // Place 정보를 문자열로 변환
         String placesInfo = places.stream()
-                .map(place -> String.format("- %s: %s (Lat: %.4f, Lng: %.4f)", place.getPlaceName(),
+                .map(place -> String.format("- %s: %s (Lat: %.4f, Lng: %.4f)", place.getPlaceName(), place.getAddress(),
                         place.getLatitude(), place.getLongitude()))
                 .collect(Collectors.joining("\n"));
 
@@ -58,12 +60,12 @@ public class AITripPlanService {
         String itineraryJson = openAIConfig.generateItinerary(prompt);
 
         // JSON 파싱
-        AITripPlanResponse aiTripPlanResponse = openAIConfig.parseItinerary(itineraryJson);
+        AITripPlanResponse itineraryResponse = openAIConfig.parseItinerary(itineraryJson);
 
         // 응답의 장소가 실제 방의 장소와 일치하는지 검증
-        validateItineraryResponse(aiTripPlanResponse, places);
+        validateItineraryResponse(itineraryResponse, places);
 
-        return aiTripPlanResponse;
+        return itineraryResponse;
     }
 
     /**
@@ -73,21 +75,23 @@ public class AITripPlanService {
      * @param places            실제 방에 속한 장소들
      */
     private void validateItineraryResponse(AITripPlanResponse itineraryResponse, List<Place> places) {
-        Map<Long, Place> placeMap = places.stream().collect(Collectors.toMap(Place::getId, place -> place));
+        Map<Long, Place> placeMap = places.stream()
+                .collect(Collectors.toMap(Place::getId, place -> place));
 
         for (Map.Entry<String, AITripPlanResponse.Day> entry : itineraryResponse.getData().entrySet()) {
             AITripPlanResponse.Day day = entry.getValue();
-            for (PlaceResponse placeResponse : day.getPlaces()) {
+            for (PlaceResponse placeResponse : day.getPlaces()) { // Place -> PlaceResponse로 수정
                 Place place = placeMap.get(placeResponse.getPlaceId());
                 if (place == null) {
-                    throw new BusinessException(ErrorCode.AI_TRIP_PLAN_GENERATION_FAILED,);
+                    throw new BusinessException(ErrorCode.AI_TRIP_PLAN_GENERATION_FAILED); // ErrorCode -> Code로 수정
                 }
-                if (!place.getName().equals(placeResponse.getPlaceName()) ||
+                if (!place.getPlaceName().equals(placeResponse.getPlaceName()) ||
                         !Objects.equals(place.getLatitude(), placeResponse.getLat()) ||
                         !Objects.equals(place.getLongitude(), placeResponse.getLng())) {
-                    throw new BusinessException(ErrorCode.AI_TRIP_PLAN_GENERATION_FAILED);
+                    throw new BusinessException(ErrorCode.AI_TRIP_PLAN_GENERATION_FAILED); // ErrorCode -> Code로 수정
                 }
             }
         }
     }
+
 }

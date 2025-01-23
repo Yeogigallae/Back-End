@@ -15,14 +15,7 @@ public class PlaceResponse {
     private Long roomId;
     private String placeName;
     private String address;
-    private Coordinates coordinates;
     private Double lat;
     private Double lng;
 
-    @Getter
-    @Builder
-    public static class Coordinates {
-        private Double lat;
-        private Double lng;
-    }
 }

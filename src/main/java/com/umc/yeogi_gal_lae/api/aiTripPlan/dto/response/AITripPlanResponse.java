@@ -1,7 +1,7 @@
 package com.umc.yeogi_gal_lae.api.AITripPlan.dto.response;
 
 
-import com.umc.yeogi_gal_lae.api.place.domain.Place;
+import com.umc.yeogi_gal_lae.api.place.dto.response.PlaceResponse;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -20,6 +20,6 @@ public class AITripPlanResponse {
     @Builder
     public static class Day {
         private String date;
-        private List<Place> places;
+        private List<PlaceResponse> places;
     }
 }

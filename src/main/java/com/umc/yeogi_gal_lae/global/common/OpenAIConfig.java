@@ -2,6 +2,8 @@ package com.umc.yeogi_gal_lae.global.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.yeogi_gal_lae.api.AITripPlan.dto.request.OpenAIRequest;
+import com.umc.yeogi_gal_lae.api.AITripPlan.dto.response.AITripPlanResponse;
+import com.umc.yeogi_gal_lae.api.AITripPlan.dto.response.OpenAIResponse;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import java.util.List;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
 
 @Component
 public class OpenAIConfig {
@@ -53,7 +56,7 @@ public class OpenAIConfig {
 
         if (openAIResponse == null || openAIResponse.getChoices().isEmpty()) {
             logger.error("OpenAI 응답이 비어 있습니다.");
-            throw new BusinessException(ErrorCode.ITINERARY_GENERATION_FAILED);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         String itineraryJson = openAIResponse.getChoices().get(0).getMessage().getContent();
@@ -69,13 +72,13 @@ public class OpenAIConfig {
      * @param itineraryJson GPT로부터 받은 여행 일정 JSON 문자열
      * @return ItineraryResponse 객체
      */
-    public ItineraryResponse parseItinerary(String itineraryJson) {
+    public AITripPlanResponse parseItinerary(String itineraryJson) {
         try {
-            ItineraryResponse itineraryResponse = objectMapper.readValue(itineraryJson, ItineraryResponse.class);
+            AITripPlanResponse itineraryResponse = objectMapper.readValue(itineraryJson, AITripPlanResponse.class);
             return itineraryResponse;
         } catch (Exception e) {
             logger.error("여행 일정 JSON 파싱 실패: {}", e.getMessage());
-            throw new BusinessException(ErrorCode.ITINERARY_GENERATION_FAILED);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }

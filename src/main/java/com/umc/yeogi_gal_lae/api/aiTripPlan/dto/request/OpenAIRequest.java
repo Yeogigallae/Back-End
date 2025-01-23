@@ -1,13 +1,19 @@
 package com.umc.yeogi_gal_lae.api.AITripPlan.dto.request;
 
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 
 @Getter
 @Builder
 @AllArgsConstructor
+@RequiredArgsConstructor
+@Setter
 public class OpenAIRequest {
 
     private String model;
@@ -15,15 +21,9 @@ public class OpenAIRequest {
 
     @Getter
     @Builder
-    public static class Massage {
+    @AllArgsConstructor
+    public static class Message {
         private String role;
         private String content;
-    }
-
-    public static class Usage {
-        private int prompt_tokens;
-        private int completion_tokens;
-        private int total_tokens;
-
     }
 }
