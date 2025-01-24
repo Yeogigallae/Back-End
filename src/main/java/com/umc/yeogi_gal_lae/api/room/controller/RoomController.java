@@ -1,7 +1,10 @@
 package com.umc.yeogi_gal_lae.api.room.controller;
 
 import com.umc.yeogi_gal_lae.api.room.dto.CreateRoomRequest;
+import com.umc.yeogi_gal_lae.api.room.dto.RoomResponse;
 import com.umc.yeogi_gal_lae.api.room.service.RoomService;
+import com.umc.yeogi_gal_lae.global.common.response.Response;
+import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +21,8 @@ public class RoomController {
 
     @Operation(summary = "방 생성")
     @PostMapping
-    public void createRoom(@RequestBody CreateRoomRequest request) {
-        roomService.createRoom(request);
+    public Response<RoomResponse> createRoom(@RequestBody CreateRoomRequest request) {
+        RoomResponse roomResponse = roomService.createRoom(request);
+        return Response.of(SuccessCode.OK, roomResponse);
     }
 }
