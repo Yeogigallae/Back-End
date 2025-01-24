@@ -1,4 +1,4 @@
-package com.umc.yeogi_gal_lae.api.AITripPlan.dto.response;
+package com.umc.yeogi_gal_lae.api.aiTripPlan.dto.response;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

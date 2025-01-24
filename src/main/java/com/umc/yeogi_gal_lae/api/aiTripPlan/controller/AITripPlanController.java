@@ -1,7 +1,7 @@
-package com.umc.yeogi_gal_lae.api.AITripPlan.controller;
+package com.umc.yeogi_gal_lae.api.aiTripPlan.controller;
 
-import com.umc.yeogi_gal_lae.api.AITripPlan.dto.response.AITripPlanResponse;
-import com.umc.yeogi_gal_lae.api.AITripPlan.service.AITripPlanService;
+import com.umc.yeogi_gal_lae.api.aiTripPlan.dto.response.AITripPlanResponse;
+import com.umc.yeogi_gal_lae.api.aiTripPlan.service.AITripPlanService;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
