@@ -46,12 +46,10 @@ public class TripPlanController {
         return Response.of(SuccessCode.OK, images);
     }
 
-    @Operation(summary = "특정 여행 계획 공유", description = "특정 TripPlanId에 해당하는 데이터를 방(RoomId)에 반환합니다.")
-    @GetMapping("/trip-plan/share")
-    public Response<Map<String, Object>> shareTripPlanToRoom(
-            @RequestParam Long tripPlanId,
-            @RequestParam Long roomId) {
-        Map<String, Object> sharedTripPlanData = (Map<String, Object>) tripPlanService.getTripPlansForRoom(roomId);
-        return Response.of(SuccessCode.OK, sharedTripPlanData);
+    @Operation(summary = "여행 계획 상세 조회", description = "특정 여행 계획의 상세 정보를 반환합니다.")
+    @GetMapping("/trip-plan/{tripPlanId}/details")
+    public Response<TripPlanResponse> getTripPlanDetails(@PathVariable Long tripPlanId) {
+        TripPlanResponse response = tripPlanService.getTripPlanDetails(tripPlanId);
+        return Response.of(SuccessCode.OK, response);
     }
 }

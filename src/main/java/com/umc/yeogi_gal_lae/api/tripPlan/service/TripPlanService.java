@@ -70,29 +70,19 @@ public class TripPlanService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public TripPlanResponse getTripPlanDetails(Long tripPlanId) {
+        TripPlan tripPlan = tripPlanRepository.findById(tripPlanId)
+                .orElseThrow(() -> new BusinessException.TripNotFoundException("여행 계획을 찾을 수 없습니다."));
+
+        return TripPlanConverter.toResponse(tripPlan);
+    }
+
     private void linkTripPlanToRoomMembers(TripPlan tripPlan, Room room) {
         List<RoomMember> members = room.getRoomMembers();
         if (members == null || members.isEmpty()) {
             throw new BusinessException(ROOM_MEMBER_NOT_EXIST);
         }
-
-        // 멤버들에게 투표 전달 로직 구현
-        members.forEach(member -> {
-            // 각 멤버와 tripPlan을 연결하는 추가 처리
-            // 예: 투표 데이터 생성 및 저장
-        });
-    }
-
-    @Transactional(readOnly = true)
-    public List<TripPlanResponse> getTripPlansForRoom(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new BusinessException(ROOM_NOT_FOUND));
-
-        List<TripPlan> tripPlans = tripPlanRepository.findByRoomId(roomId);
-
-        return tripPlans.stream()
-                .map(TripPlanConverter::toResponse)
-                .collect(Collectors.toList());
     }
 
     private final List<String> availableImages = List.of(
