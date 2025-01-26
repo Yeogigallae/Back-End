@@ -26,7 +26,13 @@ public enum SuccessCode implements BaseStatus {
 
     // Vote Success
     VOTE_CREATED_OK(HttpStatus.OK, "VOTE_200", "투표 생성에 성공하였습니다."),
-    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다.")
+    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다."),
+
+    // Room Success
+    ROOM_CREATED_OK(HttpStatus.OK, "ROOM_200", "방 생성에 성공하였습니다."),
+    ROOM_DETAILS_OK(HttpStatus.OK, "ROOM_201", "방 상세 조회에 성공하였습니다."),
+    ROOM_MEMBERS_OK(HttpStatus.OK, "ROOM_202", "방 멤버 조회에 성공하였습니다."),
+    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."); // 새로 추가된 코드
     ;
 
     private final HttpStatus httpStatus;
