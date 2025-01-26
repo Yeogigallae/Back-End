@@ -35,6 +35,12 @@ public enum ErrorCode implements BaseStatus {
 
     INVALID_PLACE_FOR_ROOM(HttpStatus.BAD_REQUEST, "ROOM_400", "룸에 속하지 않은 장소입니다."),
 
+    // Vote Error
+    VOTE_NOT_COMPLETED_YET(HttpStatus.BAD_REQUEST, "VOTE_400", "아직 투표가 종료되지 않았습니다."),
+    VOTE_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_401", "요청 하신 투표 방을 찾을 수 없습니다."),
+    TRIP_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_402", "요청 하신 여행 계획을 찾을 수 없습니다."),
+    VOTE_RESULT_FAILED(HttpStatus.BAD_REQUEST, "VOTE_403", "여행 확정에 실패하셨습니다. 이 방은 사라집니다."),
+
     // 클라이언트 오류 코드
     PLACE_NOT_BELONG_TO_ROOM(HttpStatus.BAD_REQUEST, "40001", "해당 장소는 요청한 방에 속하지 않습니다."),
     NO_PLACES_FOUND(HttpStatus.BAD_REQUEST, "40002", "해당 방에 속한 장소가 없습니다."),
