@@ -1,4 +1,4 @@
-package com.umc.yeogi_gal_lae.api.vote.dto;
+package com.umc.yeogi_gal_lae.api.vote.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
