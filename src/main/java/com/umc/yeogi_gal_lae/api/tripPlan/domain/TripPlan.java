@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.tripPlan.domain;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.types.*;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -80,5 +81,9 @@ public class TripPlan extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "vote_room_id", nullable = false)
+    private VoteRoom voteRoom;
 
 }
