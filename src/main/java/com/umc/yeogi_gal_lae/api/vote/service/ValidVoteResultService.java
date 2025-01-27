@@ -16,6 +16,7 @@ import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ValidVoteResultService {
     private final RoomRepository roomRepository;
     private final VoteRoomRepository voteRoomRepository;
 
+    @Transactional
     public boolean validResult(VoteRoomRequest voteRoomRequest) {
 
         // 투표 완료 여부 확인
@@ -59,20 +61,19 @@ public class ValidVoteResultService {
 
     }
 
+    @Transactional(readOnly = true)
     public boolean checkVoteCompleted(VoteRoomRequest voteRoomRequest) {
 
         // 반복되는 로직 헬퍼 클래스로 분리
         VoteRoom voteRoom = findVoteRoomById(voteRoomRequest.getVoteRoomId());
         TripPlan tripPlan = findTripPlanById(voteRoomRequest.getTripId());
 
-        // 여행에 해당하는 모든 투표 리스트
-        List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlan.getId());
-
-        // 조건 1. 투표 제한 시간 초과
-        boolean isTimeExpired = isVoteTimeExpired(voteRoom, tripPlan);
-        // 조건 2. 모든 멤버가 투표 했는지
+        // 조건 1. 모든 멤버가 투표 했는지
+        List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlan.getId());  // 여행에 해당하는 모든 투표 리스트
         boolean allMembersVoted = isAllMembersVoted(voteRoomRequest.getRoomId(), votes);
 
+        // 조건 2. 투표 제한 시간 초과
+        boolean isTimeExpired = isVoteTimeExpired(voteRoom, tripPlan);
 
         return isTimeExpired || allMembersVoted;
     }
@@ -88,19 +89,19 @@ public class ValidVoteResultService {
     }
 
     private VoteRoom findVoteRoomById(Long voteRoomId) {
-        return voteRoomRepository.findVoteRoomByTripPlanId(voteRoomId)
+        return voteRoomRepository.findById(voteRoomId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_ROOM_NOT_FOUND));
-    }
-
-    private boolean isVoteTimeExpired(VoteRoom voteRoom, TripPlan tripPlan) {
-        // 현재 시간이 투표 만료 시간보다 이후인지 확인
-        return LocalDateTime.now().isAfter(
-                voteRoom.getStartTime().plusSeconds(tripPlan.getVoteLimitTime().getSeconds())
-        );
     }
 
     private boolean isAllMembersVoted(Long roomId, List<Vote> votes) {
         Room room = findRoomById(roomId);
         return room.getRoomMembers().size() == votes.size();
+    }
+
+    private boolean isVoteTimeExpired(VoteRoom voteRoom, TripPlan tripPlan) {
+        // 현재 시간이 투표 만료 시간보다 이후인지 확인 (투표방 생성 시간 = 투표 시작 시간)
+        return LocalDateTime.now().isAfter(
+                voteRoom.getCreatedAt().plusSeconds(tripPlan.getVoteLimitTime().getSeconds())
+        );
     }
 }
