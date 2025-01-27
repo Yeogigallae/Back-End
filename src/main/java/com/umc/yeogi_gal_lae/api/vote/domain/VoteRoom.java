@@ -5,11 +5,9 @@ import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Builder
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="vote_room")
@@ -22,13 +20,19 @@ public class VoteRoom extends BaseEntity {
     @JoinColumn(name = "trip_plan_id", nullable = false)
     private TripPlan tripPlan;         // 여행 계획 하나 당 투표방 하나
 
-    @Column(nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(nullable = false)
-    private LocalDateTime endTime;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VoteRoomStatus status;
+
+
+    // 자동 동기화
+    public void setTripPlan(TripPlan tripPlan) {
+        if (this.tripPlan != tripPlan) {     // 현재 상태를 확인
+            this.tripPlan = tripPlan;
+            if (tripPlan != null) {
+                tripPlan.setVoteRoom(this);    // 순환 호출 방지
+            }
+        }
+    }
+
 }

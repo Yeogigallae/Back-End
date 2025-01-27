@@ -84,8 +84,20 @@ public class TripPlan extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "vote_room_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true)
+    @JoinColumn(name = "vote_room_id", nullable = true)
     private VoteRoom voteRoom;
+
+
+    // 자동 동기
+    public void setVoteRoom(VoteRoom voteRoom) {
+        if (this.voteRoom != voteRoom) { // 현재 상태를 확인
+            this.voteRoom = voteRoom;
+            if (voteRoom != null) {
+                voteRoom.setTripPlan(this); // 순환 호출 방지
+            }
+        }
+    }
+
 
 }
