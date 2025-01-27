@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.tripPlan.domain;
 
+import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.*;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
@@ -40,24 +41,8 @@ public class TripPlan extends BaseEntity {
     @Column
     private VoteLimitTime voteLimitTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Accommodation accommodation;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Meal meal;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Transportation transportation;
-//
-//    @Column(nullable = false, length = 20)
-//    private String status; // "ONGOING", "PLANNED", "COMPLETED"
-
     @Column(nullable = false, length = 50)
     private String location;
-
 
     @Column(nullable = false)
     private LocalDate startDate;
@@ -71,14 +56,19 @@ public class TripPlan extends BaseEntity {
     @Column
     private Integer maxDays; // 최대 숙박일
 
-    @Column
-    private String groupId; // 그룹 ID
+    @Column(name = "group_name") // DB 컬럼 이름 변경
+    private String groupName; // 필드명 변경
 
     @Column
     private String imageUrl; // **이미지 URL 추가**
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user; // 여행 계획 작성자
+
+    // 방과의 연관 관계 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false) // 방 ID를 외래 키로 설정
+    private Room room; // 여행 계획이 속한 방
 
 }

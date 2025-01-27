@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.room.controller;
 
+
 import com.umc.yeogi_gal_lae.api.room.dto.request.AddRoomMemberRequest;
 import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoominfoResponse;
@@ -7,6 +8,7 @@ import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
 import com.umc.yeogi_gal_lae.api.room.service.RoomMemberService;
 import com.umc.yeogi_gal_lae.api.room.service.RoomService;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
+
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -105,6 +107,8 @@ public class RoomController {
         // 서비스 호출
         List<RoomMemberResponse> members = roomService.getRoomMembers(roomId);
 
+
         return Response.of(SuccessCode.ROOM_MEMBERS_OK, members);
+
     }
 }

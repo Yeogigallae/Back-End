@@ -30,7 +30,29 @@ public enum ErrorCode implements BaseStatus {
     // Place Error
     PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE_404", "장소를 찾을 수 없습니다."),
 
-    ;
+    //TripPlan Error
+    TRIP_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "TRIP_PLAN_404", "일치하는 여행 계획이 없습니다."),
+
+    // Room Error
+    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "ROOM_404", "룸을 찾을 수 없습니다."),
+
+    INVALID_PLACE_FOR_ROOM(HttpStatus.BAD_REQUEST, "ROOM_400", "룸에 속하지 않은 장소입니다."),
+
+    // Room Member Error
+    ROOM_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "ROOM_MEMBER_404", "방에 멤버가 존재하지 않습니다."),
+
+    // 클라이언트 오류 코드
+    PLACE_NOT_BELONG_TO_ROOM(HttpStatus.BAD_REQUEST, "40001", "해당 장소는 요청한 방에 속하지 않습니다."),
+    NO_PLACES_FOUND(HttpStatus.BAD_REQUEST, "40002", "해당 방에 속한 장소가 없습니다."),
+
+    // Image Error
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_404", "이미지를 찾을 수 없습니다."),
+
+    //날짜 선택 오류
+    DATE_ERROR(HttpStatus.BAD_REQUEST, "DATE_401", "적절한 날짜 선택이 아닙니다."),
+
+    // 서버 오류 코드
+    AI_TRIP_PLAN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "50001", "여행 일정 생성에 실패했습니다.");;
 
     private final HttpStatus httpStatus;
     private final String code;
