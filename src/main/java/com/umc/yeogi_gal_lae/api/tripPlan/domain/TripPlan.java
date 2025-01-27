@@ -52,9 +52,11 @@ public class TripPlan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column
     private Transportation transportation;
-//
-//    @Column(nullable = false, length = 20)
-//    private String status; // "ONGOING", "PLANNED", "COMPLETED"
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Status status;
+
 
     @Column(nullable = false, length = 50)
     private String location;
