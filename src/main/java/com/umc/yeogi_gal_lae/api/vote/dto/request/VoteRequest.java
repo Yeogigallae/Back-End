@@ -29,5 +29,8 @@ public class VoteRequest {
 
         @NotNull(message = "투표 타입")
         private  String type;
+
+        @NotNull(message = "현재 투표 중인 방의 Id")
+        private Long voteRoomId;
     }
 }

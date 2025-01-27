@@ -61,13 +61,13 @@ public class VoteController {
             description = "여행 계획에 대한 투표 결과를 타입에 따라 구분하여 반환 합니다." +
                     "사용자가 투표한 Type 에 해당하는 항목에 사용자의 id 와 name 이 포함 되어 반환됩니다.")
     @GetMapping("/vote/results/{tripId}")
-    public Response<List<VoteResponse>> getVoteResults(@PathVariable @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
+    public Response<List<VoteResponse.ResultDTO>> getVoteResults(@PathVariable @NotNull(message = "여행 ID는 필수입니다.") Long tripId) {
 
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        voteService.getVoteResults(userEmail, tripId);
+        List<VoteResponse.ResultDTO> results = voteService.getVoteResults(userEmail, tripId);
 
-        return Response.of(SuccessCode.VOTE_RESULTS_OK);
+        return Response.of(SuccessCode.VOTE_RESULTS_OK, results);
     }
 
     @Validated

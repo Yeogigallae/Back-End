@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface VoteRoomRepository extends JpaRepository<VoteRoom,Long> {
 
     Optional<VoteRoom> findVoteRoomByTripPlanId(Long tripId);
+
+    Optional<VoteRoom> findByTripPlanId(Long id);
 }

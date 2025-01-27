@@ -54,12 +54,15 @@ public class VoteService {
     public void createVote(VoteRequest.createVoteReq request, String userEmail){
 
         // 유저 이메일로 검증
-        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
-        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException.TripNotFoundException("요청하신 여행 계획이 존재하지 않습니다."));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+        VoteRoom voteRoom = voteRoomRepository.findByTripPlanId(tripPlan.getId()).orElseThrow(() -> new BusinessException(ErrorCode.VOTE_ROOM_NOT_FOUND));
+
 
         Vote vote = voteRepository.findByTripPlanId(tripPlan.getId())      // DB 에 Vote 객체가 있다면,
                 .orElseGet(() -> voteRepository.save(Vote.builder()         // 없다면, Vote 객체 생성
                         .tripPlan(tripPlan)
+                        .voteRoom(voteRoom)
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
 
