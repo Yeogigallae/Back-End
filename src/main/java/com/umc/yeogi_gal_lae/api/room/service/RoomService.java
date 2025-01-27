@@ -47,6 +47,17 @@ public class RoomService {
                 .build();
 
         roomRepository.save(room);
+
+        // 방 멤버 추가
+        List<User> users = userRepository.findAllById(request.getUserIds());
+
+        List<RoomMember> newRoomMembers = users.stream()
+                .map(user -> RoomMemberConverter.fromRequest(room, user))
+                .toList();
+
+
+        roomMemberRepository.saveAll(newRoomMembers);
+
     }
 
     /**
@@ -75,17 +86,17 @@ public class RoomService {
      * @return 사용자 이름 목록
      */
     public List<RoomMemberResponse> getRoomMembers(Long roomId) {
-        // 방 존재 확인
-        if (!roomRepository.existsById(roomId)) {
-            throw new EntityNotFoundException("방을 찾을 수 없습니다.");
-        }
+//        // 방 존재 확인
+//        if (!roomRepository.existsById(roomId)) {
+//            throw new EntityNotFoundException("방을 찾을 수 없습니다.");
+//        }
 
         // 방에 속한 사용자 목록 조회
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByIdRoomId(roomId);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomId(roomId);
 
-        // RoomMember에서 User 객체의 이름 추출
+        // RoomMember 객체를 RoomMemberResponse로 변환
         return roomMembers.stream()
-                .map(roomMember ->  RoomMemberConverter.toResponse(roomMember)) // RoomMember의 User 이름
+                .map(roomMember -> RoomMemberConverter.toResponse(roomMember)) // RoomMember의 User 이름
                 .toList();
     }
 }

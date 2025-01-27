@@ -12,4 +12,6 @@ import java.util.List;
 public class CreateRoomRequest {
     private String roomName; // 방 이름
     private List<Long> members;
+    private List<Long> userIds;
+
 }
