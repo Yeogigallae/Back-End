@@ -32,7 +32,12 @@ public enum SuccessCode implements BaseStatus {
     ROOM_CREATED_OK(HttpStatus.OK, "ROOM_200", "방 생성에 성공하였습니다."),
     ROOM_DETAILS_OK(HttpStatus.OK, "ROOM_201", "방 상세 조회에 성공하였습니다."),
     ROOM_MEMBERS_OK(HttpStatus.OK, "ROOM_202", "방 멤버 조회에 성공하였습니다."),
-    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."); // 새로 추가된 코드
+    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."),
+
+    // Friendship Success
+    FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_200", "친구 목록 조회 성공."),
+    FRIENDSHIP_CREATED_OK(HttpStatus.CREATED, "FRIEND_201", "친구 관계 생성 성공."),
+    INVITE_CREATED_OK(HttpStatus.CREATED, "INVITE_200", "초대 생성 성공.");
     ;
 
     private final HttpStatus httpStatus;
