@@ -32,14 +32,26 @@ public class VoteController {
     private final ValidVoteResultService validVoteResultService;
 
     @Validated
+    @Operation(summary = "투표방 생성 API", description = "등록된 여행 계획에 대한 투표방을 생성합니다.")
+    @PostMapping("/vote/new-room")
+    public Response<Void> createVoteRoom(@RequestBody @Valid VoteRequest.createVoteRoomReq voteRequest) {
+
+        voteService.createVoteRoom(voteRequest);
+
+        return Response.of(SuccessCode.VOTE_ROOM_CREATED_OK);
+    }
+
+
+    @Validated
     @Operation(summary = "투표 API", description = "현재 사용자의 투표 요청 입니다.")
     @PostMapping("/vote")
-    public Response<Void> createVote(@RequestBody @Valid VoteRequest voteRequest) {
+    public Response<Void> createVote(@RequestBody @Valid VoteRequest.createVoteReq voteRequest) {
 
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         voteRequest.setUserEmail(userEmail);
-        voteService.createVote(voteRequest);
+        voteService.createVote(voteRequest, userEmail);
+
         return Response.of(SuccessCode.VOTE_CREATED_OK);
     }
 

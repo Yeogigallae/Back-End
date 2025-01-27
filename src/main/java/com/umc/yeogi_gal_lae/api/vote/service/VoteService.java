@@ -6,18 +6,23 @@ import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoomStatus;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 
 import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
+import com.umc.yeogi_gal_lae.api.vote.repository.VoteRoomRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
+import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,12 +34,27 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
     private final TripPlanRepository tripPlanRepository;
+    private final VoteRoomRepository voteRoomRepository;
 
     @Transactional
-    public void createVote(VoteRequest request){
+    public void createVoteRoom(VoteRequest.createVoteRoomReq request) {
+
+        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+
+        VoteRoom voteRoom = new VoteRoom();
+        voteRoom.setTripPlan(tripPlan);
+        voteRoom.setStatus(VoteRoomStatus.COMPLETED);
+
+        voteRoomRepository.save(voteRoom);
+    }
+
+
+    @Transactional
+    public void createVote(VoteRequest.createVoteReq request, String userEmail){
 
         // 유저 이메일로 검증
-        User user = userRepository.findByEmail(request.getUserEmail()).orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
         TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException.TripNotFoundException("요청하신 여행 계획이 존재하지 않습니다."));
 
         Vote vote = voteRepository.findByTripPlanId(tripPlan.getId())      // DB 에 Vote 객체가 있다면,
