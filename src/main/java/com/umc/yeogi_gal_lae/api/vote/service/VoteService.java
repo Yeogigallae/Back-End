@@ -8,7 +8,7 @@ import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 
-import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
+import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
