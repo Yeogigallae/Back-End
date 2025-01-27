@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.room.service;
 
+
 import com.umc.yeogi_gal_lae.api.room.converter.RoomMemberConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -29,6 +31,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final UserRepository userRepository;
+
 
     /**
      * 방 생성
@@ -87,5 +90,7 @@ public class RoomService {
         return roomMembers.stream()
                 .map(roomMember ->  RoomMemberConverter.toResponse(roomMember)) // RoomMember의 User 이름
                 .toList();
+
     }
+
 }
