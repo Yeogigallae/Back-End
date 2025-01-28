@@ -2,11 +2,17 @@ package com.umc.yeogi_gal_lae.api.room.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@Builder
 @Embeddable
 public class RoomMemberId implements Serializable {
 
@@ -22,5 +28,17 @@ public class RoomMemberId implements Serializable {
     public RoomMemberId(Long roomId, Long userId) {
         this.roomId = roomId;
         this.userId = userId;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoomMemberId that = (RoomMemberId) o;
+        return Objects.equals(roomId, that.roomId) && Objects.equals(userId, that.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roomId, userId);
     }
 }

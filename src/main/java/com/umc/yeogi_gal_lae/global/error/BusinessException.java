@@ -37,4 +37,10 @@ public class BusinessException extends RuntimeException {
             super(message);
         }
     }
+
+    public static class RoomNotFoundException extends RuntimeException {
+        public RoomNotFoundException(String message) {
+            super(message);
+        }
+    }
 }
