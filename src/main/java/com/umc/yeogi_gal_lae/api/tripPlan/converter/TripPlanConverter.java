@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.tripPlan.converter;
 
+import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanRequest;
 import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanResponse;
@@ -10,39 +11,28 @@ import java.time.LocalDate;
 
 public class TripPlanConverter {
 
-    public static TripPlan toEntity(TripPlanRequest request, User user) {
-
-        if (user == null) {
-            throw new IllegalArgumentException("User 정보가 필요합니다.");
-        }
+    public static TripPlan toEntity(TripPlanRequest request, User user, Room room, String imageUrl, String groupName, TripPlanType tripPlanType) {
 
         TripPlan.TripPlanBuilder builder = TripPlan.builder()
                 .name(request.getName())
                 .location(request.getLocation())
                 .startDate(request.getStartDate() != null ? LocalDate.parse(request.getStartDate()) : null)
                 .endDate(request.getEndDate() != null ? LocalDate.parse(request.getEndDate()) : null)
-                .tripPlanType(request.getTripPlanType())
-                .tripType(request.getTripType()) // 추가
+                .tripPlanType(tripPlanType)
+                .tripType(request.getTripType())
                 .voteLimitTime(request.getVoteLimitTime())
                 .minDays(request.getMinDays())
                 .maxDays(request.getMaxDays())
-                .groupId(request.getGroupId())
-                .imageUrl(request.getImageUrl())// **이미지 URL 변환 추가**
-                .price(request.getPrice())
-                .user(user);
+                .groupName(groupName)
+                .imageUrl(imageUrl) // 사용자 대표 이미지 사용
+                .user(user)
+                .room(room);
 
-        switch (request.getTripPlanType()) {
+        switch (tripPlanType) {
             case SCHEDULE:
                 if (request.getScheduleDetails() != null) {
                     builder.description(request.getScheduleDetails().getMessage())
                             .price(request.getScheduleDetails().getPrice()); // price는 SCHEDULE 타입에서만 사용
-                }
-                break;
-            case BUDGET:
-                if (request.getBudgetDetails() != null) {
-                    builder.transportation(request.getBudgetDetails().getTransportation())
-                            .accommodation(request.getBudgetDetails().getAccommodation())
-                            .meal(request.getBudgetDetails().getMeal());
                 }
                 break;
             case COURSE:
@@ -67,10 +57,7 @@ public class TripPlanConverter {
                 .voteLimitTime(tripPlan.getVoteLimitTime())
                 .minDays(tripPlan.getMinDays())
                 .maxDays(tripPlan.getMaxDays())
-                .groupId(tripPlan.getGroupId())
-                .transportation(tripPlan.getTransportation())
-                .accommodation(tripPlan.getAccommodation())
-                .meal(tripPlan.getMeal())
+                .groupName(tripPlan.getGroupName())
                 .description(tripPlan.getDescription())
                 .imageUrl(tripPlan.getImageUrl());
 
