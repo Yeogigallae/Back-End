@@ -55,7 +55,7 @@ public class TripPlan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Status status;
+    private Status status = Status.PLANNED;     // 기본값 설정
 
 
     @Column(nullable = false, length = 50)

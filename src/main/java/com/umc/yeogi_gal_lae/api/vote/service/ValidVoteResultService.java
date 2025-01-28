@@ -49,8 +49,9 @@ public class ValidVoteResultService {
         long badVotes = votes.stream().filter(v -> v.getType() == VoteType.BAD).count();
 
 
+        // 반대표가 더 많을 시, 재투표를 위해 투표 방 삭제
         if (goodVotes < badVotes) {
-            voteRoomRepository.delete(voteRoom);     // 투표 방 삭제
+            voteRoomRepository.delete(voteRoom);
             return true;
         }
         else{

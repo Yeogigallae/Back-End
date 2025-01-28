@@ -20,10 +20,6 @@ public class VoteRoom extends BaseEntity {
     @JoinColumn(name = "trip_plan_id", nullable = false)
     private TripPlan tripPlan;         // 여행 계획 하나 당 투표방 하나
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private VoteRoomStatus status;
-
 
     // 자동 동기화
     public void setTripPlan(TripPlan tripPlan) {

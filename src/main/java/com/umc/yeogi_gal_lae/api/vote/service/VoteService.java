@@ -2,12 +2,12 @@ package com.umc.yeogi_gal_lae.api.vote.service;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
+import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
-import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoomStatus;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 
 import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,9 +42,11 @@ public class VoteService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
 
         VoteRoom voteRoom = new VoteRoom();
-        voteRoom.setTripPlan(tripPlan);
-        voteRoom.setStatus(VoteRoomStatus.COMPLETED);
 
+        voteRoom.setTripPlan(tripPlan);
+        tripPlan.setStatus(Status.ONGOING);        // tripPlan status 값  변경
+
+        tripPlanRepository.save(tripPlan);
         voteRoomRepository.save(voteRoom);
     }
 
