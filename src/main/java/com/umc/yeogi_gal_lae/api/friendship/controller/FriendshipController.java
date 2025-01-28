@@ -2,8 +2,9 @@ package com.umc.yeogi_gal_lae.api.friendship.controller;
 
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteRequest;
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteResponse;
-import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
+//import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
 import com.umc.yeogi_gal_lae.api.friendship.service.FriendshipService;
+import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/friendships")
+@RequestMapping("/friendship")
 @RequiredArgsConstructor
 @Slf4j
 public class FriendshipController {
@@ -30,7 +31,7 @@ public class FriendshipController {
     @PostMapping("/invite")
     public Response<CreateInviteResponse> createInvite(@RequestBody CreateInviteRequest request) {
 
-        String inviteUrl = friendshipService.generateInviteUrl(request.getInviterId(), request.getInviteeEmail());
+        String inviteUrl = friendshipService.generateInviteUrl(request.getInviterId());
 
         CreateInviteResponse response = new CreateInviteResponse(inviteUrl);
         return Response.of(SuccessCode.INVITE_CREATED_OK, response);
@@ -43,7 +44,10 @@ public class FriendshipController {
     @PostMapping("/accept")
     public Response<Void> acceptInvite(@RequestParam @NotNull(message = "토큰은 필수입니다.") String token) {
 
-        friendshipService.acceptInvite(token);
+        // 친구 초대 수락자의 유저 정보
+        String inviteeEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
+        friendshipService.acceptInvite(token,inviteeEmail);
         return Response.of(SuccessCode.FRIENDSHIP_CREATED_OK);
     }
 

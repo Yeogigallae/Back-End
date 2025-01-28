@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.user.domain;
 
+import com.umc.yeogi_gal_lae.api.friendship.domain.Friendship;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -8,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,5 +44,8 @@ public class User extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;
+
+    @OneToMany(mappedBy = "users")
+    private List<Friendship> friendshipList = new ArrayList<>();
 
 }

@@ -2,7 +2,7 @@ package com.umc.yeogi_gal_lae.api.friendship.service;
 
 import com.umc.yeogi_gal_lae.api.friendship.domain.Friendship;
 import com.umc.yeogi_gal_lae.api.friendship.domain.FriendshipInvite;
-import com.umc.yeogi_gal_lae.api.friendship.repository.FriendshipRelationRepository;
+import com.umc.yeogi_gal_lae.api.friendship.domain.FriendshipStatus;
 import com.umc.yeogi_gal_lae.api.friendship.repository.FriendshipRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
@@ -17,41 +17,39 @@ import java.util.UUID;
 public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
-    private final FriendshipRelationRepository friendshipRelationRepository;
     private final UserRepository userRepository;
 
-    public String generateInviteUrl(Long inviterId, String inviteeEmail) {
+    public String generateInviteUrl(Long inviterId) {
         // 랜덤 토큰 생성
         String token = UUID.randomUUID().toString();
 
-        // 초대 정보 저장
-        FriendshipInvite invite = new FriendshipInvite();
-        invite.setInviterId(inviterId);
-        invite.setInviteeEmail(inviteeEmail);
-        invite.setToken(token);
-        invite.setCreatedAt(LocalDateTime.now());
+        FriendshipInvite invite = FriendshipInvite.builder()
+                .inviterId(inviterId)
+                .token(token)
+                .createdAt(LocalDateTime.now())
+                .build();
+
         friendshipRepository.save(invite);
 
         // 초대 URL 생성
-        return "https://example.com/friendship?token=" + token;
-    }
+        return "http://localhost:8080/friendship/accept?token=" + token;    }
 
-    public void acceptInvite(String token) {
-        // 초대 정보 조회
+
+
+    public void acceptInvite(String token, String inviteeEmail) {
+        // 초대 정보 조회(invite 안에 inviter id 포함돼있음.)
         FriendshipInvite invite = friendshipRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid invite token"));
 
-        // 요청을 보낸 사용자와 받은 사용자 조회
-        User inviter = userRepository.findById(invite.getInviterId())
-                .orElseThrow(() -> new IllegalArgumentException("Inviter not found"));
-        User invitee = userRepository.findByEmail(invite.getInviteeEmail())
+        // invitee id 추출 optional로 정의돼있어서 필요 없는데 예외 처리
+        User invitee = userRepository.findByEmail(inviteeEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Invitee not found"));
 
-        // 친구 관계 생성
-        Friendship relation = new Friendship();
-        relation.setUser(inviter); // 요청을 보낸 사용자
-        relation.setFriend(invitee); // 요청을 받은 사용자
-        friendshipRelationRepository.save(relation);
+        Friendship friendship = Friendship.builder()
+                .inviterId(invite.getInviterId())
+                .inviteeId(invitee.getId())
+                .status(FriendshipStatus.ACCEPT) // 필요하면 초기값 설정
+                .build();
 
         // 초대 정보 삭제
         friendshipRepository.delete(invite);

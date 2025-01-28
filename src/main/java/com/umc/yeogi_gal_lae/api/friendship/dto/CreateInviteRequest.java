@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CreateInviteRequest {
     private Long inviterId;      // 초대한 사용자 ID
-    private String inviteeEmail; // 초대받는 사용자의 이메일
+    private String inviteeId; // 초대받는 사용자의 이메일
 }
