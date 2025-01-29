@@ -54,8 +54,8 @@ public class FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("Invitee not found"));
 
         Friendship friendship = Friendship.builder()
-                .inviter(invite.getInviter()) // ✅ User 객체 직접 설정
-                .invitee(invitee) // ✅ 초대받은 User 객체 직접 설정
+                .inviter(invite.getInviter()) // User 객체 직접 설정
+                .invitee(invitee) // 초대받은 User 객체 직접 설정
                 .status(FriendshipStatus.ACCEPT)
                 .build();
 
@@ -70,27 +70,34 @@ public class FriendshipService {
 
     @Transactional
     public List<FriendListResponse> getFriendList(Long userId) {
+        // 친구 관계를 조회: 사용자가 inviter이거나 invitee인 모든 관계를 가져옵니다.
         List<Friendship> friendships = friendshipRepository.findByInviterIdOrInviteeId(userId, userId);
 
-        Set<FriendListResponse> friendSet = new HashSet<>();
+        // 친구 ID를 저장할 리스트 생성
+        List<Long> friendIds = new ArrayList<>();
 
+        // 친구 관계를 순회하며 친구 ID 수집
         for (Friendship friendship : friendships) {
             Long friendId = friendship.getInviter().getId().equals(userId)
                     ? friendship.getInvitee().getId()
                     : friendship.getInviter().getId();
-
-            User friend = userRepository.findById(friendId).orElse(null);
-
-            FriendListResponse friendResponse = FriendListResponse.builder()
-                    .friendId(friendId)
-                    .friendName(friend != null ? friend.getUsername() : "Unknown")
-                    .profileImageUrl(friend != null ? friend.getProfileImage() : null)
-                    .build();
-
-            friendSet.add(friendResponse); // 자동으로 중복 제거됨
+            friendIds.add(friendId);
         }
 
-        return new ArrayList<>(friendSet); // Set을 다시 List로 변환하여 반환
+        // 수집한 친구 ID로 사용자 정보를 한 번에 조회 (성능 최적화)
+        List<User> friends = userRepository.findAllById(friendIds);
+
+        // User 객체를 기반으로 FriendListResponse 생성
+        List<FriendListResponse> friendResponses = friends.stream()
+                .map(friend -> FriendListResponse.builder()
+                        .friendId(friend.getId()) // 친구 ID
+                        .friendName(Optional.ofNullable(friend.getUsername()).orElse("Unknown")) // 이름 (Optional로 처리)
+                        .profileImageUrl(Optional.ofNullable(friend.getProfileImage()).orElse(null)) // 프로필 이미지 (Optional)
+                        .build())
+                .toList();
+
+        // 중복된 친구를 제거하고 반환
+        return friendResponses.stream().distinct().toList();
     }
 
 }

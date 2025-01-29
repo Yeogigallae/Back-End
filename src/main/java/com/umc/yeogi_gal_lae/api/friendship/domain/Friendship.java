@@ -17,11 +17,11 @@ public class Friendship {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inviter_id", referencedColumnName = "user_id") // ✅ User의 user_id를 참조
+    @JoinColumn(name = "inviter_id", referencedColumnName = "user_id") // User의 user_id를 참조
     private User inviter;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invitee_id", referencedColumnName = "user_id") // ✅ User의 user_id를 참조
+    @JoinColumn(name = "invitee_id", referencedColumnName = "user_id") // User의 user_id를 참조
     private User invitee;
 
 
