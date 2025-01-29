@@ -2,16 +2,20 @@ package com.umc.yeogi_gal_lae.api.vote.service;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
+import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 
-import com.umc.yeogi_gal_lae.api.vote.dto.VoteRequest;
+import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
+import com.umc.yeogi_gal_lae.api.vote.repository.VoteRoomRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
+import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,17 +33,37 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
     private final TripPlanRepository tripPlanRepository;
+    private final VoteRoomRepository voteRoomRepository;
 
     @Transactional
-    public void createVote(VoteRequest request){
+    public void createVoteRoom(VoteRequest.createVoteRoomReq request) {
+
+        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+
+        VoteRoom voteRoom = new VoteRoom();
+
+        voteRoom.setTripPlan(tripPlan);
+        tripPlan.setStatus(Status.ONGOING);        // tripPlan status 값  변경
+
+        tripPlanRepository.save(tripPlan);
+        voteRoomRepository.save(voteRoom);
+    }
+
+
+    @Transactional
+    public void createVote(VoteRequest.createVoteReq request, String userEmail){
 
         // 유저 이메일로 검증
-        User user = userRepository.findByEmail(request.getUserEmail()).orElseThrow(()-> new BusinessException.UserNotFoundException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
-        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException.TripNotFoundException("요청하신 여행 계획이 존재하지 않습니다."));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+        VoteRoom voteRoom = voteRoomRepository.findByTripPlanId(tripPlan.getId()).orElseThrow(() -> new BusinessException(ErrorCode.VOTE_ROOM_NOT_FOUND));
+
 
         Vote vote = voteRepository.findByTripPlanId(tripPlan.getId())      // DB 에 Vote 객체가 있다면,
                 .orElseGet(() -> voteRepository.save(Vote.builder()         // 없다면, Vote 객체 생성
                         .tripPlan(tripPlan)
+                        .voteRoom(voteRoom)
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
 
