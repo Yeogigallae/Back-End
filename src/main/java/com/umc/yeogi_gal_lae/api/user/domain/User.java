@@ -44,8 +44,14 @@ public class User extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;
+    ;
 
-    @OneToMany(mappedBy = "users")
-    private List<Friendship> friendshipList = new ArrayList<>();
+    @OneToMany(mappedBy = "inviter", cascade = CascadeType.ALL, orphanRemoval = true) // ✅ 초대한 친구 관계
+    private List<Friendship> invitedFriends = new ArrayList<>();
+
+    @OneToMany(mappedBy = "invitee", cascade = CascadeType.ALL, orphanRemoval = true) // ✅ 초대받은 친구 관계
+    private List<Friendship> receivedFriends = new ArrayList<>();
+
+
 
 }

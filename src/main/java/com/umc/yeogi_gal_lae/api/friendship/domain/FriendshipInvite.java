@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.friendship.domain;
 
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -7,18 +8,25 @@ import java.time.LocalDateTime;
 import lombok.*;
 
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
 @Getter
-@Table(name = "friendship_invite")
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FriendshipInvite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long inviterId;          // 초대한 사용자 ID
-    private String token;            // 랜덤하게 생성된 토큰
-    private LocalDateTime createdAt; // 초대 생성 시간
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ 초대한 User 객체 직접 참조
+    @JoinColumn(name = "inviter_id", referencedColumnName = "user_id")
+    private User inviter;
+
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ 초대받을 User 객체 참조 가능 (Optional)
+    @JoinColumn(name = "invitee_id", referencedColumnName = "user_id", nullable = true)
+    private User invitee;
+
+    private String token; // ✅ 초대 토큰
 }

@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.api.friendship.controller;
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteRequest;
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteResponse;
 //import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
+import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
 import com.umc.yeogi_gal_lae.api.friendship.service.FriendshipService;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
