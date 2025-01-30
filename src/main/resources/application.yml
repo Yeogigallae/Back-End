@@ -48,6 +48,10 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  jackson:
+    serialization:
+      indent-output: true
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity: 1800000    # 30분
@@ -60,3 +64,10 @@ jwt:
 
 invite:
   url: http://localhost:8080/friendship/accept
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: https://api.openai.com/v1
+
+

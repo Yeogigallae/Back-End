@@ -1,9 +1,12 @@
 package com.umc.yeogi_gal_lae.global.jwt.service;
 
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
@@ -14,8 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 @Getter
@@ -111,14 +112,18 @@ public class JwtService {
         }
 
         Object principal = authentication.getPrincipal();
-
         if (principal instanceof String email) {
-            return Optional.of(email); // 이메일이 String으로 저장된 경우
+            // 예전 방식: principal이 문자열로 저장된 경우
+            return Optional.of(email);
         } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
-            return Optional.of(userDetails.getUsername()); // UserDetails에서 가져오기
+            // principal이 UserDetails 구현체인 경우
+            return Optional.of(userDetails.getUsername());
+        } else if (principal instanceof User userEntity) {
+            // ★ 핵심: principal이 User 엔티티일 경우
+            return Optional.ofNullable(userEntity.getEmail());
         }
 
-        return Optional.empty(); // 다른 타입인 경우
+        return Optional.empty();
     }
 
 

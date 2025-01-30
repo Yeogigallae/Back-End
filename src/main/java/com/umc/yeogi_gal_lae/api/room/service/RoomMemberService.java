@@ -35,40 +35,40 @@ public class RoomMemberService {
      */
     @Transactional
     public void addRoomMembers(AddRoomMemberRequest request, String userEmail ) {
-        // 방 존재 확인
+        // 방 존재 확인: 인원 추가를 한다면 있는 방 중에 선택을 해서 요청할 것같아서 주석
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new BusinessException.RoomNotFoundException("해당 방이 존재하지 않습니다."));
 
         // 요청된 사용자 ID를 통해 유저 확인
         List<User> users = userRepository.findAllById(request.getUserIds());
 
-        // 요청된 사용자 중 존재하지 않는 사용자 ID 필터링
-        Set<Long> foundUserIds = users.stream()
-                .map(User::getId)
-                .collect(Collectors.toSet());
+//        // 요청된 사용자 중 존재하지 않는 사용자 ID 필터링: 존재하지 않는 사용자 -> friendship으로 이동
+//        Set<Long> foundUserIds = users.stream()
+//                .map(User::getId)
+//                .collect(Collectors.toSet());
+//
+//        List<Long> notFoundUserIds = request.getUserIds().stream()
+//                .filter(userId -> !foundUserIds.contains(userId))
+//                .toList();
+//
+//        if (!notFoundUserIds.isEmpty()) {
+//            throw new BusinessException.UserNotFoundException("다음 사용자 ID가 존재하지 않습니다: " + notFoundUserIds);
+//        }
 
-        List<Long> notFoundUserIds = request.getUserIds().stream()
-                .filter(userId -> !foundUserIds.contains(userId))
-                .toList();
-
-        if (!notFoundUserIds.isEmpty()) {
-            throw new BusinessException.UserNotFoundException("다음 사용자 ID가 존재하지 않습니다: " + notFoundUserIds);
-        }
-
-        // 이미 추가된 멤버 필터링
-        List<Long> existingUserIds = roomMemberRepository.findAllByIdRoomId(room.getId()).stream()
-                .map(roomMember -> roomMember.getUser().getId())
-                .collect(Collectors.toList());
-
+        // 이미 추가된 멤버 필터링 : 이미 필터링 된 유저 정보를 기반으로 선택하기 때문에 주석
+//        List<Long> existingUserIds = roomMemberRepository.findAllByIdRoomId(room.getId()).stream()
+//                .map(roomMember -> roomMember.getUser().getId())
+//                .collect(Collectors.toList());
+        // 새로 추가할 맴버만 필터링
         List<RoomMember> newRoomMembers = users.stream()
-                .filter(user -> !existingUserIds.contains(user.getId()))
+//                .filter(user -> !existingUserIds.contains(user.getId()))
                 .map(user -> RoomMemberConverter.fromRequest(room, user))
                 .toList();
 
-        if (newRoomMembers.isEmpty()) {
-            log.warn("모든 사용자는 이미 방에 추가되어 있습니다. roomId: {}", room.getId());
-            return;
-        }
+//        if (newRoomMembers.isEmpty()) {
+//            log.warn("모든 사용자는 이미 방에 추가되어 있습니다. roomId: {}", room.getId());
+//            return;
+//        }
 
         // 새 멤버 일괄 저장
         roomMemberRepository.saveAll(newRoomMembers);
@@ -82,13 +82,13 @@ public class RoomMemberService {
      * @return 방 멤버 목록
      */
     public List<RoomMemberResponse> getRoomMembers(Long roomId) {
-        // 방 존재 확인
-        if (!roomRepository.existsById(roomId)) {
-            throw new EntityNotFoundException("방을 찾을 수 없습니다: " + roomId);
-        }
+        // 방 존재 확인: 방 조회 api먼저 호출하기 때문에 필요 없을 것 같음.
+//        if (!roomRepository.existsById(roomId)) {
+//            throw new EntityNotFoundException("방을 찾을 수 없습니다: " + roomId);
+//        }
 
         // 방에 속한 멤버 목록 조회
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByIdRoomId(roomId);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomId(roomId);
 
         // RoomMember -> RoomMemberResponse 변환
         return roomMembers.stream()
@@ -103,13 +103,13 @@ public class RoomMemberService {
      * @return 사용자가 속한 방 목록
      */
     public List<RoomMemberResponse> getRoomsByUserId(Long userId) {
-        // 사용자 존재 확인
-        if (!userRepository.existsById(userId)) {
-            throw new BusinessException.UserNotFoundException("사용자를 찾을 수 없습니다: " + userId);
-        }
+        // 사용자 존재 확인: 있는 사용자 중에
+//        if (!userRepository.existsById(userId)) {
+//            throw new BusinessException.UserNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+//        }
 
         // 사용자가 속한 방 목록 조회
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByIdUserId(userId);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByUserId(userId);
 
         // RoomMember -> RoomMemberResponse 변환
         return roomMembers.stream()
