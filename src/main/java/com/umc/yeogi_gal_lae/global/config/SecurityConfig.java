@@ -7,6 +7,8 @@ import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
 import java.util.List;
+
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -68,6 +71,19 @@ public class SecurityConfig {
 //          )
                 // 로그아웃 성공 시 / 주소로 이동
 //          .logout((logoutConfig) -> logoutConfig.logoutSuccessUrl("/"))
+                // 로그아웃 설정 추가
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // 로그아웃 요청 경로 설정
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            SecurityContextHolder.clearContext(); // 인증 정보 제거
+                            response.setStatus(HttpServletResponse.SC_OK); // 200 응답 반환
+                            response.getWriter().write("{\"message\": \"Logout successful\"}");
+                            response.getWriter().flush();
+                        })
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .clearAuthentication(true) // 인증 정보 제거
+                        .deleteCookies("JSESSIONID") // 쿠키 제거
+                )
                 .oauth2Login(oauth2Login -> oauth2Login
                         .userInfoEndpoint(endpoint -> endpoint
                                 .userService(customOauth2UserService))
