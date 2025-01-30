@@ -25,7 +25,6 @@ public class Friendship {
     private User invitee;
 
 
-
     private FriendshipStatus status;
 
 }

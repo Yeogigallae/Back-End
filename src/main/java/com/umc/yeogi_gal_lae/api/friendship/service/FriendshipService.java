@@ -10,9 +10,9 @@ import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Value;import org.springframework.stereotype.Service;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,8 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipInviteRepository friendshipInviteRepository;
     private final UserRepository userRepository;
+    @Value("${invite.url}") // 설정 파일에서 초대 URL 읽기
+    private String inviteUrl;
 
     public String generateInviteUrl(Long inviterId) {
         // 랜덤 토큰 생성
@@ -39,7 +41,7 @@ public class FriendshipService {
         friendshipInviteRepository.save(invite);
 
         // 초대 URL 생성
-        return "http://localhost:8080/friendship/accept?token=" + token;
+        return inviteUrl + "?token=" + token;
     }
 
 
@@ -73,16 +75,12 @@ public class FriendshipService {
         // 친구 관계를 조회: 사용자가 inviter이거나 invitee인 모든 관계를 가져옵니다.
         List<Friendship> friendships = friendshipRepository.findByInviterIdOrInviteeId(userId, userId);
 
-        // 친구 ID를 저장할 리스트 생성
-        List<Long> friendIds = new ArrayList<>();
-
-        // 친구 관계를 순회하며 친구 ID 수집
-        for (Friendship friendship : friendships) {
-            Long friendId = friendship.getInviter().getId().equals(userId)
-                    ? friendship.getInvitee().getId()
-                    : friendship.getInviter().getId();
-            friendIds.add(friendId);
-        }
+// 친구 ID 리스트를 Stream을 사용하여 변환
+        List<Long> friendIds = friendships.stream()
+                .map(friendship -> friendship.getInviter().getId().equals(userId)
+                        ? friendship.getInvitee().getId()
+                        : friendship.getInviter().getId())
+                .toList();
 
         // 수집한 친구 ID로 사용자 정보를 한 번에 조회 (성능 최적화)
         List<User> friends = userRepository.findAllById(friendIds);
@@ -98,6 +96,18 @@ public class FriendshipService {
 
         // 중복된 친구를 제거하고 반환
         return friendResponses.stream().distinct().toList();
+    }
+
+    // 내가 초대한 친구 목록 조회
+    public List<User> getInvitedFriends(Long userId) {
+        List<Friendship> friendships = friendshipRepository.findInvitedFriends(userId);
+        return friendships.stream().map(Friendship::getInvitee).collect(Collectors.toList());
+    }
+
+    // 내가 초대받은 친구 목록 조회
+    public List<User> getReceivedFriends(Long userId) {
+        List<Friendship> friendships = friendshipRepository.findReceivedFriends(userId);
+        return friendships.stream().map(Friendship::getInviter).collect(Collectors.toList());
     }
 
 }

@@ -1,9 +1,9 @@
 package com.umc.yeogi_gal_lae.api.friendship.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class CreateInviteResponse {
     private String inviteUrl; // 생성된 초대 URL

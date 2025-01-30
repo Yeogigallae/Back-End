@@ -2,9 +2,6 @@ package com.umc.yeogi_gal_lae.api.friendship.domain;
 
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-
 import lombok.*;
 
 
