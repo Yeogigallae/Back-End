@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.notification.controller;
 
 import com.umc.yeogi_gal_lae.api.notification.dto.NotificationDto;
 import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +17,34 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     /**
-     * 알림 리스트 조회 API (GET)
+     * 시작 알림 생성 API
+     */
+    @PostMapping("/start")
+    public ResponseEntity<String> createStartNotification(
+            @RequestParam String roomName,
+            @RequestParam String userName,
+            @RequestParam NotificationType type) {
+        notificationService.createStartNotification(roomName, userName, type);
+        return ResponseEntity.ok("시작 알림이 생성되었습니다.");
+    }
+
+    /**
+     * 종료 알림 생성 API
+     */
+    @PostMapping("/end")
+    public ResponseEntity<String> createEndNotification(
+            @RequestParam String roomName,
+            @RequestParam NotificationType type) {
+        notificationService.createEndNotification(roomName, type);
+        return ResponseEntity.ok("종료 알림이 생성되었습니다.");
+    }
+
+    /**
+     * 최신 알림 조회 API
      */
     @GetMapping
-    public ResponseEntity<List<NotificationDto>> getNotifications() {
-        // Mock 데이터를 생성해 반환
-        List<NotificationDto> mockData = List.of(
-                new NotificationDto(1L, "투표 종료", "가보자고 방의 투표 결과를 확인해보세요!", "VOTE"),
-                new NotificationDto(2L, "코스 짜기 완료", "가보자고 방의 생성된 코스를 확인해보세요!", "COURSE"),
-                new NotificationDto(3L, "예산 정하기 완료", "가보자고 방의 예산을 확인해보세요!", "BUDGET")
-        );
-
-        return ResponseEntity.ok(mockData);
+    public ResponseEntity<List<NotificationDto>> getAllNotifications() {
+        List<NotificationDto> notifications = notificationService.getAllNotifications();
+        return ResponseEntity.ok(notifications);
     }
 }
