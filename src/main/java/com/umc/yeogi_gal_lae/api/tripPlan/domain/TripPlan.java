@@ -42,20 +42,22 @@ public class TripPlan extends BaseEntity {
     @Column
     private VoteLimitTime voteLimitTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Accommodation accommodation;
+//    @Enumerated(EnumType.STRING)
+//    @Column
+//    private Accommodation accommodation;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column
+//    private Meal meal;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column
+//    private Transportation transportation;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Meal meal;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Transportation transportation;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private Status status = Status.PLANNED;     // 기본값 설정
 
 
