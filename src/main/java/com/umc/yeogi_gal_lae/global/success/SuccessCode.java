@@ -14,6 +14,11 @@ public enum SuccessCode implements BaseStatus {
     CREATED(HttpStatus.CREATED, "COMMON_201", "성공적으로 생성되었습니다."),
     NO_CONTENT(HttpStatus.NO_CONTENT, "COMMON_204", "성공적으로 삭제되었습니다."),
 
+    // Home API Success
+    ONGOING_VOTE_ROOMS_FETCH_OK(HttpStatus.OK, "HOME_200", "진행 중인 투표방 조회 성공"),
+    COMPLETED_VOTE_ROOMS_FETCH_OK(HttpStatus.OK, "HOME_201", "완료된 투표방 조회 성공"),
+    COMPLETED_TRIP_PLANS_FETCH_OK(HttpStatus.OK, "HOME_202", "완료된 여행 계획 조회 성공"),
+
     // User Success
     USER_FETCH_OK(HttpStatus.OK, "USER_200", "유저 정보 조회 성공"),
     TOKEN_REISSUE_OK(HttpStatus.OK, "TOKEN_200", "토큰 재발급 성공"),
