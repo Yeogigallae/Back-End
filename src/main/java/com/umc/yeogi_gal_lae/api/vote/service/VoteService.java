@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.service;
 
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
     private final TripPlanRepository tripPlanRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void createVote(VoteRequest request){
@@ -42,6 +45,10 @@ public class VoteService {
                         .tripPlan(tripPlan)
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
+
+        // 투표 시작 알림 생성
+        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), NotificationType.VOTE_START);
+
 
         // 기존 투표 이력 확인
         Vote currentVote = user.getVote();
@@ -85,6 +92,12 @@ public class VoteService {
                         typeName -> typeName,
                         Collectors.counting())
                 );
+
+        // tripId를 이용해 TripPlan 조회 후
+        TripPlan tripPlan = tripPlanRepository.findById(tripId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 여행 계획을 찾을 수 없습니다."));
+        // 투표 완료 알림 생성
+        notificationService.createEndNotification(tripPlan.getRoom().getName(), NotificationType.VOTE_COMPLETE);
 
         VoteResponse.ResultDTO goodResponse = VoteConverter.convert("GOOD", userVote.orElse(null), groupedVotes);
         VoteResponse.ResultDTO badResponse = VoteConverter.convert("BAD", userVote.orElse(null), groupedVotes);

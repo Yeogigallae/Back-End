@@ -18,26 +18,6 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     /**
-     * 최신순으로 정렬된 알림 리스트 조회
-     */
-    @Transactional(readOnly = true)
-    public List<NotificationDto> getAllNotifications() {
-        List<Notification> notifications = notificationRepository.findAllByOrderByCreatedAtDesc();
-        return notifications.stream()
-                .map(notification -> new NotificationDto(
-                        notification.getId(),
-                        generateTitle(notification),
-                        (notification.getType() == NotificationType.VOTE_START ||
-                                notification.getType() == NotificationType.COURSE_START ||
-                                notification.getType() == NotificationType.BUDGET_START)
-                                ? generateCaptionForStart(notification.getRoomName(), notification.getUserName(), notification.getType())
-                                : generateCaptionForEnd(notification.getRoomName(), notification.getType()),
-                        notification.getType().name()
-                ))
-                .collect(Collectors.toList());
-    }
-
-    /**
      * 시작 알림 생성
      */
     @Transactional
@@ -60,6 +40,27 @@ public class NotificationService {
         notification.setType(type);
         notification.setContent(generateCaptionForEnd(roomName, type));
         notificationRepository.save(notification);
+    }
+
+
+    /**
+     * 최신순으로 정렬된 알림 리스트 조회
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationDto> getAllNotifications() {
+        List<Notification> notifications = notificationRepository.findAllByOrderByCreatedAtDesc();
+        return notifications.stream()
+                .map(notification -> new NotificationDto(
+                        notification.getId(),
+                        generateTitle(notification),
+                        (notification.getType() == NotificationType.VOTE_START ||
+                                notification.getType() == NotificationType.COURSE_START ||
+                                notification.getType() == NotificationType.BUDGET_START)
+                                ? generateCaptionForStart(notification.getRoomName(), notification.getUserName(), notification.getType())
+                                : generateCaptionForEnd(notification.getRoomName(), notification.getType()),
+                        notification.getType().name()
+                ))
+                .collect(Collectors.toList());
     }
 
     /**
