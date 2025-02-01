@@ -7,9 +7,11 @@ import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.jwt.JwtToken;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -51,5 +53,16 @@ public class UserController {
 
         return Response.of(SuccessCode.TOKEN_REISSUE_OK, null);
     }
+
+    @PostMapping("/logout")
+    public Response<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        SecurityContextHolder.clearContext(); // 인증 정보 제거
+        request.getSession().invalidate(); // 세션 무효화
+
+        response.setHeader("Set-Cookie", "XSRF-TOKEN=; HttpOnly; Path=/; Max-Age=0");
+
+        return Response.of(SuccessCode.OK);
+    }
+
 }
 

@@ -15,15 +15,10 @@ public class TripPlanResponse {
     private String endDate;
     private String price; // 가격 정보
     private String imageUrl;
-    private String status;
-    private int remainingTime;
     private TripPlanType tripPlanType; // "COURSE", "SCHEDULE", "BUDGET"
     private TripType tripType;
     private VoteLimitTime voteLimitTime; // "30분", "60분", "4시간", "6시간"
     private Integer minDays; // 최소 숙박일
     private Integer maxDays; // 최대 숙박일
-    private String groupId; // 그룹 ID
-    private Transportation transportation;
-    private Accommodation accommodation;
-    private Meal meal;
+    private String groupName;
 }

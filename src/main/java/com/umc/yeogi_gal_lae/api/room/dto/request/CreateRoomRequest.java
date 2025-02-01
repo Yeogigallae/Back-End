@@ -11,5 +11,6 @@ import java.util.List;
 @Getter @Setter
 public class CreateRoomRequest {
     private String roomName; // 방 이름
-    private List<Long> members;
+    private List<Long> userIds;
+
 }

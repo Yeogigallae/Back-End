@@ -25,8 +25,11 @@ public enum SuccessCode implements BaseStatus {
     PLACES_FETCHED(HttpStatus.OK, "PLACE_201", "여행 장소 전체 조회 성공y."),
 
     // Vote Success
-    VOTE_CREATED_OK(HttpStatus.OK, "VOTE_200", "투표 생성에 성공하였습니다."),
-    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_201", "투표 결과 조회에 성공하였습니다."),
+    VOTE_ROOM_CREATED_OK(HttpStatus.OK, "VOTE_200", "투표방 생성에 성공하였습니다."),
+    VOTE_CREATED_OK(HttpStatus.OK, "VOTE_201", "투표 생성에 성공하였습니다."),
+    VOTE_RESULTS_OK(HttpStatus.OK, "VOTE_202", "투표 결과 조회에 성공하였습니다."),
+    VOTE_FINISH_OK(HttpStatus.OK, "VOTE_203", "여행 계획 확정(투표)에 성공하였습니다."),
+
 
     // Room Success
     ROOM_CREATED_OK(HttpStatus.OK, "ROOM_200", "방 생성에 성공하였습니다."),
@@ -37,8 +40,14 @@ public enum SuccessCode implements BaseStatus {
     // Friendship Success
     FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_200", "친구 목록 조회 성공."),
     FRIENDSHIP_CREATED_OK(HttpStatus.CREATED, "FRIEND_201", "친구 관계 생성 성공."),
-    INVITE_CREATED_OK(HttpStatus.CREATED, "INVITE_200", "초대 생성 성공.");
-    ;
+    INVITE_CREATED_OK(HttpStatus.CREATED, "INVITE_200", "초대 생성 성공."),
+    
+
+    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."), // 새로 추가된 코드
+
+    // AI Success
+    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -9,6 +9,8 @@ import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,21 +27,22 @@ public class UserService {
      * @AuthenticationPrincipal UserDetails 를 이용하는 등 다양하게 구현 가능
      */
     public User getUser() {
-        // SecurityContextHolder에서 이메일 가져오기
-        String currentUserEmail = jwtService.getCurrentUserEmail()
-                .orElseThrow(() -> {
-                    log.error("현재 인증된 사용자 이메일을 가져오지 못했습니다.");
-                    return new BusinessException(ErrorCode.USER_NOT_FOUND);
-                });
+        // SecurityContext에서 Authentication 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        log.info("현재 인증된 사용자 이메일: {}", currentUserEmail);
+        // principal을 User로 캐스팅
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof User)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        // 이메일로 유저 조회
-        return userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> {
-                    log.error("이메일 {}에 해당하는 사용자를 찾을 수 없습니다.", currentUserEmail);
-                    return new BusinessException(ErrorCode.USER_NOT_FOUND);
-                });
+        // 이미 DB 조회된 User 엔티티
+        User user = (User) principal;
+        log.info("인증된 사용자: userId={}, email={}", user.getId(), user.getEmail());
+        return user;
     }
 
 
