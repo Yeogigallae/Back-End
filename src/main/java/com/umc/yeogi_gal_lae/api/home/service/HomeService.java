@@ -4,9 +4,11 @@ import com.umc.yeogi_gal_lae.api.home.converter.HomeConverter;
 import com.umc.yeogi_gal_lae.api.home.dto.HomeResponse;
 import com.umc.yeogi_gal_lae.api.home.repository.HomeRepository;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +40,7 @@ public class HomeService {
 
         List<HomeResponse.OngoingVoteRoom> rooms = homeRepository.findAllOngoingVoteRooms().stream()
                 .filter(voteRoom -> userRoomIds.contains(voteRoom.getTripPlan().getRoom().getId()))
+                .filter(voteRoom -> !isVoteTimeExpired(voteRoom)) // ⬅ **제한 시간이 초과된 투표방 제거**
                 .map(HomeConverter::toOngoingVoteRoom)
                 .collect(Collectors.toList());
 
@@ -75,5 +79,19 @@ public class HomeService {
                 .map(HomeConverter::toCompletedTripPlan)
                 .collect(Collectors.toList());
         return Response.of(SuccessCode.COMPLETED_TRIP_PLANS_FETCH_OK, new HomeResponse.CompletedTripPlanList(trips.size(), trips));
+    }
+
+    /**
+     * 제한 시간이 초과되었는지 확인하는 메서드
+     */
+    private boolean isVoteTimeExpired(VoteRoom voteRoom) {
+        if (voteRoom == null || voteRoom.getTripPlan() == null) {
+            return false;
+        }
+
+        TripPlan tripPlan = voteRoom.getTripPlan();
+        LocalDateTime voteEndTime = voteRoom.getCreatedAt().plusSeconds(tripPlan.getVoteLimitTime().getSeconds());
+
+        return LocalDateTime.now().isAfter(voteEndTime);
     }
 }
