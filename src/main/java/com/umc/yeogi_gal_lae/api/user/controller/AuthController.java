@@ -10,10 +10,14 @@ import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOauth2User;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,4 +64,20 @@ public class AuthController {
             return Response.of(ErrorCode.UNAUTHORIZED);
         }
     }
+
+    @GetMapping("/check-cookie")
+    public ResponseEntity<String> checkCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies(); // 요청에 포함된 쿠키 가져오기
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return ResponseEntity.ok("Access Token Found: " + cookie.getValue());
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Access Token Cookie Not Found");
+    }
+
 }
