@@ -41,7 +41,6 @@ public enum ErrorCode implements BaseStatus {
     // Vote Error
     VOTE_NOT_COMPLETED_YET(HttpStatus.BAD_REQUEST, "VOTE_400", "아직 투표가 종료되지 않았습니다."),
     VOTE_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_401", "요청 하신 투표 방을 찾을 수 없습니다."),
-    TRIP_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_402", "요청 하신 여행 계획을 찾을 수 없습니다."),
     VOTE_RESULT_FAILED(HttpStatus.BAD_REQUEST, "VOTE_403", "여행 확정에 실패하셨습니다. 이 방은 사라집니다."),
 
     // Room Member Error
@@ -58,7 +57,11 @@ public enum ErrorCode implements BaseStatus {
     DATE_ERROR(HttpStatus.BAD_REQUEST, "DATE_401", "적절한 날짜 선택이 아닙니다."),
 
     // 서버 오류 코드
-    AI_TRIP_PLAN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "50001", "여행 일정 생성에 실패했습니다.");;
+    AI_TRIP_PLAN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "50001", "여행 일정 생성에 실패했습니다."),
+
+    // 투표방 오류
+    VOTE_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "VOTE_400", "이미 존재하는 투표 방입니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
