@@ -27,33 +27,42 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        // CustomOauth2User에서 User 객체 가져오기
+        // CustomOauth2User 에서 User 객체 가져오기
         CustomOauth2User customOauth2User = (CustomOauth2User) authentication.getPrincipal();
         User user = customOauth2User.getUser();
 
         // JWT 토큰 생성
         JwtToken jwtToken = jwtService.createJwtToken(user.getEmail());
 
-        // Access Token을 HTTP 헤더에 설정
-        Cookie accessCookie = new Cookie("accessToken", jwtToken.getAccessToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(false); // HTTPS 환경에서만 전송
-        accessCookie.setPath("/"); // 전체 경로에 대해 유효
-        accessCookie.setMaxAge((int) (jwtService.getRefreshTokenValidTime() / 1000)); // 초 단위
-        response.addCookie(accessCookie);
-        response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
+        // Access Token 을 HTTP 헤더에 설정
+        Cookie accessTokenCookie = createAccessTokenCookie(jwtToken.getAccessToken(), (int) (jwtService.getAccessTokenValidTime() / 1000));
+        response.addCookie(accessTokenCookie);
 
         // Refresh Token을 쿠키에 설정 (옵션)
-        Cookie refreshCookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // HTTPS 환경에서만 전송
-        refreshCookie.setPath("/"); // 전체 경로에 대해 유효
-        refreshCookie.setMaxAge((int) (jwtService.getRefreshTokenValidTime() / 1000)); // 초 단위
-        response.addCookie(refreshCookie);
+        Cookie refreshTokenCookie = createRefreshTokenCookie(jwtToken.getRefreshToken(), (int) (jwtService.getRefreshTokenValidTime() / 1000));
+        response.addCookie(refreshTokenCookie);
 
         log.info("OAuth2 로그인 성공. Access Token 및 Refresh Token 발급 완료.");
 
         // Redirect 또는 응답 처리 (JSON 응답 등)
         response.sendRedirect("/"); // 예: 홈 페이지로 리다이렉트
+    }
+
+    public Cookie createAccessTokenCookie(String accessToken, int maxAge) {
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true); // HTTPS에서만 사용
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(maxAge);
+        return accessTokenCookie;
+    }
+
+    public Cookie createRefreshTokenCookie(String refreshToken, int maxAge) {
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true); // HTTPS에서만 사용
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(maxAge);
+        return refreshTokenCookie;
     }
 }
