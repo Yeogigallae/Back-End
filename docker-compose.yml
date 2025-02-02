@@ -52,6 +52,19 @@ services:
     networks:
       - yeogigallae_network
 
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - yeogigallae_network
+    restart: always
+
 # 동일 네트워크에서 컨테이너 간 통신을 위한 네트워크 설정
 # 각 컨테이너들은 backend 와 네트워크 내부에서 통신 or 외부와 통신 가능
 networks:
