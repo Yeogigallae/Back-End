@@ -66,6 +66,21 @@ public class JwtService {
         return new JwtToken(accessToken, refreshToken);
     }
 
+    // 쿠키에서 Access Token 추출
+    public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    log.info("Access Token이 쿠키에서 추출되었습니다: {}", cookie.getValue());
+                    return Optional.of(cookie.getValue());
+                }
+            }
+        }
+        log.warn("Access Token이 쿠키에서 발견되지 않았습니다.");
+        return Optional.empty();
+    }
+
+
     // 헤더 값에서 "Bearer " 접두어를 필터링 + 제거하여 실제 토큰만 반환
     public Optional<String> extractBearerToken(String headerValue) {
         return Optional.ofNullable(headerValue)
@@ -103,41 +118,4 @@ public class JwtService {
         }
     }
 
-    // SecurityContextHolder에서 현재 인증된 사용자의 email 꺼내기
-    public Optional<String> getCurrentUserEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return Optional.empty();
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof String email) {
-            // 예전 방식: principal이 문자열로 저장된 경우
-            return Optional.of(email);
-        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
-            // principal이 UserDetails 구현체인 경우
-            return Optional.of(userDetails.getUsername());
-        } else if (principal instanceof User userEntity) {
-            // ★ 핵심: principal이 User 엔티티일 경우
-            return Optional.ofNullable(userEntity.getEmail());
-        }
-
-        return Optional.empty();
-    }
-
-
-    // 쿠키에서 Access Token 추출
-    public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("accessToken".equals(cookie.getName())) {
-                    log.info("Access Token이 쿠키에서 추출되었습니다: {}", cookie.getValue());
-                    return Optional.of(cookie.getValue());
-                }
-            }
-        }
-        log.warn("Access Token이 쿠키에서 발견되지 않았습니다.");
-        return Optional.empty();
-    }
 }

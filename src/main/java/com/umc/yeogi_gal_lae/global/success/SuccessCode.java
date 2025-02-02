@@ -23,6 +23,8 @@ public enum SuccessCode implements BaseStatus {
     USER_FETCH_OK(HttpStatus.OK, "USER_200", "유저 정보 조회 성공"),
     TOKEN_REISSUE_OK(HttpStatus.OK, "TOKEN_200", "토큰 재발급 성공"),
     USER_LOGOUT_OK(HttpStatus.OK, "USER_200", "유저 로그아웃 성공"),
+    USER_LOGIN_OK(HttpStatus.OK, "USER_200", "유저 로그인 성공"),
+
 
     // Place Success
     PLACE_ADD_OK(HttpStatus.OK, "PLACE_200", "여행 장소 등록 성공."),
