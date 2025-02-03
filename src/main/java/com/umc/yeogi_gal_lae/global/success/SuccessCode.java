@@ -44,6 +44,13 @@ public enum SuccessCode implements BaseStatus {
     ROOM_MEMBERS_OK(HttpStatus.OK, "ROOM_202", "방 멤버 조회에 성공하였습니다."),
     ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."),
 
+
+    // Notification Success
+    NOTIFICATION_FETCH_OK(HttpStatus.OK, "NOTIFICATION_200", "알림 조회 성공"),
+    NOTIFICATION_START_OK(HttpStatus.CREATED, "NOTIFICATION_201", "알림 시작 성공"),
+    NOTIFICATION_END_OK(HttpStatus.OK, "NOTIFICATION_202", "알림 종료 성공"),
+
+
     // AI Success
     AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다."),
 
