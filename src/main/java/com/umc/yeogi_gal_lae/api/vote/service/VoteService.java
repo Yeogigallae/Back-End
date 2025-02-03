@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.service;
 
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
@@ -9,6 +10,8 @@ import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
+
 
 import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
@@ -34,6 +37,7 @@ public class VoteService {
     private final UserRepository userRepository;
     private final TripPlanRepository tripPlanRepository;
     private final VoteRoomRepository voteRoomRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void createVoteRoom(VoteRequest.createVoteRoomReq request) {
@@ -66,6 +70,8 @@ public class VoteService {
                         .voteRoom(voteRoom)
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
+        // 투표 시작 알림 생성
+        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), NotificationType.VOTE_START);
 
         // 기존 투표 이력 확인
         Vote currentVote = user.getVote();
