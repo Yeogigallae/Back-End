@@ -57,7 +57,11 @@ public enum ErrorCode implements BaseStatus {
     DATE_ERROR(HttpStatus.BAD_REQUEST, "DATE_401", "적절한 날짜 선택이 아닙니다."),
 
     // 서버 오류 코드
-    AI_TRIP_PLAN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "50001", "여행 일정 생성에 실패했습니다.");;
+    AI_TRIP_PLAN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "50001", "여행 일정 생성에 실패했습니다."),
+
+    // 투표방 오류
+    VOTE_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "VOTE_400", "이미 존재하는 투표 방입니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -14,10 +14,17 @@ public enum SuccessCode implements BaseStatus {
     CREATED(HttpStatus.CREATED, "COMMON_201", "성공적으로 생성되었습니다."),
     NO_CONTENT(HttpStatus.NO_CONTENT, "COMMON_204", "성공적으로 삭제되었습니다."),
 
+    // Home API Success
+    ONGOING_VOTE_ROOMS_FETCH_OK(HttpStatus.OK, "HOME_200", "진행 중인 투표방 조회 성공"),
+    COMPLETED_VOTE_ROOMS_FETCH_OK(HttpStatus.OK, "HOME_201", "완료된 투표방 조회 성공"),
+    COMPLETED_TRIP_PLANS_FETCH_OK(HttpStatus.OK, "HOME_202", "완료된 여행 계획 조회 성공"),
+
     // User Success
     USER_FETCH_OK(HttpStatus.OK, "USER_200", "유저 정보 조회 성공"),
     TOKEN_REISSUE_OK(HttpStatus.OK, "TOKEN_200", "토큰 재발급 성공"),
     USER_LOGOUT_OK(HttpStatus.OK, "USER_200", "유저 로그아웃 성공"),
+    USER_LOGIN_OK(HttpStatus.OK, "USER_200", "유저 로그인 성공"),
+
 
     // Place Success
     PLACE_ADD_OK(HttpStatus.OK, "PLACE_200", "여행 장소 등록 성공."),
@@ -39,7 +46,13 @@ public enum SuccessCode implements BaseStatus {
     ROOM_LIST_FETCHED_OK(HttpStatus.OK, "ROOM_200", "사용자가 속한 방 리스트 조회 성공"),
 
     // AI Success
-    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다.");
+    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다."),
+
+    // Friend & Invite Success
+    INVITE_CREATED_OK(HttpStatus.OK, "INVITE_200", "초대가 성공적으로 생성되었습니다."),
+    FRIENDSHIP_CREATED_OK(HttpStatus.OK, "FRIEND_200", "친구 관계가 성공적으로 생성되었습니다."),
+    FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_201", "친구 목록 조회에 성공하였습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
