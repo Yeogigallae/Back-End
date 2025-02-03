@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.api.room.controller;
 
 import com.umc.yeogi_gal_lae.api.room.dto.request.AddRoomMemberRequest;
 import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
+import com.umc.yeogi_gal_lae.api.room.dto.response.RoomListResponse;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoominfoResponse;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
 import com.umc.yeogi_gal_lae.api.room.service.RoomMemberService;
@@ -110,5 +111,19 @@ public class RoomController {
 
         return Response.of(SuccessCode.ROOM_MEMBERS_OK, members);
 
+    }
+
+    @Validated
+    @Operation(
+            summary = "사용자가 속한 방 목록 조회 API",
+            description = "특정 사용자가 속한 모든 방을 리스트 형태로 반환합니다."
+    )
+    @GetMapping("/room/user/{userId}")
+    public Response<RoomListResponse> getRoomsByUserId(
+            @PathVariable @NotNull(message = "사용자 ID는 필수입니다.") Long userId) {
+
+        RoomListResponse rooms = roomService.getRoomsByUserId(userId);
+
+        return Response.of(SuccessCode.ROOM_LIST_FETCHED_OK, rooms);
     }
 }

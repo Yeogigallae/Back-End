@@ -5,6 +5,7 @@ import com.umc.yeogi_gal_lae.api.room.converter.RoomMemberConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
+import com.umc.yeogi_gal_lae.api.room.dto.response.RoomListResponse;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
 import com.umc.yeogi_gal_lae.api.room.dto.response.RoominfoResponse;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
@@ -102,6 +103,28 @@ public class RoomService {
                 .map(roomMember -> RoomMemberConverter.toResponse(roomMember)) // RoomMember의 User 이름
                 .toList();
 
+    }
+
+    /**
+     * 사용자가 속한 방 리스트 조회
+     */
+    public RoomListResponse getRoomsByUserId(Long userId) {
+        // 사용자가 속한 RoomMember 리스트 조회
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByUserId(userId);
+
+        // RoomMember에서 Room만 추출
+        List<Room> rooms = roomMembers.stream()
+                .map(RoomMember::getRoom)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Room을 RoominfoResponse로 변환하여 리스트 생성
+        List<RoominfoResponse> roomResponses = rooms.stream()
+                .map(room -> new RoominfoResponse(room.getId(), room.getName(), room.getMaster().getUsername()))
+                .collect(Collectors.toList());
+
+        // RoomListResponse 형태로 반환
+        return new RoomListResponse(roomResponses);
     }
 
 }

@@ -35,7 +35,8 @@ public enum SuccessCode implements BaseStatus {
     ROOM_CREATED_OK(HttpStatus.OK, "ROOM_200", "방 생성에 성공하였습니다."),
     ROOM_DETAILS_OK(HttpStatus.OK, "ROOM_201", "방 상세 조회에 성공하였습니다."),
     ROOM_MEMBERS_OK(HttpStatus.OK, "ROOM_202", "방 멤버 조회에 성공하였습니다."),
-    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."), // 새로 추가된 코드
+    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."),
+    ROOM_LIST_FETCHED_OK(HttpStatus.OK, "ROOM_200", "사용자가 속한 방 리스트 조회 성공"),
 
     // AI Success
     AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다.");
