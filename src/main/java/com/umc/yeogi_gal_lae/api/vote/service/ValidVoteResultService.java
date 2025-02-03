@@ -41,12 +41,15 @@ public class ValidVoteResultService {
     public boolean validResult(VoteRoomRequest voteRoomRequest) {
 
         // 투표 완료 여부 확인
-        if (!checkVoteCompleted(voteRoomRequest)) {
-            throw new BusinessException(ErrorCode.VOTE_NOT_COMPLETED_YET);
-        }
+        if (!checkVoteCompleted(voteRoomRequest)) { throw new BusinessException(ErrorCode.VOTE_NOT_COMPLETED_YET);  }
 
         VoteRoom voteRoom = findVoteRoomById(voteRoomRequest.getVoteRoomId());
         TripPlan tripPlan = voteRoom.getTripPlan();
+
+        if (isVoteTimeExpired(voteRoom, tripPlan)) {
+            voteRoomRepository.delete(voteRoom);
+            return true;      // 재투표
+        }
 
         // 찬성/반대 투표 집계
         List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlan.getId());

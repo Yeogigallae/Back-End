@@ -69,4 +69,7 @@ openai:
     key: ${OPENAI_API_KEY}
     url: https://api.openai.com/v1
 
+invite:
+  url: http://localhost:8080/invite
+
 
