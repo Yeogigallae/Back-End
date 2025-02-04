@@ -39,7 +39,8 @@ public class HomeConverter {
         return new HomeResponse.CompletedTripPlan(
                 tripPlan.getName(),
                 tripPlan.getStartDate(),
-                tripPlan.getEndDate()
+                tripPlan.getEndDate(),
+                tripPlan.getTripType() // 여행 유형 포함
         );
     }
 }
