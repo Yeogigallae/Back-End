@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote;
 
+import com.umc.yeogi_gal_lae.global.oauth.oauth2user.CustomOauth2User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,14 +19,17 @@ public class AuthenticatedUserUtils {
 
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof com.umc.yeogi_gal_lae.api.user.domain.User) {
-            // 커스텀 User 객체에서 이메일 추출
+        if (principal instanceof CustomOauth2User) {
+            //  OAuth2 로그인 사용자인 경우
+            return ((CustomOauth2User) principal).getUser().getEmail();
+        } else if (principal instanceof com.umc.yeogi_gal_lae.api.user.domain.User) {
+            //  커스텀 User 객체
             return ((com.umc.yeogi_gal_lae.api.user.domain.User) principal).getEmail();
         } else if (principal instanceof UserDetails) {
-            // UserDetails 에서 username 추출
+            // UserDetails 인터페이스
             return ((UserDetails) principal).getUsername();
         } else if (principal instanceof String) {
-            // Principal 이 String 인 경우 처리
+            //  Principal이 String 형태인 경우
             return (String) principal;
         } else {
             throw new IllegalArgumentException("알 수 없는 principal 타입: " + principal.getClass().getName());
