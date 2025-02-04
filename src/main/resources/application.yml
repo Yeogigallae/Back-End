@@ -23,6 +23,8 @@ spring:
       enabled: true
     swagger-ui:
       enabled: true
+      cache:
+        disabled: true
   h2:
     console:
       enabled: true
