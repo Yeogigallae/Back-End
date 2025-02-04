@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 public class TripPlanConverter {
 
-    public static TripPlan toEntity(TripPlanRequest request, User user, Room room, String imageUrl, String groupName, TripPlanType tripPlanType) {
+    public static TripPlan toEntity(TripPlanRequest request, User user, Room room, String groupName, TripPlanType tripPlanType) {
 
         TripPlan.TripPlanBuilder builder = TripPlan.builder()
                 .name(request.getName())
@@ -24,7 +24,7 @@ public class TripPlanConverter {
                 .minDays(request.getMinDays())
                 .maxDays(request.getMaxDays())
                 .groupName(groupName)
-                .imageUrl(imageUrl) // 사용자 대표 이미지 사용
+                .imageUrl(request.getImageUrl()) // 클라이언트가 입력한 URL 사용
                 .user(user)
                 .room(room);
 
@@ -59,6 +59,7 @@ public class TripPlanConverter {
                 .maxDays(tripPlan.getMaxDays())
                 .groupName(tripPlan.getGroupName())
                 .description(tripPlan.getDescription())
+                .imageUrl(tripPlan.getImageUrl()) // 클라이언트가 입력한 URL 반환
                 .imageUrl(tripPlan.getImageUrl());
 
         // price는 SCHEDULE 타입에서만 반환
