@@ -6,14 +6,11 @@ import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,7 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -49,8 +45,9 @@ public class SecurityConfig {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(requests ->
-                        requests.anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout") // 로그아웃 요청 경로 설정
