@@ -34,4 +34,10 @@ public class HomeController {
     public Response<HomeResponse.CompletedTripPlanList> getCompletedTripPlans(@RequestParam String userEmail) {
         return homeService.getCompletedTripPlans(userEmail);
     }
+
+    @Operation(summary = "홈 화면 알림 확인 여부", description = "특정 사용자가 읽지 않은 알림이 있는지 여부를 반환합니다.")
+    @GetMapping("/notification-status")
+    public Response<HomeResponse.NotificationStatus> getNotificationStatus(@RequestParam String userEmail) {
+        return homeService.getNotificationStatus(userEmail);
+    }
 }
