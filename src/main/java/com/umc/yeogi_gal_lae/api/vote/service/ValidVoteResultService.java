@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.service;
 
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
@@ -13,10 +14,13 @@ import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRoomRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +35,7 @@ public class ValidVoteResultService {
     private final TripPlanRepository tripPlanRepository;
     private final RoomRepository roomRepository;
     private final VoteRoomRepository voteRoomRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public boolean validResult(VoteRoomRequest voteRoomRequest) {
@@ -55,11 +60,25 @@ public class ValidVoteResultService {
         // 반대표가 더 많을 시, 재투표를 위해 투표 방 삭제
         if (goodVotes < badVotes) {
             voteRoomRepository.delete(voteRoom);
+            
+            // roomId를 통해 roomName 가져오기
+            Room room = findRoomById(voteRoomRequest.getRoomId());
+            String roomName = room.getName();
+
+            // 투표 완료 알림 생성
+            notificationService.createEndNotification(roomName, NotificationType.VOTE_COMPLETE);
             return true;
         }
         else{
             tripPlan.setStatus(Status.COMPLETED);   // 여행 계획 '완료'로 상태 변경
             tripPlanRepository.save(tripPlan);
+
+            // roomId를 통해 roomName 가져오기
+            Room room = findRoomById(voteRoomRequest.getRoomId());
+            String roomName = room.getName();
+
+            // 투표 완료 알림 생성
+            notificationService.createEndNotification(roomName, NotificationType.VOTE_COMPLETE);
             return false;
         }
 

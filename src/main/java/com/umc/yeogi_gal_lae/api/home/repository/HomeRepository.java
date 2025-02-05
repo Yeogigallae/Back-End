@@ -13,4 +13,8 @@ public interface HomeRepository extends JpaRepository<TripPlan, Long> {
 
     @Query("SELECT vr FROM VoteRoom vr JOIN vr.tripPlan tp WHERE tp.status = 'ONGOING'")
     List<VoteRoom> findAllOngoingVoteRooms();
+
+    // 완료된 투표방과 연관된 종료 날짜가 현재 또는 미래인 여행 계획 조회
+    @Query("SELECT tp FROM TripPlan tp JOIN tp.voteRoom vr WHERE vr.tripPlan.status = 'COMPLETED' AND tp.endDate >= CURRENT_DATE")
+    List<TripPlan> findCompletedVoteRoomsWithEndDateAfterNow();
 }

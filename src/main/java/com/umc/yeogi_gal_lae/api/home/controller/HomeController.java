@@ -23,10 +23,10 @@ public class HomeController {
         return homeService.getOngoingVoteRooms(userEmail);
     }
 
-    @Operation(summary = "완료된 투표방 조회", description = "사용자가 속한 완료된 투표방과 개수를 조회합니다.")
+    @Operation(summary = "완료된 투표 기반 예정된 여행 조회", description = "완료된 투표 상태의 여행 중 종료 날짜가 현재 시간과 같거나 미래인 여행들을 조회합니다.")
     @GetMapping("/completed-vote-rooms")
     public Response<HomeResponse.CompletedVoteRoomList> getCompletedVoteRooms(@RequestParam String userEmail) {
-        return homeService.getCompletedVoteRooms(userEmail);
+        return homeService.getFutureVoteBasedTrips(userEmail);
     }
 
     @Operation(summary = "완료된 여행 계획 조회", description = "사용자가 속한 완료된 여행 계획과 개수를 조회합니다.")

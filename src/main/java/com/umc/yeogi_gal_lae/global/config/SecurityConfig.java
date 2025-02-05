@@ -6,9 +6,8 @@ import com.umc.yeogi_gal_lae.global.jwt.service.JwtService;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,32 +45,10 @@ public class SecurityConfig {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-//                .authorizeHttpRequests(requests -> requests
-//                        .requestMatchers("/api/v1/resumes/search").hasRole("ADMIN") // resume
-//                        .requestMatchers("/api/v1/resumes/**").hasAnyRole("ADMIN", "REGULAR") // resume
-//                        .anyRequest().permitAll()
-//                )
-                .authorizeHttpRequests(requests ->
-                        requests.anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
-//          .authorizeHttpRequests(authorize -> authorize
-//                  .requestMatchers(
-//                          "/v3/api-docs/**",
-//                          "/oauth2/**",
-//                          "/oauth2/authorization/google",
-//                          "/index.html",
-//                          "/swagger/**",
-//                          "/swagger-ui/**",
-//                          "/swagger-ui/index.html/**",
-//                          "/api-docs/**",
-//                          "/signup.html",
-//                          "/api/v1/reissue"
-//                  ).permitAll()
-//                  .anyRequest().authenticated()
-//          )
-                // 로그아웃 성공 시 / 주소로 이동
-//          .logout((logoutConfig) -> logoutConfig.logoutSuccessUrl("/"))
-                // 로그아웃 설정 추가
                 .logout(logout -> logout
                         .logoutUrl("/logout") // 로그아웃 요청 경로 설정
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -84,16 +61,15 @@ public class SecurityConfig {
                         .clearAuthentication(true) // 인증 정보 제거
                         .deleteCookies("JSESSIONID") // 쿠키 제거
                 )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) //  세션 유지 설정
+                )
                 .oauth2Login(oauth2Login -> oauth2Login
                         .userInfoEndpoint(endpoint -> endpoint
                                 .userService(customOauth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler) // 2.
-                        .failureHandler(oAuth2LoginFailureHandler) // 3.
+                        .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 핸들러 연결
+                        .failureHandler(oAuth2LoginFailureHandler)
                 )
-//          .exceptionHandling(authenticationManager ->authenticationManager
-//                  .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-//                  .accessDeniedHandler(jwtAccessDeniedHandler)
-//          )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userRepository),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -104,16 +80,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of(
-                "http://localhost:8080",
-                "http://localhost:5173",
-                "http://43.201.12.8:8081",
-                "https://www.yeogi.my/course"
-        ));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

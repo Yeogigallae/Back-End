@@ -23,6 +23,8 @@ public enum SuccessCode implements BaseStatus {
     USER_FETCH_OK(HttpStatus.OK, "USER_200", "유저 정보 조회 성공"),
     TOKEN_REISSUE_OK(HttpStatus.OK, "TOKEN_200", "토큰 재발급 성공"),
     USER_LOGOUT_OK(HttpStatus.OK, "USER_200", "유저 로그아웃 성공"),
+    USER_LOGIN_OK(HttpStatus.OK, "USER_200", "유저 로그인 성공"),
+
 
     // Place Success
     PLACE_ADD_OK(HttpStatus.OK, "PLACE_200", "여행 장소 등록 성공."),
@@ -40,10 +42,28 @@ public enum SuccessCode implements BaseStatus {
     ROOM_CREATED_OK(HttpStatus.OK, "ROOM_200", "방 생성에 성공하였습니다."),
     ROOM_DETAILS_OK(HttpStatus.OK, "ROOM_201", "방 상세 조회에 성공하였습니다."),
     ROOM_MEMBERS_OK(HttpStatus.OK, "ROOM_202", "방 멤버 조회에 성공하였습니다."),
-    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."), // 새로 추가된 코드
+    ROOM_MEMBERS_ADDED_OK(HttpStatus.OK, "ROOM_203", "방 멤버 추가에 성공하였습니다."),
+    ROOM_LIST_FETCHED_OK(HttpStatus.OK, "ROOM_200", "사용자가 속한 방 리스트 조회 성공"),
+
+
+    // Notification Success
+    NOTIFICATION_FETCH_OK(HttpStatus.OK, "NOTIFICATION_200", "알림 조회 성공"),
+    NOTIFICATION_START_OK(HttpStatus.CREATED, "NOTIFICATION_201", "알림 시작 성공"),
+    NOTIFICATION_END_OK(HttpStatus.OK, "NOTIFICATION_202", "알림 종료 성공"),
+
 
     // AI Success
-    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다.");
+    AI_TRIP_PLAN_GENERATED(HttpStatus.OK, "20001", "여행 일정이 성공적으로 생성되었습니다."),
+
+    // Friend & Invite Success
+    INVITE_CREATED_OK(HttpStatus.OK, "INVITE_200", "초대가 성공적으로 생성되었습니다."),
+    FRIENDSHIP_CREATED_OK(HttpStatus.OK, "FRIEND_200", "친구 관계가 성공적으로 생성되었습니다."),
+    FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_201", "친구 목록 조회에 성공하였습니다."),
+
+    // TripPlan Success
+    TRIP_PLAN_CREATED_OK(HttpStatus.OK, "TRIP_PLAN200", "여행계획 생성 성공했습니다."),
+    TRIP_PLAN_RESULT_OK(HttpStatus.OK, "TRIP_PLAN201", "여행계획 조회 성공했습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
