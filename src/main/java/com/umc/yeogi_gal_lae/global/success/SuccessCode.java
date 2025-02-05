@@ -58,7 +58,11 @@ public enum SuccessCode implements BaseStatus {
     // Friend & Invite Success
     INVITE_CREATED_OK(HttpStatus.OK, "INVITE_200", "초대가 성공적으로 생성되었습니다."),
     FRIENDSHIP_CREATED_OK(HttpStatus.OK, "FRIEND_200", "친구 관계가 성공적으로 생성되었습니다."),
-    FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_201", "친구 목록 조회에 성공하였습니다.");
+    FRIEND_LIST_OK(HttpStatus.OK, "FRIEND_201", "친구 목록 조회에 성공하였습니다."),
+
+    // TripPlan Success
+    TRIP_PLAN_CREATED_OK(HttpStatus.OK, "TRIP_PLAN200", "여행계획 생성 성공했습니다."),
+    TRIP_PLAN_RESULT_OK(HttpStatus.OK, "TRIP_PLAN201", "여행계획 조회 성공했습니다.");
 
 
     private final HttpStatus httpStatus;

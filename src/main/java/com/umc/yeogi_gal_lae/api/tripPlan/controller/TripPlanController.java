@@ -8,10 +8,12 @@ import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
@@ -20,36 +22,20 @@ public class TripPlanController {
 
     private final TripPlanService tripPlanService;
 
-    @Operation(summary = "새로운 투표 생성", description = "TripPlanType에 따라 새로운 투표를 생성합니다.")
+    @Operation(summary = "새로운 여행 계획 생성", description = "사용자가 직접 이미지 URL과 계획들을 입력하여 여행 계획을 생성합니다.")
     @PostMapping("/trip-plan/votes/{tripPlanType}")
     public Response<TripPlanResponse> createVote(
-            @PathVariable TripPlanType tripPlanType,
-            @RequestBody TripPlanRequest request) {
+        @PathVariable TripPlanType tripPlanType,
+        @RequestBody TripPlanRequest request) {
 
         TripPlanResponse response = tripPlanService.createTripPlan(request, request.getUserId(), request.getRoomId(), tripPlanType);
-        return Response.of(SuccessCode.OK, response);
-    }
-
-    @Operation(summary = "투표 생성 대표이미지 선택", description = "투표 생성 대표이미지를 선택 API입니다.")
-    @PostMapping("/images/select")
-    public Response<String> saveRepresentativeImage(
-            @RequestParam Long userId,
-            @RequestParam String imageUrl) {
-        tripPlanService.saveUserRepresentativeImage(userId, imageUrl);
-        return Response.of(SuccessCode.OK, "대표 이미지가 저장되었습니다.");
-    }
-
-    @Operation(summary = "투표 생성 대표이미지 조회", description = "투표 생성 대표이미지를 조회 API입니다.")
-    @GetMapping("/images")
-    public Response<List<String>> getAvailableImages() {
-        List<String> images = tripPlanService.getAvailableImages();
-        return Response.of(SuccessCode.OK, images);
+        return Response.of(SuccessCode.TRIP_PLAN_CREATED_OK, response);
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "특정 여행 계획의 상세 정보를 반환합니다.")
     @GetMapping("/trip-plan/{tripPlanId}/details")
     public Response<TripPlanResponse> getTripPlanDetails(@PathVariable Long tripPlanId) {
         TripPlanResponse response = tripPlanService.getTripPlanDetails(tripPlanId);
-        return Response.of(SuccessCode.OK, response);
+        return Response.of(SuccessCode.TRIP_PLAN_RESULT_OK, response);
     }
 }
