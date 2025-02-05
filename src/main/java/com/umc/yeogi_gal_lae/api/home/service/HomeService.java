@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.api.home.service;
 import com.umc.yeogi_gal_lae.api.home.converter.HomeConverter;
 import com.umc.yeogi_gal_lae.api.home.dto.HomeResponse;
 import com.umc.yeogi_gal_lae.api.home.repository.HomeRepository;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
@@ -28,6 +29,7 @@ public class HomeService {
     private final HomeRepository homeRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Response<HomeResponse.OngoingVoteRoomList> getOngoingVoteRooms(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -97,5 +99,13 @@ public class HomeService {
         LocalDateTime voteEndTime = voteRoom.getCreatedAt().plusSeconds(tripPlan.getVoteLimitTime().getSeconds());
 
         return LocalDateTime.now().isAfter(voteEndTime);
+    }
+
+    /**
+     * 특정 사용자의 읽지 않은 알림 여부 반환 (이메일 기반)
+     */
+    public Response<HomeResponse.NotificationStatus> getNotificationStatus(String userEmail) {
+        boolean hasUnreadNotifications = notificationService.hasUnreadNotifications(userEmail);
+        return Response.of(SuccessCode.NOTIFICATION_FETCH_OK, new HomeResponse.NotificationStatus(hasUnreadNotifications));
     }
 }
