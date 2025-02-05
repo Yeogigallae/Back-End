@@ -19,7 +19,7 @@ import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/friendship")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class FriendshipController {
@@ -31,7 +31,7 @@ public class FriendshipController {
             summary = "친구 초대 URL 생성",
             description = "사용자가 친구 초대를 위해 공유 가능한 URL을 생성합니다."
     )
-    @PostMapping("/invite")
+    @PostMapping("/friendship/invite")
     public Response<CreateInviteResponse> createInvite(@RequestBody CreateInviteRequest request) {
 
         String inviteUrl = friendshipService.generateInviteUrl(request.getInviterId());
@@ -44,7 +44,7 @@ public class FriendshipController {
             summary = "친구 초대 수락",
             description = "친구 초대 URL을 통해 친구 요청을 수락하고 관계를 생성합니다."
     )
-    @PostMapping("/accept")
+    @PostMapping("/friendship/accept")
     public Response<Void> acceptInvite(@RequestParam @NotNull(message = "토큰은 필수입니다.") String token) {
 
         // 친구 초대 수락자의 유저 정보
@@ -59,7 +59,7 @@ public class FriendshipController {
             summary = "친구 목록 조회 API",
             description = "현재 사용자의 친구 목록을 반환합니다."
     )
-    @GetMapping("/friends")
+    @GetMapping("/friendship/friends")
     public Response<List<FriendListResponse>> getFriends() {
 
         // 토큰에서 인증된 사용자 이메일 가져오기
