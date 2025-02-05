@@ -4,6 +4,7 @@ import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteRequest;
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteResponse;
 import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
 import com.umc.yeogi_gal_lae.api.friendship.service.FriendshipService;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ import java.util.List;
 public class FriendshipController {
 
     private final FriendshipService friendshipService;
+    private final UserRepository userRepository;
 
     @Operation(
             summary = "친구 초대 URL 생성",
@@ -47,19 +50,28 @@ public class FriendshipController {
         // 친구 초대 수락자의 유저 정보
         String inviteeEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        friendshipService.acceptInvite(token,inviteeEmail);
+        friendshipService.acceptInvite(token, inviteeEmail);
         return Response.of(SuccessCode.FRIENDSHIP_CREATED_OK);
     }
 
     @Validated
     @Operation(
-            summary = "친구 목록 조회",
-            description = "사용자의 친구 목록을 반환합니다."
+            summary = "친구 목록 조회 API",
+            description = "현재 사용자의 친구 목록을 반환합니다."
     )
-    @GetMapping("/list/{userId}")
-    public Response<List<FriendListResponse>> getFriendList(
-            @PathVariable @NotNull(message = "사용자 ID는 필수입니다.") Long userId) {
+    @GetMapping("/friends")
+    public Response<List<FriendListResponse>> getFriends() {
 
+        // 토큰에서 인증된 사용자 이메일 가져오기
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
+        // 이메일로 사용자 ID 조회
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Long userId = user.getId();
+
+        // 친구 목록 조회 서비스 호출
         List<FriendListResponse> friends = friendshipService.getFriendList(userId);
 
         return Response.of(SuccessCode.FRIEND_LIST_OK, friends);
