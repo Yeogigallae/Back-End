@@ -50,6 +50,7 @@ public enum SuccessCode implements BaseStatus {
     NOTIFICATION_FETCH_OK(HttpStatus.OK, "NOTIFICATION_200", "알림 조회 성공"),
     NOTIFICATION_START_OK(HttpStatus.CREATED, "NOTIFICATION_201", "알림 시작 성공"),
     NOTIFICATION_END_OK(HttpStatus.OK, "NOTIFICATION_202", "알림 종료 성공"),
+    NOTIFICATION_READ_OK(HttpStatus.OK, "NOTIFICATION_203", "알림 읽음"),
 
 
     // AI Success
