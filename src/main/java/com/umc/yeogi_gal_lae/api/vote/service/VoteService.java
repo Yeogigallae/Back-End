@@ -40,26 +40,6 @@ public class VoteService {
     private final NotificationService notificationService;
 
     @Transactional
-    public synchronized void createVoteRoom(VoteRequest.createVoteRoomReq request) {
-        // 1. 여행 계획 ID로 TripPlan 조회
-        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
-
-        // 2. 기존 VoteRoom이 존재하는지 확인 (중복 생성 방지)
-        if (voteRoomRepository.findByTripPlanId(tripPlan.getId()).isPresent()) {
-            throw new BusinessException(ErrorCode.VOTE_ROOM_ALREADY_EXISTS);
-        }
-
-        // 3. 새로운 VoteRoom 생성 및 저장
-        VoteRoom voteRoom = new VoteRoom();
-        voteRoom.setTripPlan(tripPlan);
-        tripPlan.setStatus(Status.ONGOING); // 여행 계획을 '진행 중' 상태로 변경
-
-        voteRoomRepository.save(voteRoom);
-        tripPlanRepository.save(tripPlan);
-    }
-
-    @Transactional
     public void createVote(VoteRequest.createVoteReq request, String userEmail){
 
         // 유저 이메일로 검증
@@ -75,7 +55,7 @@ public class VoteService {
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
         // 투표 시작 알림 생성
-        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), NotificationType.VOTE_START);
+        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), user.getEmail(),NotificationType.VOTE_START);
 
         // 기존 투표 이력 확인
         Vote currentVote = user.getVote();

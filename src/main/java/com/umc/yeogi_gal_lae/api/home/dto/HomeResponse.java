@@ -65,4 +65,10 @@ public class HomeResponse {
         private int totalCount;
         private List<CompletedTripPlan> trips;
     }
+
+    @Getter
+    @AllArgsConstructor
+    public static class NotificationStatus {
+        private boolean hasUnreadNotifications;
+    }
 }
