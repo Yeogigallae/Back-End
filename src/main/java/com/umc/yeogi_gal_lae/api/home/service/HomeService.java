@@ -47,19 +47,23 @@ public class HomeService {
         return Response.of(SuccessCode.ONGOING_VOTE_ROOMS_FETCH_OK, new HomeResponse.OngoingVoteRoomList(rooms.size(), rooms));
     }
 
-    public Response<HomeResponse.CompletedVoteRoomList> getCompletedVoteRooms(String userEmail) {
+
+    // 완료된 투표방과 연관된 종료 날짜가 현재 또는 미래인 여행 계획 조회
+    public Response<HomeResponse.CompletedVoteRoomList> getFutureVoteBasedTrips(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        // 사용자가 속한 방 ID 목록 조회
         List<Long> userRoomIds = roomMemberRepository.findAllByUserId(user.getId())
-                .stream()
-                .map(roomMember -> roomMember.getRoom().getId())
-                .collect(Collectors.toList());
+            .stream()
+            .map(roomMember -> roomMember.getRoom().getId())
+            .collect(Collectors.toList());
 
-        List<HomeResponse.CompletedVoteRoom> rooms = homeRepository.findByStatus(Status.COMPLETED).stream()
-                .filter(tripPlan -> userRoomIds.contains(tripPlan.getRoom().getId()))
-                .map(HomeConverter::toCompletedVoteRoom)
-                .collect(Collectors.toList());
+        // 완료된 투표방과 연관된 여행 계획 중 종료 날짜가 현재 또는 미래인 여행 필터링
+        List<HomeResponse.CompletedVoteRoom> rooms = homeRepository.findCompletedVoteRoomsWithEndDateAfterNow().stream()
+            .filter(tripPlan -> userRoomIds.contains(tripPlan.getRoom().getId()))
+            .map(HomeConverter::toCompletedVoteRoom)
+            .collect(Collectors.toList());
 
         return Response.of(SuccessCode.COMPLETED_VOTE_ROOMS_FETCH_OK, new HomeResponse.CompletedVoteRoomList(rooms.size(), rooms));
     }
