@@ -19,6 +19,11 @@ services:
     networks:
       - yeogigallae_network
     restart: on-failure
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     container_name: redis1
