@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.api.notification.controller;
 import com.umc.yeogi_gal_lae.api.notification.dto.NotificationDto;
 import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
+import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +58,8 @@ public class NotificationController {
      */
     @PatchMapping("/{id}/read")
     public ResponseEntity<Response<Void>> markNotificationAsRead(
-        @PathVariable Long id,
-        @RequestParam String userEmail) {
+        @PathVariable Long id) {
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
         notificationService.markNotificationAsRead(id, userEmail);
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_READ_OK));
     }
