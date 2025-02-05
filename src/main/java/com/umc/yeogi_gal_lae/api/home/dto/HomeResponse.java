@@ -30,7 +30,7 @@ public class HomeResponse {
         private String roomName;
         private String location;
         private LocalDate startDate;
-        private LocalDate endDate;
+        private String endDate;
         private String imageUrl;
     }
 
@@ -40,7 +40,7 @@ public class HomeResponse {
         private String tripName;
         private String location;
         private LocalDate startDate;
-        private LocalDate endDate;
+        private String endDate;
         private TripType tripType;
         private String imageUrl;
     }
