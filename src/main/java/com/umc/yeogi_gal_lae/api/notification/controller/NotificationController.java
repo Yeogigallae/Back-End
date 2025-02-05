@@ -25,8 +25,9 @@ public class NotificationController {
     public ResponseEntity<Response<Void>> createStartNotification(
             @RequestParam String roomName,
             @RequestParam String userName,
+            @RequestParam String userEmail,
             @RequestParam NotificationType type) {
-        notificationService.createStartNotification(roomName, userName, type);
+        notificationService.createStartNotification(roomName, userName, userEmail, type);
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_START_OK));
     }
 
@@ -36,8 +37,9 @@ public class NotificationController {
     @PostMapping("/end")
     public ResponseEntity<Response<Void>> createEndNotification(
             @RequestParam String roomName,
+            @RequestParam String userEmail,
             @RequestParam NotificationType type) {
-        notificationService.createEndNotification(roomName, type);
+        notificationService.createEndNotification(roomName, userEmail, type);
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_END_OK));
     }
 
@@ -48,5 +50,16 @@ public class NotificationController {
     public ResponseEntity<Response<List<NotificationDto>>> getAllNotifications() {
         List<NotificationDto> notifications = notificationService.getAllNotifications();
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_FETCH_OK, notifications));
+    }
+
+    /**
+     * 특정 알림 읽음 처리
+     */
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<Response<Void>> markNotificationAsRead(
+        @PathVariable Long id,
+        @RequestParam String userEmail) {
+        notificationService.markNotificationAsRead(id, userEmail);
+        return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_READ_OK));
     }
 }
