@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
-@AllArgsConstructor
 @Builder
-public class RoomListResponse {
-    private List<RoomResponse> rooms; // 여러 개의 방 정보
+@AllArgsConstructor
+public class SimpleRoomMemberResponse {
+    private Long userId;
+    private String profileImage;
 }
