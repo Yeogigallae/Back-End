@@ -47,6 +47,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/health").permitAll()  // 헬스 체크 허용
                         .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
                 .logout(logout -> logout
@@ -75,23 +76,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-    // Nginx 로 Cors 설정 이전
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//
-//        configuration.addAllowedOriginPattern("*");
-//        configuration.addAllowedHeader("*");
-//        configuration.addAllowedMethod("*");
-//
-//        configuration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//
-//        return source;
-//    }
 
     @Bean
     public RedirectStrategy redirectStrategy() {
