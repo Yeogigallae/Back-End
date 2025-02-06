@@ -40,9 +40,6 @@ services:
       - .env
     ports:
       - "8081:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy   # MySQL이 정상적으로 실행된 후 시작
     environment:
       - MYSQL_USER=${PROD_DB_USERNAME}
       - MYSQL_PASSWORD=${PROD_DB_PASSWORD}
