@@ -113,6 +113,10 @@ public class RoomController {
 
     }
 
+    /**
+     * 방 멤버 조회 API
+     */
+
     @Validated
     @Operation(
             summary = "사용자가 속한 방 목록 조회 API",
