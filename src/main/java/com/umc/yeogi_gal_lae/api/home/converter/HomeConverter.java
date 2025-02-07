@@ -53,7 +53,7 @@ public class HomeConverter {
 
     public static HomeResponse.CompletedTripPlan toCompletedTripPlan(TripPlan tripPlan) {
         return new HomeResponse.CompletedTripPlan(
-                tripPlan.getName(),
+                tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),
                 tripPlan.getEndDate().format(DATE_FORMATTER),
