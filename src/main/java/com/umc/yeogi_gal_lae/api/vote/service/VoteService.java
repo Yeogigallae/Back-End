@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.vote.service;
 
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
@@ -42,6 +43,7 @@ public class VoteService {
     private final VoteRoomRepository voteRoomRepository;
     private final RoomRepository roomRepository;
     private final NotificationService notificationService;
+    private final RoomMemberRepository roomMemberRepository;
 
     @Transactional(readOnly = true)
     public VoteResponse.VoteInfoDTO getTripPlanInfoForVote(Long tripId, Long roomId , String userEmail){
@@ -50,10 +52,7 @@ public class VoteService {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ROOM_NOT_FOUND));
         TripPlan tripPlan = tripPlanRepository.findById(tripId).orElseThrow(() -> new BusinessException(TRIP_PLAN_NOT_FOUND));
 
-        // VoteRoom 인원 카운트
-        VoteRoom voteRoom = Optional.ofNullable(tripPlan.getVoteRoom()).orElseThrow(() -> new BusinessException(VOTE_ROOM_NOT_FOUND));
-        int userCount = userRepository.countUsersInVoteRoom(voteRoom);
-
+        int userCount = roomMemberRepository.countByRoomIdAndTripId(roomId, tripId);
 
         return VoteConverter.toResponse(user, room, tripPlan, userCount);
     }

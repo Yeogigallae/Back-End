@@ -19,7 +19,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-
-    @Query("SELECT COUNT(u) FROM User u WHERE u.vote.voteRoom = :voteRoom")
-    int countUsersInVoteRoom(@Param("voteRoom") VoteRoom voteRoom);
 }
