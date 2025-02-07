@@ -37,7 +37,7 @@ public class HomeResponse {
     @Getter
     @AllArgsConstructor
     public static class CompletedTripPlan {
-        private String tripName;
+        private String roomName;
         private String location;
         private LocalDate startDate;
         private String endDate;

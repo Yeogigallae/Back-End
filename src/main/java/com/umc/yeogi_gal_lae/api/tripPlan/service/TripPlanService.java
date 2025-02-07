@@ -45,7 +45,7 @@ public class TripPlanService {
         // 여행 계획 관련 검증 로직 호출
         validateTripPlanDays(request.getMinDays(), request.getMaxDays());
 
-        TripPlan tripPlan = TripPlanConverter.toEntity(request, user, room, room.getName(),
+        TripPlan tripPlan = TripPlanConverter.toEntity(request, user, room,
             tripPlanType);
         tripPlanRepository.save(tripPlan);
 

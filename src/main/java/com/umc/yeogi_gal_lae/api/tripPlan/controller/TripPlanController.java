@@ -38,10 +38,4 @@ public class TripPlanController {
         return Response.of(SuccessCode.TRIP_PLAN_CREATED_OK, response);
     }
 
-    @Operation(summary = "여행 계획 상세 조회", description = "특정 여행 계획의 상세 정보를 반환합니다.")
-    @GetMapping("/trip-plan/{tripPlanId}/details")
-    public Response<TripPlanResponse> getTripPlanDetails(@PathVariable Long tripPlanId) {
-        TripPlanResponse response = tripPlanService.getTripPlanDetails(tripPlanId);
-        return Response.of(SuccessCode.TRIP_PLAN_RESULT_OK, response);
-    }
 }
