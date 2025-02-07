@@ -11,10 +11,9 @@ import java.time.LocalDate;
 
 public class TripPlanConverter {
 
-    public static TripPlan toEntity(TripPlanRequest request, User user, Room room, String groupName, TripPlanType tripPlanType) {
+    public static TripPlan toEntity(TripPlanRequest request, User user, Room room, TripPlanType tripPlanType) {
 
         TripPlan.TripPlanBuilder builder = TripPlan.builder()
-                .name(request.getName())
                 .location(request.getLocation())
                 .startDate(request.getStartDate() != null ? LocalDate.parse(request.getStartDate()) : null)
                 .endDate(request.getEndDate() != null ? LocalDate.parse(request.getEndDate()) : null)
@@ -23,7 +22,6 @@ public class TripPlanConverter {
                 .voteLimitTime(request.getVoteLimitTime())
                 .minDays(request.getMinDays())
                 .maxDays(request.getMaxDays())
-                .groupName(groupName)
                 .imageUrl(request.getImageUrl()) // 클라이언트가 입력한 URL 사용
                 .user(user)
                 .room(room);
@@ -48,7 +46,6 @@ public class TripPlanConverter {
     public static TripPlanResponse toResponse(TripPlan tripPlan) {
         TripPlanResponse.TripPlanResponseBuilder responseBuilder = TripPlanResponse.builder()
                 .id(tripPlan.getId())
-                .name(tripPlan.getName())
                 .location(tripPlan.getLocation())
                 .startDate(tripPlan.getStartDate() != null ? tripPlan.getStartDate().toString() : null)
                 .endDate(tripPlan.getEndDate() != null ? tripPlan.getEndDate().toString() : null)
@@ -57,7 +54,7 @@ public class TripPlanConverter {
                 .voteLimitTime(tripPlan.getVoteLimitTime())
                 .minDays(tripPlan.getMinDays())
                 .maxDays(tripPlan.getMaxDays())
-                .groupName(tripPlan.getGroupName())
+                .roomName(tripPlan.getRoom().getName())
                 .description(tripPlan.getDescription())
                 .imageUrl(tripPlan.getImageUrl()) // 클라이언트가 입력한 URL 반환
                 .imageUrl(tripPlan.getImageUrl());

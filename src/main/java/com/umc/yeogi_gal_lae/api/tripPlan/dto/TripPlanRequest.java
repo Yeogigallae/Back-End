@@ -2,11 +2,9 @@ package com.umc.yeogi_gal_lae.api.tripPlan.dto;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.types.*;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class TripPlanRequest {
-    private String name; // 여행 이름
     private String location; // 여행 장소
     private String startDate;
     private String endDate;
