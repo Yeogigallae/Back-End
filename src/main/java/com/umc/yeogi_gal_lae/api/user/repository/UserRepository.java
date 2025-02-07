@@ -5,6 +5,7 @@ import com.umc.yeogi_gal_lae.api.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 
+import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findUsersByVoteTripPlanId(@Param("tripId") Long tripId);
 
     Optional<User> findByUsername(String username);
+
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.vote.voteRoom = :voteRoom")
+    int countUsersInVoteRoom(@Param("voteRoom") VoteRoom voteRoom);
 }
