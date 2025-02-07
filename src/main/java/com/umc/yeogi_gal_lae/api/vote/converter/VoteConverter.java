@@ -11,10 +11,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
 public class VoteConverter {
 
-    public VoteResponse.VoteInfoDTO toResponse(User user, Room room, TripPlan tripPlan, int userCount){
+    public static VoteResponse.VoteInfoDTO toResponse(User user, Room room, TripPlan tripPlan, int userCount){
 
 
         Integer customDate = tripPlan.getStartDate() != null ? tripPlan.getStartDate().getMonthValue() : null;
@@ -44,7 +43,7 @@ public class VoteConverter {
     }
 
 
-    public  VoteResponse.ResultDTO convert( String type, User userVote, Map<String, Long> groupedVotes ) {
+    public static VoteResponse.ResultDTO convert( String type, User userVote, Map<String, Long> groupedVotes ) {
 
         // 현재 사용자가 특정 type('GOOD', 'BAD')에 투표했는지 확인
         Optional<User> filteredUserVote = Optional.ofNullable(userVote).filter(user -> user.getVote().getType().name().equals(type));
@@ -57,7 +56,7 @@ public class VoteConverter {
                 .build();
     }
 
-    private String extractCity(String address) {
+    private static String extractCity(String address) {
         Pattern pattern = Pattern.compile("([가-힣]+시)");
         Matcher matcher = pattern.matcher(address);
 
