@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
+@RequestMapping("/api")
 public class CheckServerStatusController {
 
     @Operation(description = "Docker 컨테이너 가동 시 헬스 체킹을 위한 컨트롤러")
