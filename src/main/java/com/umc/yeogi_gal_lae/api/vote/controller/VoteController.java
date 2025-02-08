@@ -22,7 +22,6 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 @Validated
 @Slf4j

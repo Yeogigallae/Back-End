@@ -13,7 +13,7 @@
 //import org.springframework.web.bind.annotation.RestController;
 //
 //@RestController
-//@RequestMapping("/api/rooms")
+//@RequestMapping("/rooms")
 //@Validated // 유효성 검사 활성화
 //public class AITripPlanController {
 //

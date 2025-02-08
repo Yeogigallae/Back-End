@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class RoomController {
