@@ -62,7 +62,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.info("OAuth2 로그인 성공. Access Token 및 Refresh Token 발급 완료.");
 
         // Redirect 또는 응답 처리 (JSON 응답 등)
-        response.sendRedirect("/"); // 예: 홈 페이지로 리다이렉트
+        response.sendRedirect("http://localhost:5173/login/kakao");     // 프론트로 리다이렉팅
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"message\": \"OAuth2 로그인 성공\", \"status\": \"success\"}");
