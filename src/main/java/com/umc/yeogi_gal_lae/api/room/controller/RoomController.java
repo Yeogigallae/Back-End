@@ -113,16 +113,12 @@ public class RoomController {
 
     }
 
-    /**
-     * 방 멤버 조회 API
-     */
-
     @Validated
     @Operation(
             summary = "사용자가 속한 방 목록 조회 API",
             description = "현재 인증된 사용자가 속한 모든 방을 리스트 형태로 반환합니다."
     )
-    @GetMapping("/room/user")
+    @GetMapping("/room/list")
     public Response<RoomListResponse> getRoomsByAuthenticatedUser() {
         // 인증된 사용자 이메일 가져오기
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
