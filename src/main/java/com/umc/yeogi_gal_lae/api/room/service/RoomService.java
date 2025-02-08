@@ -5,9 +5,7 @@ import com.umc.yeogi_gal_lae.api.room.converter.RoomMemberConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
 import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
-import com.umc.yeogi_gal_lae.api.room.dto.response.RoomListResponse;
-import com.umc.yeogi_gal_lae.api.room.dto.response.RoomMemberResponse;
-import com.umc.yeogi_gal_lae.api.room.dto.response.RoominfoResponse;
+import com.umc.yeogi_gal_lae.api.room.dto.response.*;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
@@ -118,13 +116,24 @@ public class RoomService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // Room을 RoominfoResponse로 변환하여 리스트 생성
-        List<RoominfoResponse> roomResponses = rooms.stream()
-                .map(room -> new RoominfoResponse(room.getId(), room.getName(), room.getMaster().getUsername()))
+        // Room을 RoomResponse로 변환하여 리스트 생성
+        List<RoomResponse> roomResponses = rooms.stream()
+                .map(room -> RoomResponse.builder()
+                        .roomId(room.getId())
+                        .roomName(room.getName())
+                        .members(room.getRoomMembers().stream()
+                                .map(member -> new SimpleRoomMemberResponse(
+                                        member.getUser().getId(),
+                                        member.getUser().getProfileImage() // 프로필 이미지 추가
+                                ))
+                                .collect(Collectors.toList()))
+                        .build())
                 .collect(Collectors.toList());
 
         // RoomListResponse 형태로 반환
         return new RoomListResponse(roomResponses);
     }
+
+
 
 }
