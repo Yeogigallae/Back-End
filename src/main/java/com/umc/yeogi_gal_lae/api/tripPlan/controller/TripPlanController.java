@@ -4,6 +4,7 @@ import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanRequest;
 import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanResponse;
 import com.umc.yeogi_gal_lae.api.tripPlan.service.TripPlanService;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
+import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,14 +29,13 @@ public class TripPlanController {
         @PathVariable TripPlanType tripPlanType,
         @RequestBody TripPlanRequest request) {
 
-        TripPlanResponse response = tripPlanService.createTripPlan(request, request.getUserId(), request.getRoomId(), tripPlanType);
+        // 현재 로그인한 사용자의 이메일 조회
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
+        // TripPlan 생성 (userId는 내부적으로 처리)
+        TripPlanResponse response = tripPlanService.createTripPlan(request, userEmail, request.getRoomId(), tripPlanType);
+
         return Response.of(SuccessCode.TRIP_PLAN_CREATED_OK, response);
     }
 
-    @Operation(summary = "여행 계획 상세 조회", description = "특정 여행 계획의 상세 정보를 반환합니다.")
-    @GetMapping("/trip-plan/{tripPlanId}/details")
-    public Response<TripPlanResponse> getTripPlanDetails(@PathVariable Long tripPlanId) {
-        TripPlanResponse response = tripPlanService.getTripPlanDetails(tripPlanId);
-        return Response.of(SuccessCode.TRIP_PLAN_RESULT_OK, response);
-    }
 }

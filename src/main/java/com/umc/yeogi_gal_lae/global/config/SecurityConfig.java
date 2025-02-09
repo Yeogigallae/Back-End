@@ -40,15 +40,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
                 .httpBasic(HttpBasicConfigurer::disable)
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
+//                        .requestMatchers("/actuator/health").permitAll()  // 헬스 체크 허용
+//                        .requestMatchers("/actuator/**").permitAll() // 모든 Actuator 엔드포인트 허용
                         .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))   // 세션 허용 x
                 .logout(logout -> logout
                         .logoutUrl("/logout") // 로그아웃 요청 경로 설정
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -75,20 +77,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
 
     @Bean
     public RedirectStrategy redirectStrategy() {

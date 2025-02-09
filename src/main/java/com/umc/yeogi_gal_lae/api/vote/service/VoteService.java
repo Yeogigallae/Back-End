@@ -1,9 +1,11 @@
 package com.umc.yeogi_gal_lae.api.vote.service;
 
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
+import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
+import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
-import com.umc.yeogi_gal_lae.api.tripPlan.types.Status;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
@@ -28,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.umc.yeogi_gal_lae.global.error.ErrorCode.*;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -37,27 +41,22 @@ public class VoteService {
     private final UserRepository userRepository;
     private final TripPlanRepository tripPlanRepository;
     private final VoteRoomRepository voteRoomRepository;
+    private final RoomRepository roomRepository;
     private final NotificationService notificationService;
+    private final RoomMemberRepository roomMemberRepository;
 
-    @Transactional
-    public synchronized void createVoteRoom(VoteRequest.createVoteRoomReq request) {
-        // 1. 여행 계획 ID로 TripPlan 조회
-        TripPlan tripPlan = tripPlanRepository.findById(request.getTripId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+    @Transactional(readOnly = true)
+    public VoteResponse.VoteInfoDTO getTripPlanInfoForVote(Long tripId, Long roomId , String userEmail){
 
-        // 2. 기존 VoteRoom이 존재하는지 확인 (중복 생성 방지)
-        if (voteRoomRepository.findByTripPlanId(tripPlan.getId()).isPresent()) {
-            throw new BusinessException(ErrorCode.VOTE_ROOM_ALREADY_EXISTS);
-        }
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new BusinessException(ROOM_NOT_FOUND));
+        TripPlan tripPlan = tripPlanRepository.findById(tripId).orElseThrow(() -> new BusinessException(TRIP_PLAN_NOT_FOUND));
 
-        // 3. 새로운 VoteRoom 생성 및 저장
-        VoteRoom voteRoom = new VoteRoom();
-        voteRoom.setTripPlan(tripPlan);
-        tripPlan.setStatus(Status.ONGOING); // 여행 계획을 '진행 중' 상태로 변경
+        int userCount = roomMemberRepository.countByRoomIdAndTripId(roomId, tripId);
 
-        voteRoomRepository.save(voteRoom);
-        tripPlanRepository.save(tripPlan);
+        return VoteConverter.toResponse(user, room, tripPlan, userCount);
     }
+
 
     @Transactional
     public void createVote(VoteRequest.createVoteReq request, String userEmail){
@@ -65,7 +64,7 @@ public class VoteService {
         // 유저 이메일로 검증
         User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
         TripPlan tripPlan = tripPlanRepository.findById(request.getTripId()).orElseThrow(()-> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
-        VoteRoom voteRoom = voteRoomRepository.findByTripPlanId(tripPlan.getId()).orElseThrow(() -> new BusinessException(ErrorCode.VOTE_ROOM_NOT_FOUND));
+        VoteRoom voteRoom = voteRoomRepository.findByTripPlanId(tripPlan.getId()).orElseThrow(() -> new BusinessException(VOTE_ROOM_NOT_FOUND));
 
 
         Vote vote = voteRepository.findByTripPlanId(tripPlan.getId())      // DB 에 Vote 객체가 있다면,
@@ -75,7 +74,7 @@ public class VoteService {
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
         // 투표 시작 알림 생성
-        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), NotificationType.VOTE_START);
+        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), user.getEmail(),NotificationType.VOTE_START);
 
         // 기존 투표 이력 확인
         Vote currentVote = user.getVote();

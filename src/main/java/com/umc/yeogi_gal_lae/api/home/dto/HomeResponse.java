@@ -30,17 +30,17 @@ public class HomeResponse {
         private String roomName;
         private String location;
         private LocalDate startDate;
-        private LocalDate endDate;
+        private String endDate;
         private String imageUrl;
     }
 
     @Getter
     @AllArgsConstructor
     public static class CompletedTripPlan {
-        private String tripName;
+        private String roomName;
         private String location;
         private LocalDate startDate;
-        private LocalDate endDate;
+        private String endDate;
         private TripType tripType;
         private String imageUrl;
     }
@@ -64,5 +64,11 @@ public class HomeResponse {
     public static class CompletedTripPlanList {
         private int totalCount;
         private List<CompletedTripPlan> trips;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class NotificationStatus {
+        private boolean hasUnreadNotifications;
     }
 }

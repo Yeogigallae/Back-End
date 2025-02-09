@@ -24,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Validated
 @Slf4j
 public class VoteController {
 
@@ -31,18 +32,18 @@ public class VoteController {
     private final VoteService voteService;
     private final ValidVoteResultService validVoteResultService;
 
-    @Validated
-    @Operation(summary = "투표방 생성 API", description = "등록된 여행 계획에 대한 투표방을 생성합니다.")
-    @PostMapping("/vote/new-room")
-    public Response<Void> createVoteRoom(@RequestBody @Valid VoteRequest.createVoteRoomReq voteRequest) {
+    @Operation(summary = "투표하고자 하는 여행 계획의 정보 조회 API", description = "현재 투표의 여행 계획 정보에 해당합니다.")
+    @GetMapping("/vote/trip-info")
+    public Response<VoteResponse.VoteInfoDTO> getTripPlanInfoForVote(@RequestParam @NotNull  Long tripId,
+                                                                     @RequestParam @NotNull  Long roomId){
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        voteService.createVoteRoom(voteRequest);
+        VoteResponse.VoteInfoDTO result = voteService.getTripPlanInfoForVote(tripId, roomId, userEmail);
 
-        return Response.of(SuccessCode.VOTE_ROOM_CREATED_OK);
+        return Response.of(SuccessCode.TRIP_PLAN_RESULT_OK, result);
     }
 
 
-    @Validated
     @Operation(summary = "투표 API", description = "현재 사용자의 투표 요청 입니다.")
     @PostMapping("/vote")
     public Response<Void> createVote(@RequestBody @Valid VoteRequest.createVoteReq voteRequest) {
@@ -55,9 +56,8 @@ public class VoteController {
         return Response.of(SuccessCode.VOTE_CREATED_OK);
     }
 
-    @Validated
     @Operation(
-            summary = "투표 조회 API",
+            summary = "투표 결과 조회 API",
             description = "여행 계획에 대한 투표 결과를 타입에 따라 구분하여 반환 합니다." +
                     "사용자가 투표한 Type 에 해당하는 항목에 사용자의 id 와 name 이 포함 되어 반환됩니다.")
     @GetMapping("/vote/results/{tripId}")
@@ -70,7 +70,6 @@ public class VoteController {
         return Response.of(SuccessCode.VOTE_RESULTS_OK, results);
     }
 
-    @Validated
     @Operation(
             summary = "투표 종료 및 여행 계획 여부 판단 API",
             description = "투표의 종료 여부를 판단하고, 투표 결과에 따라 여행 계획 성공 및 실패 여부가 확정됩니다." )

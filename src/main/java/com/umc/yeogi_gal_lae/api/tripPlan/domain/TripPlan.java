@@ -21,9 +21,6 @@ public class TripPlan extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
-    private String name;
-
     @Column
     private String description;
 
@@ -62,8 +59,8 @@ public class TripPlan extends BaseEntity {
     @Column
     private Integer maxDays; // 최대 숙박일
 
-    @Column(name = "group_name") // DB 컬럼 이름 변경
-    private String groupName; // 필드명 변경
+    @Column(name = "group_name") // 기존: groupName
+    private String roomName; // 필드명 변경
 
     @Column
     private String imageUrl; // **이미지 URL 추가**

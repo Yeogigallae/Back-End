@@ -6,11 +6,15 @@ import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HomeConverter {
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
+
     public static HomeResponse.OngoingVoteRoom toOngoingVoteRoom(VoteRoom voteRoom) {
         Duration duration = Duration.between(LocalDateTime.now(),
                 voteRoom.getCreatedAt().plusSeconds(voteRoom.getTripPlan().getVoteLimitTime().getSeconds()));
@@ -42,17 +46,17 @@ public class HomeConverter {
                 tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),
-                tripPlan.getEndDate(),
+                tripPlan.getEndDate().format(DATE_FORMATTER),
                 tripPlan.getImageUrl()
         );
     }
 
     public static HomeResponse.CompletedTripPlan toCompletedTripPlan(TripPlan tripPlan) {
         return new HomeResponse.CompletedTripPlan(
-                tripPlan.getName(),
+                tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),
-                tripPlan.getEndDate(),
+                tripPlan.getEndDate().format(DATE_FORMATTER),
                 tripPlan.getTripType(),
                 tripPlan.getImageUrl()
         );
