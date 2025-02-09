@@ -1,6 +1,5 @@
 package com.umc.yeogi_gal_lae.api.friendship.controller;
 
-import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteRequest;
 import com.umc.yeogi_gal_lae.api.friendship.dto.CreateInviteResponse;
 import com.umc.yeogi_gal_lae.api.friendship.dto.FriendListResponse;
 import com.umc.yeogi_gal_lae.api.friendship.service.FriendshipService;
@@ -26,14 +25,18 @@ public class FriendshipController {
     private final FriendshipService friendshipService;
     private final UserRepository userRepository;
 
-    @Operation(
-            summary = "친구 초대 URL 생성",
-            description = "사용자가 친구 초대를 위해 공유 가능한 URL을 생성합니다."
-    )
-    @PostMapping("/friendship/invite")
-    public Response<CreateInviteResponse> createInvite(@RequestBody CreateInviteRequest request) {
+    @Operation(summary = "친구 초대 URL 생성", description = "사용자가 친구 초대를 위해 공유 가능한 URL을 생성합니다.")
+    @PostMapping("/invite")
+    public Response<CreateInviteResponse> createInvite() {
+        // 인증된 사용자 이메일 가져오기
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        String inviteUrl = friendshipService.generateInviteUrl(request.getInviterId());
+        // 이메일을 기반으로 사용자 객체 조회
+        User inviter = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("요청하신 이메일과 일치하는 유저가 존재하지 않습니다."));
+
+        // 초대 URL 생성
+        String inviteUrl = friendshipService.generateInviteUrl(inviter.getId());
 
         CreateInviteResponse response = new CreateInviteResponse(inviteUrl);
         return Response.of(SuccessCode.INVITE_CREATED_OK, response);
