@@ -18,6 +18,7 @@ import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class FriendshipController {
