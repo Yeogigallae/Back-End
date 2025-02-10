@@ -4,6 +4,7 @@ package com.umc.yeogi_gal_lae.api.room.service;
 import com.umc.yeogi_gal_lae.api.room.converter.RoomMemberConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.domain.RoomMember;
+import com.umc.yeogi_gal_lae.api.room.domain.RoomMemberId;
 import com.umc.yeogi_gal_lae.api.room.dto.request.CreateRoomRequest;
 import com.umc.yeogi_gal_lae.api.room.dto.response.*;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
@@ -65,13 +66,23 @@ public class RoomService {
     /**
      * 방 정보 조회
      *
-     * @param roomId    방 ID
+     * @param roomId 방 ID
      * @return RoomResponse (방 정보 DTO)
      */
     public RoominfoResponse getRoomDetails(Long roomId) {
         // 방 존재 확인
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("요청하신 방이 존재하지 않습니다."));
+                .orElseGet(() -> {
+                    log.warn("DB에 해당 방이 존재하지 않음, 목업 데이터 반환합니다.");
+                    return Room.builder()
+                            .id(0L)  // 기본 목업 데이터 ID
+                            .name("Default Room")
+                            .master(User.builder()
+                                    .id(0L)
+                                    .username("Mock Master")
+                                    .build())
+                            .build();
+                });
 
         // 방 정보 응답
         return RoominfoResponse.builder()
@@ -90,17 +101,29 @@ public class RoomService {
     public List<RoomMemberResponse> getRoomMembers(Long roomId) {
         // 방 존재 확인
         if (!roomRepository.existsById(roomId)) {
-            throw new IllegalArgumentException("방을 찾을 수 없습니다.");
+            log.warn("DB에 해당 방이 존재하지 않음, 기본 목업 데이터 반환");
+            return List.of(
+                    new RoomMemberResponse(new RoomMemberId(roomId, 0L), roomId, 0L, "mock_profile1.jpg"),
+                    new RoomMemberResponse(new RoomMemberId(roomId, 1L), roomId, 1L, "mock_profile2.jpg")
+            );
         }
 
         // 방에 속한 사용자 목록 조회
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomId(roomId);
 
+        // DB에 데이터가 없을 경우 기본 데이터 반환
+        if (roomMembers.isEmpty()) {
+            log.warn("방 멤버가 없음, 기본 목업 데이터 반환");
+            return List.of(
+                    new RoomMemberResponse(new RoomMemberId(roomId, 0L), roomId, 0L, "mock_profile1.jpg"),
+                    new RoomMemberResponse(new RoomMemberId(roomId, 1L), roomId, 1L, "mock_profile2.jpg")
+            );
+        }
+
         // RoomMember 객체를 RoomMemberResponse로 변환
         return roomMembers.stream()
-                .map(roomMember -> RoomMemberConverter.toResponse(roomMember)) // RoomMember의 User 이름
+                .map(RoomMemberConverter::toResponse)
                 .toList();
-
     }
 
     /**
@@ -115,6 +138,28 @@ public class RoomService {
                 .map(RoomMember::getRoom)
                 .distinct()
                 .collect(Collectors.toList());
+
+        // DB에 데이터가 없을 경우 기본 목업 데이터 반환
+        if (rooms.isEmpty()) {
+            log.warn("사용자가 속한 방이 없음, 기본 목업 데이터 반환");
+            return new RoomListResponse(List.of(
+                    RoomResponse.builder()
+                            .roomId(0L)
+                            .roomName("Mock Room 1")
+                            .members(List.of(
+                                    new SimpleRoomMemberResponse(0L, "mock_profile1.jpg"),
+                                    new SimpleRoomMemberResponse(1L, "mock_profile2.jpg")
+                            ))
+                            .build(),
+                    RoomResponse.builder()
+                            .roomId(1L)
+                            .roomName("Mock Room 2")
+                            .members(List.of(
+                                    new SimpleRoomMemberResponse(2L, "mock_profile3.jpg")
+                            ))
+                            .build()
+            ));
+        }
 
         // Room을 RoomResponse로 변환하여 리스트 생성
         List<RoomResponse> roomResponses = rooms.stream()
