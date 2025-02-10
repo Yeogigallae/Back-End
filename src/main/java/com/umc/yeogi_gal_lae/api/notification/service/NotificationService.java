@@ -68,8 +68,8 @@ public class NotificationService {
                                         notification.getType() == NotificationType.COURSE_START ||
                                         notification.getType() == NotificationType.BUDGET_START),
                         notification.getType().name(),
-                        notification.getTripPlanId(),  // ✅ TripPlan ID 추가
-                        notification.getTripPlanType() // ✅ TripPlan Type 추가
+                        notification.getTripPlanId(),
+                        notification.getTripPlanType()
                 ))
                 .collect(Collectors.toList());
     }
