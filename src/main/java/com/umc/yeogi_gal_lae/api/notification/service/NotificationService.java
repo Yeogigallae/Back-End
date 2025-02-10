@@ -8,6 +8,7 @@ import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -59,6 +61,11 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationDto> getAllNotifications() {
         List<Notification> notifications = notificationRepository.findAllByOrderByCreatedAtDesc();
+        // 레포지토리가 비어있으면 목업 데이터 반환
+        if (notifications.isEmpty()) {
+            log.warn("알림 데이터 없음, 기본 목업 데이터 반환");
+            return mockNotifications();
+        }
         return notifications.stream()
                 .map(notification -> new NotificationDto(
                         notification.getId(),
@@ -72,6 +79,17 @@ public class NotificationService {
                         notification.getTripPlanType()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 목업 알림 데이터 생성
+     */
+    private List<NotificationDto> mockNotifications() {
+        return List.of(
+                new NotificationDto(1L, "투표 시작", "mock에서 투표가 시작되었습니다!", "VOTE_START", 100L, TripPlanType.COURSE),
+                new NotificationDto(2L, "예산 설정 시작", "mock에서 예산 설정이 시작되었습니다!", "BUDGET_START", 101L, TripPlanType.SCHEDULE),
+                new NotificationDto(3L, "코스 선택 시작", "mock에서 코스 선택이 시작되었습니다!", "COURSE_START", 102L, TripPlanType.SCHEDULE)
+        );
     }
 
     /**
