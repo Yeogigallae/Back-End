@@ -14,6 +14,7 @@ public class HomeResponse {
     @Getter
     @AllArgsConstructor
     public static class OngoingVoteRoom {
+        private Long tripPlanId;
         private String roomName;
         private String location;
         private int totalMembers;
@@ -27,6 +28,7 @@ public class HomeResponse {
     @Getter
     @AllArgsConstructor
     public static class CompletedVoteRoom {
+        private Long tripPlanId;
         private String roomName;
         private String location;
         private LocalDate startDate;
@@ -37,6 +39,7 @@ public class HomeResponse {
     @Getter
     @AllArgsConstructor
     public static class CompletedTripPlan {
+        private Long tripPlanId;
         private String roomName;
         private String location;
         private LocalDate startDate;
