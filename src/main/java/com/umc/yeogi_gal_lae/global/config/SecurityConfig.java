@@ -9,10 +9,12 @@ import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -81,5 +83,11 @@ public class SecurityConfig {
     @Bean
     public RedirectStrategy redirectStrategy() {
         return new DefaultRedirectStrategy(); // 기본 리다이렉트 전략 사용
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+//        정적 리소스에 시큐리티 적용하지 않음
+        return (web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
     }
 }
