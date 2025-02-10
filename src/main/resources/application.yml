@@ -1,11 +1,8 @@
 spring:
   server:
     port: 8080
-  web:
-    resources:
-      static-locations: classpath:/static/, classpath:/public/, classpath:/resources/, classpath:/META-INF/resources/
   mvc:
-    static-path-pattern: /static/**
+    static-path-pattern: /**
   profiles:
     active: dev
   datasource:
@@ -60,6 +57,9 @@ spring:
   jackson:
     serialization:
       indent-output: true
+  web:
+    resources:
+      static-locations: classpath:/static/
 
 jwt:
   secret: ${JWT_SECRET}
