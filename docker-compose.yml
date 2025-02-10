@@ -57,8 +57,13 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt/live/api.yeogi.my:/etc/letsencrypt/live/api.yeogi.my:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+      - /etc/letsencrypt/privkey.pem:/etc/letsencrypt/privkey.pem:ro
+
     depends_on:
       backend:
         condition: service_healthy   # Backend가 정상적으로 실행된 후 시작
