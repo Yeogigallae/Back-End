@@ -1,8 +1,6 @@
 spring:
   server:
     port: 8080
-  mvc:
-    static-path-pattern: /**
   profiles:
     active: dev
   datasource:
@@ -53,10 +51,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-
-  jackson:
-    serialization:
-      indent-output: true
   web:
     resources:
       static-locations: classpath:/static/
