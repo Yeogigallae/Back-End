@@ -129,5 +129,15 @@ public class FriendshipService {
         return mockFriends;
     }
 
+    @Transactional
+    public void deleteFriendship(Long userId, Long friendId) {
+        // 친구 관계 조회 (양방향 확인)
+        Friendship friendship = friendshipRepository.findByInviterIdAndInviteeId(userId, friendId)
+                .or(() -> friendshipRepository.findByInviterIdAndInviteeId(friendId, userId)) // 반대 방향도 확인
+                .orElseThrow(() -> new IllegalArgumentException("친구 관계가 아닙니다. "));
+
+        // 친구 관계 삭제
+        friendshipRepository.delete(friendship);
+    }
 
 }
