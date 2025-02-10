@@ -53,12 +53,6 @@ public class TripPlan extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column
-    private Integer minDays; // 최소 숙박일
-
-    @Column
-    private Integer maxDays; // 최대 숙박일
-
     @Column(name = "group_name") // 기존: groupName
     private String roomName; // 필드명 변경
 
