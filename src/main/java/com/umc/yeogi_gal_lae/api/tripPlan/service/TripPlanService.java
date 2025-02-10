@@ -42,9 +42,6 @@ public class TripPlanService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new BusinessException(ROOM_NOT_FOUND));
 
-        // 여행 계획 관련 검증 로직 호출
-        validateTripPlanDays(request.getMinDays(), request.getMaxDays());
-
         TripPlan tripPlan = TripPlanConverter.toEntity(request, user, room,
             tripPlanType);
         tripPlanRepository.save(tripPlan);
@@ -55,12 +52,6 @@ public class TripPlanService {
         createVoteRoomForTrip(tripPlan);
 
         return TripPlanConverter.toResponse(tripPlan);
-    }
-
-    private void validateTripPlanDays(Integer minDays, Integer maxDays) {
-        if (minDays < 1 || maxDays < minDays) {
-            throw new BusinessException(DATE_ERROR);
-        }
     }
 
     @Transactional(readOnly = true)
