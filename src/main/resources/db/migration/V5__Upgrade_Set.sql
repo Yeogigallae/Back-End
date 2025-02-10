@@ -2,10 +2,6 @@
 ALTER TABLE notification
     MODIFY COLUMN is_read BIT NOT NULL;
 
--- 2. room 테이블 변경 (master_id에 외래 키 추가)
-ALTER TABLE room
-    ADD CONSTRAINT FKhm55owuj9qgvc3hm9ikcd8kw5
-        FOREIGN KEY (master_id) REFERENCES users (user_id);
 
 -- 3. trip_plans 테이블 변경 (vote_room_id 외래 키 추가)
 ALTER TABLE trip_plans
