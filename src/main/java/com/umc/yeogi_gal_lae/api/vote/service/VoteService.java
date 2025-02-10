@@ -74,7 +74,7 @@ public class VoteService {
                         .type(VoteType.valueOf(request.getType().trim().toUpperCase()))   // 초기 타입 설정
                         .build()));
         // 투표 시작 알림 생성
-        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), user.getEmail(),NotificationType.VOTE_START);
+        notificationService.createStartNotification(tripPlan.getRoom().getName(), user.getUsername(), user.getEmail(),NotificationType.VOTE_START, tripPlan.getId(), tripPlan.getTripPlanType());
 
         // 기존 투표 이력 확인
         Vote currentVote = user.getVote();
