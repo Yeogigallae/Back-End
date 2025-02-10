@@ -66,7 +66,7 @@ public class ValidVoteResultService {
             String roomName = room.getName();
 
             // 투표 완료 알림 생성
-            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE);
+            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE, tripPlan.getId(), tripPlan.getTripPlanType());
             return true;
         }
         else{
@@ -78,7 +78,7 @@ public class ValidVoteResultService {
             String roomName = room.getName();
 
             // 투표 완료 알림 생성
-            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE);
+            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE, tripPlan.getId(), tripPlan.getTripPlanType());
             return false;
         }
 

@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.notification.domain;
 
+import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,6 +19,8 @@ public class Notification extends BaseEntity {
     private String roomName; // 방 이름
     private String userName; // 사용자 이름 (시작 알림에만 필요)
     private String userEmail; // 사용자 이메일 추가 (중복 문제 해결)
+    private Long tripPlanId;
+    private TripPlanType tripPlanType;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
