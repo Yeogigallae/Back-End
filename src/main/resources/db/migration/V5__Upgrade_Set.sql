@@ -2,9 +2,6 @@
 ALTER TABLE notification
     MODIFY COLUMN is_read BIT NOT NULL;
 
-ALTER TABLE notification
-    ADD COLUMN user_email VARCHAR(255) NULL;
-
 -- 2. room 테이블 변경 (master_id에 외래 키 추가)
 ALTER TABLE room
     ADD CONSTRAINT FKhm55owuj9qgvc3hm9ikcd8kw5
