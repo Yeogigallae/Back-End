@@ -79,4 +79,26 @@ public class FriendshipController {
 
         return Response.of(SuccessCode.FRIEND_LIST_OK, friends);
     }
+
+    @Operation(
+            summary = "친구 삭제 API",
+            description = "친구 관계를 삭제합니다."
+    )
+    @DeleteMapping("/friendship/friends/{friendId}")
+    public Response<Void> deleteFriend(@PathVariable Long friendId) {
+
+        // 토큰에서 인증된 사용자 이메일 가져오기
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
+        // 이메일로 사용자 ID 조회
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Long userId = user.getId();
+
+        // 친구 삭제 서비스 호출
+        friendshipService.deleteFriendship(userId, friendId);
+
+        return Response.ok(SuccessCode.FRIEND_DELETED_OK);
+    }
 }

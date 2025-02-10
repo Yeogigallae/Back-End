@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Optional<Friendship> findById(Long id);
     List<Friendship> findByInviterIdOrInviteeId(Long inviterId, Long inviteeId);
+    Optional<Friendship> findByInviterIdAndInviteeId(Long inviterId, Long inviteeId);
 
 //     inviter invitee를 user 객체로 바로 조회할 일이 없으면 이 코드 필요 없는 거 아닌지
     @Query("SELECT f FROM Friendship f WHERE f.inviter.id = :userId")
@@ -17,6 +18,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
     @Query("SELECT f FROM Friendship f WHERE f.invitee.id = :userId")
     List<Friendship> findReceivedFriends(@Param("userId") Long userId);
+
+
 
     //쓰면 Jpa로 이렇게 써도 될지
 //    // 내가 초대한 친구 목록 조회 (inviter_id = userId)
