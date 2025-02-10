@@ -75,7 +75,12 @@ public class FriendshipService {
         // 친구 관계를 조회: 사용자가 inviter이거나 invitee인 모든 관계를 가져옵니다.
         List<Friendship> friendships = friendshipRepository.findByInviterIdOrInviteeId(userId, userId);
 
-// 친구 ID 리스트를 Stream을 사용하여 변환
+        if (friendships.isEmpty()) {
+            // ⚠ 친구 목록이 없으면 목업 데이터 반환
+            return generateMockFriendList();
+        }
+
+        // 친구 ID 리스트를 Stream을 사용하여 변환
         List<Long> friendIds = friendships.stream()
                 .map(friendship -> friendship.getInviter().getId().equals(userId)
                         ? friendship.getInvitee().getId()
@@ -109,5 +114,20 @@ public class FriendshipService {
         List<Friendship> friendships = friendshipRepository.findReceivedFriends(userId);
         return friendships.stream().map(Friendship::getInviter).collect(Collectors.toList());
     }
+
+    private List<FriendListResponse> generateMockFriendList() {
+        List<FriendListResponse> mockFriends = new ArrayList<>();
+
+        // 3명의 목업 친구 생성
+        for (int i = 1; i <= 3; i++) {
+            mockFriends.add(FriendListResponse.builder()
+                    .friendId((long) i)
+                    .friendName("Mock Friend " + i)
+                    .profileImageUrl("https://example.com/mock-image-" + i + ".jpg")
+                    .build());
+        }
+        return mockFriends;
+    }
+
 
 }
