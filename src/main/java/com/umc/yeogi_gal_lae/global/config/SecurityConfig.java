@@ -48,8 +48,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
-//                        .requestMatchers("/actuator/health").permitAll()  // 헬스 체크 허용
-//                        .requestMatchers("/actuator/**").permitAll() // 모든 Actuator 엔드포인트 허용
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //  정적 리소스 허용
+                        .requestMatchers("/favicon.ico", "/static/**", "/resources/**", "/public/**").permitAll() //  추가적인 정적 리소스 허용
                         .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))   // 세션 허용 x
