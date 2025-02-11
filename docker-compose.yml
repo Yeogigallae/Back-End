@@ -47,7 +47,7 @@ services:
     networks:
       - yeogigallae_network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080 | grep -v 'NoResourceFoundException' || true" ]
+      test: [ "CMD-SHELL", "curl -s http://localhost:8080 | grep -q 'NoResourceFoundException' && exit 0 || curl -f http://localhost:8080" ]
       interval: 10s
       timeout: 5s
       retries: 5
