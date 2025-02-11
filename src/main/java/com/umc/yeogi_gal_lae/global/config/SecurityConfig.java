@@ -47,8 +47,8 @@ public class SecurityConfig {
 //                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //  정적 리소스 허용
-                        .requestMatchers("/favicon.ico", "/static/**", "/images/**", "/js/**", "/index.html" ,"/resources/**","/public/**").permitAll()
+//                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //  정적 리소스 허용
+//                        .requestMatchers("/favicon.ico", "/static/**", "/images/**", "/js/**", "/index.html" ,"/resources/**","/public/**").permitAll()
                         .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))   // 세션 허용 x
