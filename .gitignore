@@ -38,6 +38,5 @@ out/
 
 .env
 
-echo "src/main/resources/application.yml" >> .gitignore
 nginx.conf
 application-prod.yml
