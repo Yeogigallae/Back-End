@@ -31,7 +31,7 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 // Swagger UI에서 "Authorize" 누르면 JWT 헤더 적용
 //                .servers(Collections.singletonList(new Server().url("https://api.yeogi.my").description("Production Server")))
-                .servers(List.of(new Server().url("https://api.yeogi.my/api").description("Production Server")))
+//                .servers(List.of(new Server().url("https://api.yeogi.my/api").description("Production Server")))
                 .addSecurityItem(securityRequirement)
                 .components(components);
     }
