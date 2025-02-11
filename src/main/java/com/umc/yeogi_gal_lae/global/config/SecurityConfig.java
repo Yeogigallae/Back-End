@@ -42,9 +42,9 @@ public class SecurityConfig {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .requiresChannel(channel ->
-                        channel.anyRequest().requiresSecure()  // 모든 요청을 HTTPS로 강제
-                )
+//                .requiresChannel(channel ->
+//                        channel.anyRequest().requiresSecure()  // 모든 요청을 HTTPS로 강제
+//                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //  정적 리소스 허용
