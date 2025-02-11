@@ -47,7 +47,7 @@ services:
     networks:
       - yeogigallae_network
     healthcheck:
-      test: [ "CMD-SHELL", "docker logs backend | grep -q 'NoResourceFoundException' && exit 0 || curl -f http://localhost:8080" ]
+      test: [ "CMD-SHELL", "curl -s http://localhost:8080 | tee response.txt | grep -q 'NoResourceFoundException' && exit 0 || (curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -qE '200|302|404' && exit 0 || exit 1)" ]
       interval: 10s
       timeout: 5s
       retries: 5
