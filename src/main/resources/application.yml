@@ -37,7 +37,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: http://localhost:5173/login
+            redirect-uri: http://localhost:5173/login/kakao
             authorization-grant-type: authorization_code
         provider:
           kakao:
