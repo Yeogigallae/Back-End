@@ -11,4 +11,9 @@ public class StaticController {
     public String home() {
         return "forward:/static/index.html"; // index.html 을 서빙
     }
+
+    @GetMapping("/favicon.ico")
+    public String favicon() {
+        return "forward:/static/favicon.ico"; // favicon.ico 서빙
+    }
 }
