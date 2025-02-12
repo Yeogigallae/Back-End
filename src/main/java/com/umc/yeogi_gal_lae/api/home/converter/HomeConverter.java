@@ -30,6 +30,7 @@ public class HomeConverter {
             .collect(Collectors.toList());
 
         return new HomeResponse.OngoingVoteRoom(
+                voteRoom.getTripPlan().getId(),
                 voteRoom.getTripPlan().getRoom().getName(),
                 voteRoom.getTripPlan().getLocation(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().size(),
@@ -43,6 +44,7 @@ public class HomeConverter {
 
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan) {
         return new HomeResponse.CompletedVoteRoom(
+                tripPlan.getId(),
                 tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),
@@ -53,6 +55,7 @@ public class HomeConverter {
 
     public static HomeResponse.CompletedTripPlan toCompletedTripPlan(TripPlan tripPlan) {
         return new HomeResponse.CompletedTripPlan(
+                tripPlan.getId(),
                 tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),

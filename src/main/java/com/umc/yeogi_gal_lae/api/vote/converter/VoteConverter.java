@@ -27,8 +27,6 @@ public class VoteConverter {
 
                 .customLocation(customLocation)            // "경기도 부천시" => "부천시"
                 .price(tripPlan.getPrice())
-                .minDays(tripPlan.getMinDays())
-                .maxDays(tripPlan.getMaxDays())
                 .month(customDate)        // "2025-02-01"  -> "2월"
 
                 .roomName(room.getName())

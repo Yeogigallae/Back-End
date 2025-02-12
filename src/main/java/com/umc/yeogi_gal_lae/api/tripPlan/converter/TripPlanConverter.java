@@ -20,8 +20,6 @@ public class TripPlanConverter {
                 .tripPlanType(tripPlanType)
                 .tripType(request.getTripType())
                 .voteLimitTime(request.getVoteLimitTime())
-                .minDays(request.getMinDays())
-                .maxDays(request.getMaxDays())
                 .imageUrl(request.getImageUrl()) // 클라이언트가 입력한 URL 사용
                 .user(user)
                 .room(room);
@@ -52,8 +50,6 @@ public class TripPlanConverter {
                 .tripPlanType(tripPlan.getTripPlanType())
                 .tripType(tripPlan.getTripType())
                 .voteLimitTime(tripPlan.getVoteLimitTime())
-                .minDays(tripPlan.getMinDays())
-                .maxDays(tripPlan.getMaxDays())
                 .roomName(tripPlan.getRoom().getName())
                 .description(tripPlan.getDescription())
                 .imageUrl(tripPlan.getImageUrl()) // 클라이언트가 입력한 URL 반환

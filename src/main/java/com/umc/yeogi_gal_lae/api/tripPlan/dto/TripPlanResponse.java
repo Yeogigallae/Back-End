@@ -17,7 +17,5 @@ public class TripPlanResponse {
     private TripPlanType tripPlanType; // "COURSE", "SCHEDULE", "BUDGET"
     private TripType tripType;
     private VoteLimitTime voteLimitTime; // "30분", "60분", "4시간", "6시간"
-    private Integer minDays; // 최소 숙박일
-    private Integer maxDays; // 최대 숙박일
     private String roomName;
 }
