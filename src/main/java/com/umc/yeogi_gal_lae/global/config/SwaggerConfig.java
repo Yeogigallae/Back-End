@@ -9,7 +9,6 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -29,9 +28,7 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(apiInfo())
-                // Swagger UI에서 "Authorize" 누르면 JWT 헤더 적용
-//                .servers(Collections.singletonList(new Server().url("https://api.yeogi.my").description("Production Server")))
-//                .servers(List.of(new Server().url("https://api.yeogi.my/api").description("Production Server")))
+                .addServersItem(new Server().url("/"))
                 .addSecurityItem(securityRequirement)
                 .components(components);
     }
