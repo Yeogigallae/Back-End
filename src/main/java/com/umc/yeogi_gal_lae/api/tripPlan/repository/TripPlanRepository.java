@@ -15,6 +15,4 @@ public interface TripPlanRepository extends JpaRepository<TripPlan, Long> {
     @Modifying
     @Query("UPDATE TripPlan tp SET tp.voteRoom = NULL WHERE tp.user = :user")
     void detachVoteRoomByUser(@Param("user") User user);
-  
-    Optional<TripPlan> findTripPlanByRoomId(Long roomId);
 }
