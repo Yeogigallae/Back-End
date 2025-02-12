@@ -23,6 +23,12 @@ configurations {
     }
 }
 
+processResources {
+    from("src/main/resources/static") {
+        into("static")
+    }
+}
+
 
 dependencies {
     // web
