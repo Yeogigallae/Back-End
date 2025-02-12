@@ -39,4 +39,4 @@ out/
 .env
 
 nginx.conf
-application-prod.yml
+src/main/resources/application-prod.yml
