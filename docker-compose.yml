@@ -47,7 +47,7 @@ services:
     networks:
       - yeogigallae_network
     healthcheck:
-      test: [ "CMD-SHELL", "/bin/bash /home/ubuntu/healthcheck.sh" ]
+      test: [ "CMD-SHELL", "/home/ubuntu/healthcheck.sh" ]
       #      test: [ "CMD-SHELL", "(docker logs backend 2>&1 | grep -q 'No static resource' && exit 0) || (curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -qE '200|302|404' && exit 0 || exit 1)" ]
       interval: 10s
       timeout: 5s
