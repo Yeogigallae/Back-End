@@ -4,6 +4,7 @@ spring:
       on-profile: prod
   server:
     port: 8081
+    forward-headers-strategy: framework
   datasource:
     url: jdbc:mysql://${PROD_DB_ENDPOINT}:3306/umc?serverTimezone=UTC
     username: ${PROD_DB_USERNAME}
@@ -11,17 +12,19 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     show_sql: false        # prod 환경에서는 SQL 출력 비활성화
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    table: _flyway_schema_history
-    baseline-on-migrate: false
+    enabled: false
   data:
     redis:
       host: redis
       port: 6379
+  mvc:
+    static-path-pattern: /static/**
+  web:
+    resources:
+      static-locations: classpath:/static/, file:/static/
