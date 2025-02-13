@@ -59,6 +59,12 @@ public class TripPlan extends BaseEntity {
     @Column
     private String imageUrl; // **이미지 URL 추가**
 
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // 여행 계획 작성자

@@ -16,13 +16,6 @@ public class HomeConverter {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
     public static HomeResponse.OngoingVoteRoom toOngoingVoteRoom(VoteRoom voteRoom) {
-        Duration duration = Duration.between(LocalDateTime.now(),
-                voteRoom.getCreatedAt().plusSeconds(voteRoom.getTripPlan().getVoteLimitTime().getSeconds()));
-
-        long hours = duration.toHours();
-        long minutes = duration.toMinutes() % 60;
-        long seconds = duration.getSeconds() % 60;
-        String formattedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
         List<String> profileImageUrls = voteRoom.getTripPlan().getRoom().getRoomMembers().stream()
             .map(member -> member.getUser().getProfileImage())
@@ -34,12 +27,14 @@ public class HomeConverter {
                 voteRoom.getTripPlan().getRoom().getName(),
                 voteRoom.getTripPlan().getLocation(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().size(),
-                formattedTime,
+                voteRoom.getTripPlan().getVoteLimitTime(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().stream().filter(m -> m.getUser().getVote() != null).count(),
                 profileImageUrls,
                 voteRoom.getCreatedAt(),
-                voteRoom.getTripPlan().getTripPlanType()
-        );
+                voteRoom.getTripPlan().getTripPlanType(),
+                voteRoom.getTripPlan().getLatitude(),
+                voteRoom.getTripPlan().getLongitude()
+                );
     }
 
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan) {
