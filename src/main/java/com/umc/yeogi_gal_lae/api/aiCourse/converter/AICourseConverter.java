@@ -1,6 +1,8 @@
-package com.umc.yeogi_gal_lae.api.itinerary.converter;
+package com.umc.yeogi_gal_lae.api.aiCourse.converter;
 
-import com.umc.yeogi_gal_lae.api.itinerary.dto.DailyItineraryResponse;
+import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
+import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseResponse;
+import com.umc.yeogi_gal_lae.api.aiCourse.dto.DailyItineraryResponse;
 import com.umc.yeogi_gal_lae.api.place.converter.PlaceConverter;
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
 import com.umc.yeogi_gal_lae.api.place.dto.response.PlaceResponse;
@@ -9,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class ItineraryConverter {
+public class AICourseConverter {
 
     public static PlaceResponse toPlaceResponse(Place place) {
         if (place == null) {
@@ -51,5 +53,13 @@ public class ItineraryConverter {
                                 .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public static AICourseResponse toAICourseResponse(AICourse aiCourse) {
+        return AICourseResponse.builder()
+                .id(aiCourse.getId())
+                .tripPlanId(aiCourse.getTripPlan().getId())
+                .roomId(aiCourse.getTripPlan().getRoom().getId())
+                .build();
     }
 }
