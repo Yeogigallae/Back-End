@@ -3,6 +3,8 @@ package com.umc.yeogi_gal_lae.api.home.dto;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripType;
 import java.time.LocalDateTime;
+
+import com.umc.yeogi_gal_lae.api.tripPlan.types.VoteLimitTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,11 +20,13 @@ public class HomeResponse {
         private String roomName;
         private String location;
         private int totalMembers;
-        private String remainingTime;
+        private VoteLimitTime remainingTime;
         private long completedVotes;
         private List<String> profileImageUrls;
         private LocalDateTime createdAt;
         private TripPlanType tripPlanType;
+        private Double latitude;
+        private Double longitude;
     }
 
     @Getter
