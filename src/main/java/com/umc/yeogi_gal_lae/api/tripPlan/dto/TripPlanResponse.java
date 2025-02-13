@@ -8,6 +8,8 @@ import lombok.Getter;
 @Builder
 public class TripPlanResponse {
     private Long id; // 여행 계획 ID
+    private Long roomId;
+    private Long masterId;
     private String location; // 여행 장소
     private String description;
     private String startDate;
