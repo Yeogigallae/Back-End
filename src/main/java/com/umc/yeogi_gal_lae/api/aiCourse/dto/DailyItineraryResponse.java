@@ -1,4 +1,4 @@
-package com.umc.yeogi_gal_lae.api.itinerary.dto;
+package com.umc.yeogi_gal_lae.api.aiCourse.dto;
 
 
 import com.umc.yeogi_gal_lae.api.place.dto.response.PlaceResponse;
