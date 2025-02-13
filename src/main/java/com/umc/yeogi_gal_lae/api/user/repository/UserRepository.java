@@ -5,9 +5,9 @@ import com.umc.yeogi_gal_lae.api.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 
-import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    @Modifying
+    @Query("UPDATE User u SET u.vote = null WHERE u = :user")
+    void detachVoteFromUser(@Param("user") User user);
 }
