@@ -60,16 +60,9 @@ dependencies {
     implementation 'com.h2database:h2:2.2.220'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
-    // flyway
-    implementation 'org.flywaydb:flyway-core'
-    implementation "org.flywaydb:flyway-mysql"
+    
 }
 
-// plain jar 생성 X 설정
-jar {
-    enabled = false
-}
 
 tasks.named('test') {
     useJUnitPlatform()

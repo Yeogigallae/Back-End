@@ -7,12 +7,13 @@ import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginFailureHandler;
 import com.umc.yeogi_gal_lae.global.oauth.handle.Oauth2LoginSuccessHandler;
 import com.umc.yeogi_gal_lae.global.oauth.service.CustomOauth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,9 +22,6 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -44,10 +42,13 @@ public class SecurityConfig {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+//                .requiresChannel(channel ->
+//                        channel.anyRequest().requiresSecure()  // 모든 요청을 HTTPS로 강제
+//                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
-//                        .requestMatchers("/actuator/health").permitAll()  // 헬스 체크 허용
-//                        .requestMatchers("/actuator/**").permitAll() // 모든 Actuator 엔드포인트 허용
+//                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //  정적 리소스 허용
+//                        .requestMatchers("/favicon.ico", "/static/**", "/images/**", "/js/**", "/index.html" ,"/resources/**","/public/**").permitAll()
                         .anyRequest().permitAll() // 모든 요청을 모든 사용자에게 허용
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))   // 세션 허용 x
@@ -81,5 +82,11 @@ public class SecurityConfig {
     @Bean
     public RedirectStrategy redirectStrategy() {
         return new DefaultRedirectStrategy(); // 기본 리다이렉트 전략 사용
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+//        정적 리소스에 시큐리티 적용하지 않음
+        return (web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
     }
 }
