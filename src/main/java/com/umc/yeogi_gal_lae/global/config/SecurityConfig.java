@@ -25,13 +25,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository userRepository) throws Exception {
         http
-            .cors(AbstractHttpConfigurer::disable)  // CORS 설정 활성화
-            .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll()  // 모든 요청 허용 (테스트용)
-            )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configure(http))  // CORS 설정 활성화
+                .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/**").permitAll()  // 모든 요청 허용 (테스트용)
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
