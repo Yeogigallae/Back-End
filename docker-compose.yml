@@ -1,28 +1,4 @@
 services:
-  mysql:      # dev 환경
-    container_name: mysql1
-    image: mysql:8.0
-    environment:
-      MYSQL_DATABASE: umc
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}     # 컨테이너 초기화 시 필요
-      TZ: 'Asia/Seoul'
-    volumes:
-      - ./mysql/conf.d:/etc/mysql/conf.d
-    command:
-      - "mysqld"
-      - "--character-set-server=utf8mb4"
-      - "--collation-server=utf8mb4_unicode_ci"
-    networks:
-      - yeogigallae_network
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     container_name: redis1
     image: redis:latest
@@ -48,6 +24,7 @@ services:
       - yeogigallae_network
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+#      test: [ "CMD-SHELL", "(docker logs backend 2>&1 | grep -q 'No static resource' && exit 0) || (curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -qE '200|302|404' && exit 0 || exit 1)" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,8 +34,12 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt/live/api.yeogi.my:/etc/letsencrypt/live/api.yeogi.my:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+      - /etc/letsencrypt/privkey.pem:/etc/letsencrypt/privkey.pem:ro
     depends_on:
       backend:
         condition: service_healthy   # Backend가 정상적으로 실행된 후 시작

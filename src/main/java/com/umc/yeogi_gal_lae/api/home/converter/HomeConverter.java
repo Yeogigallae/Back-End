@@ -16,13 +16,6 @@ public class HomeConverter {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
     public static HomeResponse.OngoingVoteRoom toOngoingVoteRoom(VoteRoom voteRoom) {
-        Duration duration = Duration.between(LocalDateTime.now(),
-                voteRoom.getCreatedAt().plusSeconds(voteRoom.getTripPlan().getVoteLimitTime().getSeconds()));
-
-        long hours = duration.toHours();
-        long minutes = duration.toMinutes() % 60;
-        long seconds = duration.getSeconds() % 60;
-        String formattedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
         List<String> profileImageUrls = voteRoom.getTripPlan().getRoom().getRoomMembers().stream()
             .map(member -> member.getUser().getProfileImage())
@@ -31,20 +24,31 @@ public class HomeConverter {
 
         return new HomeResponse.OngoingVoteRoom(
                 voteRoom.getTripPlan().getId(),
+<<<<<<< HEAD
+=======
+                voteRoom.getTripPlan().getRoom().getId(),
+                voteRoom.getTripPlan().getRoom().getMaster().getId(),
+>>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
                 voteRoom.getTripPlan().getRoom().getName(),
                 voteRoom.getTripPlan().getLocation(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().size(),
-                formattedTime,
+                voteRoom.getTripPlan().getVoteLimitTime(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().stream().filter(m -> m.getUser().getVote() != null).count(),
                 profileImageUrls,
                 voteRoom.getCreatedAt(),
-                voteRoom.getTripPlan().getTripPlanType()
-        );
+                voteRoom.getTripPlan().getTripPlanType(),
+                voteRoom.getTripPlan().getLatitude(),
+                voteRoom.getTripPlan().getLongitude()
+                );
     }
 
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan) {
         return new HomeResponse.CompletedVoteRoom(
                 tripPlan.getId(),
+<<<<<<< HEAD
+=======
+                tripPlan.getRoom().getId(),
+>>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
                 tripPlan.getRoom().getName(),
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),

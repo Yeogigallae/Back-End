@@ -18,8 +18,8 @@ public class CheckServerStatusController {
         return ResponseEntity.ok("Server is running");
     }
 
-    @GetMapping("/")
-    public ResponseEntity<String> rootEndpoint() {
-        return ResponseEntity.ok("Welcome to API Server");
-    }
+//    @GetMapping("/")
+//    public ResponseEntity<String> rootEndpoint() {
+//        return ResponseEntity.ok("Welcome to API Server");
+//    }
 }

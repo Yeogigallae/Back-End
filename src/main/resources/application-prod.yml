@@ -4,6 +4,7 @@ spring:
       on-profile: prod
   server:
     port: 8081
+    forward-headers-strategy: framework
   datasource:
     url: jdbc:mysql://${PROD_DB_ENDPOINT}:3306/umc?serverTimezone=UTC
     username: ${PROD_DB_USERNAME}
@@ -22,3 +23,8 @@ spring:
     redis:
       host: redis
       port: 6379
+  mvc:
+    static-path-pattern: /static/**
+  web:
+    resources:
+      static-locations: classpath:/static/, file:/static/

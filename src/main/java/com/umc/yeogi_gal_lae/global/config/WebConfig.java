@@ -14,9 +14,4 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addRedirectViewController("/swagger/", "/swagger-ui/index.html");
 
     }
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/");
-    }
 }
