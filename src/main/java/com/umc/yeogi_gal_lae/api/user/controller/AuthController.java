@@ -60,4 +60,5 @@ public class AuthController {
     public BaseResponse<String> deleteUser(HttpServletResponse response) {
         return authService.deleteUser(response);
     }
+
 }
