@@ -18,4 +18,6 @@ public class TripPlanResponse {
     private TripType tripType;
     private VoteLimitTime voteLimitTime; // "30분", "60분", "4시간", "6시간"
     private String roomName;
+    private Double latitude;
+    private Double longitude;
 }

@@ -21,6 +21,8 @@ public class TripPlanConverter {
                 .tripType(request.getTripType())
                 .voteLimitTime(request.getVoteLimitTime())
                 .imageUrl(request.getImageUrl()) // 클라이언트가 입력한 URL 사용
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
                 .user(user)
                 .room(room);
 
@@ -53,7 +55,8 @@ public class TripPlanConverter {
                 .roomName(tripPlan.getRoom().getName())
                 .description(tripPlan.getDescription())
                 .imageUrl(tripPlan.getImageUrl()) // 클라이언트가 입력한 URL 반환
-                .imageUrl(tripPlan.getImageUrl());
+                .latitude(tripPlan.getLatitude())
+                .longitude(tripPlan.getLongitude());
 
         // price는 SCHEDULE 타입에서만 반환
         if (tripPlan.getTripPlanType() == TripPlanType.SCHEDULE) {
