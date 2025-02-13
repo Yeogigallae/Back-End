@@ -46,6 +46,8 @@ public class TripPlanConverter {
     public static TripPlanResponse toResponse(TripPlan tripPlan) {
         TripPlanResponse.TripPlanResponseBuilder responseBuilder = TripPlanResponse.builder()
                 .id(tripPlan.getId())
+                .roomId(tripPlan.getRoom().getId())
+                .masterId(tripPlan.getRoom().getMaster().getId())
                 .location(tripPlan.getLocation())
                 .startDate(tripPlan.getStartDate() != null ? tripPlan.getStartDate().toString() : null)
                 .endDate(tripPlan.getEndDate() != null ? tripPlan.getEndDate().toString() : null)
