@@ -36,4 +36,20 @@ public class ItineraryConverter {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public static List<DailyItineraryResponse> toDailyItineraryResponseList(Map<String, List<Place>> itineraryMap) {
+        return itineraryMap.entrySet().stream()
+                .sorted((e1, e2) -> {
+                    int day1 = Integer.parseInt(e1.getKey().replaceAll("\\D", ""));
+                    int day2 = Integer.parseInt(e2.getKey().replaceAll("\\D", ""));
+                    return Integer.compare(day1, day2);
+                })
+                .map(entry -> DailyItineraryResponse.builder()
+                        .day(entry.getKey())
+                        .places(entry.getValue().stream()
+                                .map(PlaceConverter::toPlaceResponse)
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
