@@ -13,6 +13,8 @@ public class TripPlanRequest {
     private VoteLimitTime voteLimitTime; // "30분", "60분", "4시간", "6시간"
     private Long roomId;
     private String imageUrl;
+    private Double latitude;
+    private Double longitude;
 
     // 이너 클래스 정의
     @Getter
