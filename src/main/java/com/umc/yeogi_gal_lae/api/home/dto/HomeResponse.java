@@ -37,6 +37,7 @@ public class HomeResponse {
         private Long tripPlanId;
         private Long roomId;
         private String roomName;
+        private Long aiCourseId;
         private String location;
         private LocalDate startDate;
         private String endDate;
