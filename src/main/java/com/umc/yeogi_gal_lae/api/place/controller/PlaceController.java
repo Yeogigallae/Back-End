@@ -10,6 +10,7 @@ import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,21 +27,25 @@ public class PlaceController {
 
     private final PlaceService placeService;
 
-    @Operation(summary = "여행 장소 추가")
+    @Operation(summary = "여행 장소 추가 (여러 개)")
     @PostMapping("/{roomId}/places")
-    public Response<PlaceResponse> addPlace(@PathVariable Long roomId, @RequestBody PlaceRequest request) {
-        Place place = placeService.addPlace(roomId, request);
-        PlaceResponse response = PlaceConverter.toPlaceResponse(place);
-        return Response.of(SuccessCode.OK, response);
+    public Response<List<PlaceResponse>> addPlaces(@PathVariable Long roomId,
+                                                   @RequestBody List<PlaceRequest> requests) {
+        List<Place> places = placeService.addPlaces(roomId, requests);
+        List<PlaceResponse> responses = places.stream()
+                .map(PlaceConverter::toPlaceResponse)
+                .collect(Collectors.toList());
+        return Response.of(SuccessCode.OK, responses);
     }
 
     @Operation(summary = "특정 장소 가져오기")
-    @GetMapping("/roomId/places/{placeId}")
-    public Response<Place> getPlaceById(
+    @GetMapping("/{roomId}/places/{placeId}")
+    public Response<PlaceResponse> getPlaceById(
             @PathVariable Long roomId,
             @PathVariable Long placeId) {
         Place place = placeService.getPlaceById(roomId, placeId);
-        return Response.of(SuccessCode.PLACES_FETCHED, place);
+        PlaceResponse response = PlaceConverter.toPlaceResponse(place);
+        return Response.of(SuccessCode.PLACES_FETCHED, response);
     }
 
     @Operation(summary = "특정 장소 삭제")
@@ -53,11 +58,10 @@ public class PlaceController {
     }
 
     @Operation(summary = "모든 장소 가져오기")
-    @GetMapping({"/{roomId}/places"})
+    @GetMapping("/{roomId}/places")
     public Response<AllPlaceResponse> getAllPlaces(@PathVariable Long roomId) {
         List<Place> places = placeService.getAllPlacesByRoomId(roomId);
         AllPlaceResponse response = PlaceConverter.toAllPlaceResponse(places);
         return Response.of(SuccessCode.OK, response);
-
     }
 }

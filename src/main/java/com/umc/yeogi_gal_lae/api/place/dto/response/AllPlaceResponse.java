@@ -4,12 +4,10 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
 
 @Builder
 @AllArgsConstructor
 @Getter
-@ToString
 public class AllPlaceResponse {
-    private final List<PlaceResponse> placeResponses;
+    private final List<PlaceResponse> places;
 }

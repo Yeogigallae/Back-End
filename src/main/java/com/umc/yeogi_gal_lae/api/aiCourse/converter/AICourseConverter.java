@@ -20,9 +20,8 @@ public class AICourseConverter {
         return PlaceResponse.builder()
                 .placeName(place.getPlaceName())
                 .address(place.getAddress())
-                .lat(place.getLatitude())
-                .lng(place.getLongitude())
-                // 필요한 다른 필드들을 매핑
+                .latitude(place.getLatitude())
+                .longitude(place.getLongitude())
                 .build();
     }
 

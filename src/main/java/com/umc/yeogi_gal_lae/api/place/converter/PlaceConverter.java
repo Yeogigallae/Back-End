@@ -5,41 +5,43 @@ import com.umc.yeogi_gal_lae.api.place.dto.request.PlaceRequest;
 import com.umc.yeogi_gal_lae.api.place.dto.response.AllPlaceResponse;
 import com.umc.yeogi_gal_lae.api.place.dto.response.PlaceResponse;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PlaceConverter {
-    // 요청 DTO -> 엔티티 변환
-    public static Place toPlaceEntity(Room room, PlaceRequest tripPlaceRequest) {
+
+    public static Place toPlaceEntity(Room room, PlaceRequest request, User user) {
         return Place.builder()
                 .room(room)
-                .placeName(tripPlaceRequest.getPlaceName())
-                .address(tripPlaceRequest.getAddress())
-                .latitude(tripPlaceRequest.getLatitude())
-                .longitude(tripPlaceRequest.getLongitude())
+                .placeName(request.getPlaceName())
+                .address(request.getAddress())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .imageUrl(request.getImageUrl())
+                .description(request.getDescription())
+                .user(user)
                 .build();
     }
 
     public static PlaceResponse toPlaceResponse(Place place) {
-        return PlaceResponse.builder()
-                .roomId(place.getRoom().getId())
-                .placeId(place.getId())
-                .placeName(place.getPlaceName())
-                .address(place.getAddress())
-                .lat(place.getLatitude())
-                .lng(place.getLongitude())
-                .build();
+        return new PlaceResponse(
+                place.getId(),
+                place.getPlaceName(),
+                place.getAddress(),
+                place.getLatitude(),
+                place.getLongitude(),
+                place.getImageUrl(),
+                place.getDescription(),
+                place.getUser().getUsername(),
+                place.getUser().getProfileImage()
+        );
     }
 
     public static AllPlaceResponse toAllPlaceResponse(List<Place> places) {
-        return AllPlaceResponse.builder()
-                .placeResponses(toAllPlaceResponses(places))
-                .build();
-    }
-
-    public static List<PlaceResponse> toAllPlaceResponses(List<Place> places) {
-        return places.stream()
+        List<PlaceResponse> placeResponses = places.stream()
                 .map(PlaceConverter::toPlaceResponse)
                 .collect(Collectors.toList());
+        return new AllPlaceResponse(placeResponses);
     }
 }
