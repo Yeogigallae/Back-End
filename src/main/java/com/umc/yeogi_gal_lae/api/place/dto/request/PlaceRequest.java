@@ -13,4 +13,5 @@ public class PlaceRequest {
     private Double longitude;
     private String imageUrl;
     private String description;
+    private Long userId;
 }

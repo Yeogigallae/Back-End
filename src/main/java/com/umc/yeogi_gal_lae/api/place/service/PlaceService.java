@@ -25,13 +25,13 @@ public class PlaceService {
     private final UserRepository userRepository;
 
     @Transactional
-    public List<Place> addPlaces(Long roomId, Long userId, List<PlaceRequest> placeRequests) {
+    public List<Place> addPlaces(Long roomId, List<PlaceRequest> placeRequests) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROOM_NOT_FOUND));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         List<Place> savedPlaces = new ArrayList<>();
         for (PlaceRequest request : placeRequests) {
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
             Place place = PlaceConverter.toPlaceEntity(room, request, user);
             placeRepository.save(place);
             savedPlaces.add(place);

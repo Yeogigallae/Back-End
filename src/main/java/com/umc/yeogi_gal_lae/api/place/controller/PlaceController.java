@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,11 +29,9 @@ public class PlaceController {
 
     @Operation(summary = "여행 장소 추가 (여러 개)")
     @PostMapping("/{roomId}/places")
-    public Response<List<PlaceResponse>> addPlaces(
-            @PathVariable Long roomId,
-            @RequestParam Long userId,
-            @RequestBody List<PlaceRequest> requests) {
-        List<Place> places = placeService.addPlaces(roomId, userId, requests);
+    public Response<List<PlaceResponse>> addPlaces(@PathVariable Long roomId,
+                                                   @RequestBody List<PlaceRequest> requests) {
+        List<Place> places = placeService.addPlaces(roomId, requests);
         List<PlaceResponse> responses = places.stream()
                 .map(PlaceConverter::toPlaceResponse)
                 .collect(Collectors.toList());
