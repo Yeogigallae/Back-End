@@ -1,63 +1,102 @@
 package com.umc.yeogi_gal_lae.api.budget.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.yeogi_gal_lae.api.budget.dto.BudgetResponse;
-import com.umc.yeogi_gal_lae.api.place.domain.Place;
+import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
+import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
+import com.umc.yeogi_gal_lae.api.budget.domain.Budget;
+import com.umc.yeogi_gal_lae.api.budget.dto.BudgetAssignment;
+import com.umc.yeogi_gal_lae.api.budget.repository.BudgetRepository;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class BudgetService {
 
+    private final BudgetRepository budgetRepository;
+    private final AICourseRepository aiCourseRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
     @Value("${openai.api.key}")
     private String apiKey;
 
-    public BudgetService(WebClient.Builder webClientBuilder) {
+    public BudgetService(BudgetRepository budgetRepository,
+                         AICourseRepository aiCourseRepository,
+                         WebClient.Builder webClientBuilder) {
+        this.budgetRepository = budgetRepository;
+        this.aiCourseRepository = aiCourseRepository;
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
         this.objectMapper = new ObjectMapper();
     }
 
     /**
-     * GPT API에 전달할 프롬프트를 구성하고, 응답을 파싱하여 각 일차별 BudgetResponse 정보를 포함하는 Map을 반환합니다.
+     * 저장된 AICourse의 스케줄 데이터를 기반으로 GPT API를 호출하여, 각 일차별 각 장소에 대해 예산 추천(예: budgetType 및 추천 금액)을 산출하고, 그 결과를 Budget 엔티티에
+     * 저장합니다.
      *
-     * @param itineraryMap 각 일차(예: "1일차", "2일차")에 해당하는 Place 목록
-     * @return 각 일차별 BudgetResponse 정보가 담긴 Map
+     * @param aiCourseId AICourse 엔티티의 기본키
+     * @return 생성된 Budget 엔티티, 실패 시 null 반환
      */
-    public Map<String, BudgetResponse> generateBudgetRecommendations(Map<String, List<Place>> itineraryMap) {
-        String prompt = buildPrompt(itineraryMap);
-        String gptResponse = callGptApi(prompt);
-        return parseGptResponse(gptResponse);
+    @Transactional
+    public Budget generateAndStoreBudget(Long aiCourseId) {
+        Optional<AICourse> aiCourseOpt = aiCourseRepository.findById(aiCourseId);
+        if (!aiCourseOpt.isPresent()) {
+            return null;
+        }
+        AICourse aiCourse = aiCourseOpt.get();
+        // aiCourse에 저장된 courseJson은 이미 일정(일차별 장소 이름 목록)을 포함하고 있음
+        String scheduleJson = aiCourse.getCourseJson();
+        // 프롬프트 구성: GPT에게 스케줄 정보를 바탕으로 각 장소의 예산 추천을 요청
+        String prompt = buildBudgetPrompt(scheduleJson);
+        // GPT API 호출
+        String gptApiResponse = callGptApi(prompt);
+        // 응답 파싱: 예시 결과 JSON은 Map<String, List<BudgetAssignment>>
+        Map<String, List<BudgetAssignment>> budgetMap = parseBudgetGptResponse(gptApiResponse);
+        try {
+            String budgetJson = objectMapper.writeValueAsString(budgetMap);
+            Budget budget = Budget.builder()
+                    .aiCourse(aiCourse)
+                    .budgetJson(budgetJson)
+                    .build();
+            return budgetRepository.save(budget);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    private String buildPrompt(Map<String, List<Place>> itineraryMap) {
-        StringBuilder promptBuilder = new StringBuilder();
-        promptBuilder.append("다음은 각 일차별 여행 일정입니다.\n");
-        itineraryMap.forEach((day, places) -> {
-            promptBuilder.append(day).append(":\n");
-            for (Place p : places) {
-                promptBuilder.append("- ").append(p.getPlaceName())
-                        .append(" (").append(p.getAddress()).append(")\n");
-            }
-            promptBuilder.append("\n");
-        });
-        promptBuilder.append("위 일정 정보를 바탕으로 각 일차별로 식사비, 활동비, 쇼핑비, 교통비를 추천해줘.\n")
-                .append("결과는 JSON 형식으로 출력해줘. 예시:\n")
-                .append("{\n")
-                .append("  \"1일차\": {\"mealBudget\": 20000, \"activityBudget\": 15000, \"shoppingBudget\": 10000, \"transportBudget\": 5000},\n")
-                .append("  \"2일차\": {\"mealBudget\": 25000, \"activityBudget\": 12000, \"shoppingBudget\": 8000, \"transportBudget\": 6000}\n")
-                .append("}\n");
-        return promptBuilder.toString();
+    private String buildBudgetPrompt(String scheduleJson) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Given the following travel schedule in JSON format: ")
+                .append(scheduleJson)
+                .append(", generate budget recommendations for each day. ");
+        prompt.append("For each place, assign exactly one budget type and a recommended amount. ");
+        prompt.append(
+                "Output the result as a JSON object where each key is the day (e.g., '1일차') and each value is an array of objects with the fields: 'placeName', 'budgetType', and 'recommendedAmount'. ");
+        prompt.append("Example output:\n");
+        prompt.append("{\n");
+        prompt.append("  \"1일차\": [\n");
+        prompt.append(
+                "    {\"placeName\": \"장소 예시\", \"budgetType\": \"activityBudget\", \"recommendedAmount\": 20000},\n");
+        prompt.append(
+                "    {\"placeName\": \"음식점 예시\", \"budgetType\": \"mealBudget\", \"recommendedAmount\": 15000}\n");
+        prompt.append("  ],\n");
+        prompt.append("  \"2일차\": [\n");
+        prompt.append(
+                "    {\"placeName\": \"장소 예시\", \"budgetType\": \"activityBudget\", \"recommendedAmount\": 25000}\n");
+        prompt.append("  ]\n");
+        prompt.append("}");
+        return prompt.toString();
     }
 
     private String callGptApi(String prompt) {
@@ -67,7 +106,6 @@ public class BudgetService {
         message.put("role", "user");
         message.put("content", prompt);
         requestBody.put("messages", List.of(message));
-
         return webClient.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
@@ -78,16 +116,40 @@ public class BudgetService {
                 .block();
     }
 
-    private Map<String, BudgetResponse> parseGptResponse(String gptResponse) {
+    private Map<String, List<BudgetAssignment>> parseBudgetGptResponse(String gptResponse) {
         try {
             JsonNode root = objectMapper.readTree(gptResponse);
             String content = root.path("choices").get(0).path("message").path("content").asText();
-            TypeReference<Map<String, BudgetResponse>> typeRef = new TypeReference<>() {
-            };
-            return objectMapper.readValue(content, typeRef);
+            int jsonStart = content.indexOf('{');
+            if (jsonStart != -1) {
+                content = content.substring(jsonStart);
+            }
+            return objectMapper.readValue(content, new TypeReference<Map<String, List<BudgetAssignment>>>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyMap();
         }
     }
+
+    public Optional<Budget> getBudgetById(Long id) {
+        return budgetRepository.findById(id);
+    }
+
+    public Map<String, List<BudgetAssignment>> getBudgetMapById(Long id) {
+        Optional<Budget> budgetOpt = budgetRepository.findById(id);
+        if (budgetOpt.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            String budgetJson = budgetOpt.get().getBudgetJson();
+            return objectMapper.readValue(budgetJson, new TypeReference<Map<String, List<BudgetAssignment>>>() {
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyMap();
+        }
+    }
+
+
 }

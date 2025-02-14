@@ -1,6 +1,7 @@
 package com.umc.yeogi_gal_lae.api.place.domain;
 
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,8 +40,17 @@ public class Place {
     @Column(nullable = false)
     private Double longitude;
 
+    @Column(nullable = false)
+    private String imageUrl;
+
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    
 }
