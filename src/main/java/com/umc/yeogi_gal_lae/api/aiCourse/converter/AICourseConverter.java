@@ -20,9 +20,8 @@ public class AICourseConverter {
         return PlaceResponse.builder()
                 .placeName(place.getPlaceName())
                 .address(place.getAddress())
-                .lat(place.getLatitude())
-                .lng(place.getLongitude())
-                // 필요한 다른 필드들을 매핑
+                .latitude(place.getLatitude())
+                .longitude(place.getLongitude())
                 .build();
     }
 
@@ -39,7 +38,10 @@ public class AICourseConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<DailyItineraryResponse> toDailyItineraryResponseList(Map<String, List<Place>> itineraryMap) {
+    public static List<DailyItineraryResponse> toDailyItineraryResponseList(
+            Map<String, List<Place>> itineraryMap,
+            String roomName,
+            int roomMemberCount) {
         return itineraryMap.entrySet().stream()
                 .sorted((e1, e2) -> {
                     int day1 = Integer.parseInt(e1.getKey().replaceAll("\\D", ""));
@@ -47,6 +49,8 @@ public class AICourseConverter {
                     return Integer.compare(day1, day2);
                 })
                 .map(entry -> DailyItineraryResponse.builder()
+                        .roomName(roomName)
+                        .totalRoomMember(roomMemberCount)
                         .day(entry.getKey())
                         .places(entry.getValue().stream()
                                 .map(PlaceConverter::toPlaceResponse)

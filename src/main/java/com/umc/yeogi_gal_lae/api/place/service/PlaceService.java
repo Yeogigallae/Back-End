@@ -6,9 +6,12 @@ import com.umc.yeogi_gal_lae.api.place.dto.request.PlaceRequest;
 import com.umc.yeogi_gal_lae.api.place.repository.PlaceRepository;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,34 +22,36 @@ public class PlaceService {
 
     private final PlaceRepository placeRepository;
     private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public Place addPlace(Long roomId, PlaceRequest placeRequest) {
-
+    public List<Place> addPlaces(Long roomId, List<PlaceRequest> placeRequests) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROOM_NOT_FOUND));
-        Place place = PlaceConverter.toPlaceEntity(room, placeRequest);
-        placeRepository.save(place);
-
-        return place;
+        List<Place> savedPlaces = new ArrayList<>();
+        for (PlaceRequest request : placeRequests) {
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+            Place place = PlaceConverter.toPlaceEntity(room, request, user);
+            placeRepository.save(place);
+            savedPlaces.add(place);
+        }
+        return savedPlaces;
     }
 
     public List<Place> getAllPlacesByRoomId(Long roomId) {
         if (!roomRepository.existsById(roomId)) {
             throw new BusinessException(ErrorCode.ROOM_NOT_FOUND);
         }
-        List<Place> places = placeRepository.findAllByRoomId(roomId);
-
-        return places;
+        return placeRepository.findAllByRoomId(roomId);
     }
 
     public Place getPlaceById(Long roomId, Long placeId) {
         if (!roomRepository.existsById(roomId)) {
             throw new BusinessException(ErrorCode.ROOM_NOT_FOUND);
         }
-        Place place = placeRepository.findById(placeId)
+        return placeRepository.findById(placeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-        return place;
     }
 
     @Transactional
