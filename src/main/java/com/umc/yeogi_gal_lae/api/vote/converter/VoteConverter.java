@@ -4,7 +4,6 @@ import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +32,7 @@ public class VoteConverter {
                 .userCount(userCount)
                 .userName(user.getUsername())
 
+                .masterId(room.getMaster().getId())
                 .masterName(room.getMaster().getUsername())
                 .voteLimitTime(tripPlan.getVoteLimitTime())
                 .startDate(tripPlan.getStartDate() != null ? tripPlan.getStartDate().toString() : null)

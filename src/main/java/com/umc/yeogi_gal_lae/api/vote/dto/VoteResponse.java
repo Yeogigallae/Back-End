@@ -37,6 +37,7 @@ public class VoteResponse {
         private Integer userCount;  // 투표방 인원
         private String userName;    // 현재 사용자의 이름
 
+        private Long masterId;
         private String masterName;
         private VoteLimitTime voteLimitTime;
         private String startDate;     // "YYYY-MM-DD"
