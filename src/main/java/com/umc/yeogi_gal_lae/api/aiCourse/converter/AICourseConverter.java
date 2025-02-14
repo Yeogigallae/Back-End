@@ -38,7 +38,10 @@ public class AICourseConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<DailyItineraryResponse> toDailyItineraryResponseList(Map<String, List<Place>> itineraryMap) {
+    public static List<DailyItineraryResponse> toDailyItineraryResponseList(
+            Map<String, List<Place>> itineraryMap,
+            String roomName,
+            int roomMemberCount) {
         return itineraryMap.entrySet().stream()
                 .sorted((e1, e2) -> {
                     int day1 = Integer.parseInt(e1.getKey().replaceAll("\\D", ""));
@@ -46,6 +49,8 @@ public class AICourseConverter {
                     return Integer.compare(day1, day2);
                 })
                 .map(entry -> DailyItineraryResponse.builder()
+                        .roomName(roomName)
+                        .totalRoomMember(roomMemberCount)
                         .day(entry.getKey())
                         .places(entry.getValue().stream()
                                 .map(PlaceConverter::toPlaceResponse)

@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DailyItineraryResponse {
     // 예: "1일차", "2일차" 등의 문자열
+    private String roomName;
+    private int totalRoomMember;
     private String day;
     private List<PlaceResponse> places;
 }

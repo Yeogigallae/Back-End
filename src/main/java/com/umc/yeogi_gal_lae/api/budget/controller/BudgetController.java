@@ -29,7 +29,7 @@ public class BudgetController {
     /**
      * POST /api/budget/gpt/{aiCourseId} aiCourseId를 기반으로 예산 추천을 생성 및 저장하고, 생성된 Budget의 정보를 반환합니다.
      */
-    @PostMapping("/gpt/{aiCourseId}")
+    @PostMapping("/aiCourse/{aiCourseId}")
     public Response<BudgetResponse> generateAndStoreBudget(@PathVariable Long aiCourseId) {
         var budget = budgetService.generateAndStoreBudget(aiCourseId);
         if (budget == null) {
