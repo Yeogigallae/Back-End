@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.global.error;
 
+import com.umc.yeogi_gal_lae.global.common.response.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -54,6 +55,11 @@ public class GlobalExceptionHandler {
         }
 
         return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
+    }
+
+    @ExceptionHandler(AuthHandler.class)
+    public ResponseEntity<BaseResponse<String>> handleAuthException(AuthHandler ex) {
+        return new ResponseEntity<>(ex.toResponse(), ex.getErrorStatus().getHttpStatus());
     }
 
     /**
