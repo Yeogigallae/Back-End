@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/ai-course")
+@RequestMapping("/api/aiCourse")
 @RequiredArgsConstructor
 public class AICourseController {
 
@@ -34,14 +34,13 @@ public class AICourseController {
     /**
      * POST /api/ai-course/gpt/{tripPlanId} TripPlan ID를 기반으로 GPT API를 호출하여 AICourse를 생성하고, 생성된 AICourse의 id를 반환합니다.
      */
-    @PostMapping("/{tripPlanId}")
+    @PostMapping("/tripPln/{tripPlanId}")
     public Response<AICourseResponse> generateAndStoreAICourse(@PathVariable Long tripPlanId) {
         Optional<TripPlan> tripPlanOpt = tripPlanRepository.findById(tripPlanId);
         if (tripPlanOpt.isEmpty()) {
             return Response.of(ErrorCode.NOT_FOUND, null);
         }
         TripPlan tripPlan = tripPlanOpt.get();
-        // 생성된 AICourse 엔티티 반환
         var aiCourse = aiCourseService.generateAndStoreAICourse(tripPlan);
         if (aiCourse == null) {
             return Response.of(ErrorCode.INTERNAL_SERVER_ERROR, null);
@@ -71,8 +70,14 @@ public class AICourseController {
         if (courseMap.isEmpty()) {
             return Response.of(ErrorCode.NOT_FOUND, null);
         }
-        // Converter를 이용하여 DailyItineraryResponse DTO 리스트로 변환
-        List<DailyItineraryResponse> responseList = AICourseConverter.toDailyItineraryResponseList(courseMap);
+        // Room 정보 가져오기
+        String roomName = aiCourse.getTripPlan().getRoom().getName();
+        int roomMemberCount = (aiCourse.getTripPlan().getRoom().getRoomMembers() != null)
+                ? aiCourse.getTripPlan().getRoom().getRoomMembers().size() : 0;
+        // Converter에 Room 정보를 추가로 전달하여 DTO 리스트 변환
+        List<DailyItineraryResponse> responseList = AICourseConverter.toDailyItineraryResponseList(
+                courseMap, roomName, roomMemberCount);
         return Response.of(SuccessCode.OK, responseList);
     }
+
 }
