@@ -12,8 +12,9 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);  // HTTPS 사용 시 적용
+        cookie.setSecure(false);  // HTTPS 사용 시 true 적용
         cookie.setMaxAge(maxAge);
+        cookie.setAttribute("SameSite", "None"); // 크로스사이트 요청 가능하게 설정
         response.addCookie(cookie);
     }
 
