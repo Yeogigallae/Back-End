@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.yeogi_gal_lae.global.error.AuthHandler;
 import com.umc.yeogi_gal_lae.global.error.ErrorStatus;
 import com.umc.yeogi_gal_lae.global.oauth.dto.KakaoDTO;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -22,20 +23,27 @@ public class KakaoUtil {
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String client;
 
-    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
-    private String redirect;
-
     @Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
     private String clientSecret;
 
     private final ObjectMapper objectMapper;
+    private final Set<String> allowedRedirectUris = Set.of(
+        "http://localhost:5173/login/kakao",
+        "https://yeogi.my/login/kakao"
+    );
+
 
     public KakaoUtil() {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 알 수 없는 필드 무시
     }
 
-    public KakaoDTO.OAuthToken requestToken(String accessCode) {
+    public KakaoDTO.OAuthToken requestToken(String accessCode, String redirectUri) {
+        if (!allowedRedirectUris.contains(redirectUri)) {
+            log.error("🚨 [ERROR] 허용되지 않은 redirect_uri 요청: {}", redirectUri);
+            throw new AuthHandler(ErrorStatus.KAKAO_INVALID_GRANT);
+        }
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -43,11 +51,16 @@ public class KakaoUtil {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", client);
-        params.add("redirect_uri", redirect);
+        params.add("redirect_uri", redirectUri);
         params.add("client_secret", clientSecret);
         params.add("code", accessCode);
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
+
+        log.info("🔹 [DEBUG] 카카오 토큰 요청 시작");
+        log.info("🔹 [DEBUG] 요청한 redirect_uri: {}", redirectUri);
+        log.info("🔹 [DEBUG] 요청한 client_id: {}", client);
+        log.info("🔹 [DEBUG] 요청한 accessCode: {}", accessCode);
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
