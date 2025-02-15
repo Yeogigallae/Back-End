@@ -76,32 +76,3 @@ test {
     // 모든 테스트를 스킵하도록 설정 (임시)
     enabled = false
 }
-//
-//// Q타입 클래스 생성 경로
-//
-//configurations.all {
-//    exclude group: "javax.persistence", module: "javax.persistence-api"
-//}
-//
-//tasks.withType(JavaCompile).configureEach {
-//    options.compilerArgs << "-Aquerydsl.jpa.packageSuffix=.jpa"
-//    options.compilerArgs << "-Aquerydsl.jpa.imports=jakarta.persistence.*"
-//}
-//
-//// Q타입 클래스 생성 경로
-//def generated = "$buildDir/generated/sources/annotationProcessor/java/main"
-//
-//// QueryDSL QClass 파일 생성 위치 설정
-//tasks.withType(JavaCompile).configureEach {
-//    options.getGeneratedSourceOutputDirectory().set(file(generated))
-//}
-//
-//// java source set에 QueryDSL QClass 위치 추가
-//sourceSets {
-//    main.java.srcDirs += [generated]
-//}
-//
-//// gradle clean 시 QClass 디렉토리 삭제
-//clean {
-//    delete file(generated)
-//}
