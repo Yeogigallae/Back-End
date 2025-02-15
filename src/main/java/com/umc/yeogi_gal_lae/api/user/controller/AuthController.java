@@ -34,8 +34,8 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @GetMapping("/login/kakao")
-    public BaseResponse<JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
-        User user = authService.oAuthLogin(accessCode, httpServletResponse);
+    public BaseResponse<JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, String redirectUri, HttpServletResponse httpServletResponse) {
+        User user = authService.oAuthLogin(accessCode, redirectUri, httpServletResponse);
         return BaseResponse.onSuccess(UserConverter.toJoinResultDTO(user));
     }
 

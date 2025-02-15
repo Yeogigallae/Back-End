@@ -44,9 +44,9 @@ public class AuthService {
     private final VoteRepository voteRepository;
 
     @Transactional
-    public User oAuthLogin(String accessCode, HttpServletResponse httpServletResponse) {
+    public User oAuthLogin(String accessCode, String redirectUri, HttpServletResponse httpServletResponse) {
         try {
-            KakaoDTO.OAuthToken oAuthToken = kakaoUtil.requestToken(accessCode);
+            KakaoDTO.OAuthToken oAuthToken = kakaoUtil.requestToken(accessCode, redirectUri);
             KakaoDTO.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(oAuthToken);
 
             String email = kakaoProfile.getKakao_account().getEmail();
