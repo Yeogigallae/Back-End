@@ -7,9 +7,12 @@ import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.user.service.AuthService;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.BaseResponse;
+import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.oauth.util.CookieUtil;
+import com.umc.yeogi_gal_lae.global.success.SuccessCode;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,4 +64,13 @@ public class AuthController {
         return authService.deleteUser(response);
     }
 
+    @Operation(summary = "유저 정보 조회")
+    @GetMapping("/user")
+    public Response<JoinResultDTO> getUserInfo() {
+        // userService.getUser() -> 현재 로그인한 User 엔티티 반환
+        var user = authService.getUser();
+        // User -> UserInfoResponse 로 변환
+        JoinResultDTO result = UserConverter.toJoinResultDTO(user);
+        return Response.of(SuccessCode.USER_FETCH_OK, result);
+    }
 }
