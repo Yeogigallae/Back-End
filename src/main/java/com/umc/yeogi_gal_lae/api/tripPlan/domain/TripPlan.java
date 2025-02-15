@@ -33,7 +33,7 @@ public class TripPlan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TripPlanType tripPlanType; // COURSE, SCHEDULE, BUDGET (여행 계획 생성, 여행 코스 생성, 여행 자본 생성)
+    private TripPlanType tripPlanType; // COURSE, SCHEDULE (여행 계획 생성, 여행 코스 생성)
 
     @Enumerated(EnumType.STRING)
     @Column
@@ -42,7 +42,7 @@ public class TripPlan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private Status status = Status.PLANNED;     // 기본값 설정
+    private Status status = Status.PLANNED;
 
     @Column(nullable = false, length = 50)
     private String location;
@@ -53,11 +53,11 @@ public class TripPlan extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "group_name") // 기존: groupName
-    private String roomName; // 필드명 변경
+    @Column(name = "group_name")
+    private String roomName;
 
     @Column
-    private String imageUrl; // **이미지 URL 추가**
+    private String imageUrl;
 
     @Column(nullable = false)
     private Double latitude;
