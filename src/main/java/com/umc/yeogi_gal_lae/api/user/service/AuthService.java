@@ -7,7 +7,6 @@ import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.user.converter.AuthConverter;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
-import com.umc.yeogi_gal_lae.api.user.dto.response.UserResponseDTO;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
@@ -133,15 +132,22 @@ public class AuthService {
     }
 
 
-    @Transactional(readOnly = true)
-    public UserResponseDTO.JoinResultDTO getUserInfo(String email) {
-        // 이메일로 사용자 조회
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public User getUser() {
+        // SecurityContext에서 Authentication 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        // User 엔티티 -> DTO 변환
-        return new UserResponseDTO.JoinResultDTO(user.getEmail(), user.getUsername(), user.getProfileImage());
+        // principal을 User로 캐스팅
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof User)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 이미 DB 조회된 User 엔티티
+        User user = (User) principal;
+        return user;
     }
-
 
 }

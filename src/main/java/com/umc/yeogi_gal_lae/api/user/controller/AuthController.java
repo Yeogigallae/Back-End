@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,14 +67,10 @@ public class AuthController {
     @Operation(summary = "유저 정보 조회")
     @GetMapping("/user")
     public Response<JoinResultDTO> getUserInfo() {
-        // 토큰에서 이메일 가져오기
-        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
-
-        // 이메일로 사용자 조회 & DTO 변환 (서비스에서 처리)
-        JoinResultDTO result = authService.getUserInfo(userEmail);
-
+        // userService.getUser() -> 현재 로그인한 User 엔티티 반환
+        var user = authService.getUser();
+        // User -> UserInfoResponse 로 변환
+        JoinResultDTO result = UserConverter.toJoinResultDTO(user);
         return Response.of(SuccessCode.USER_FETCH_OK, result);
     }
-
-
 }
