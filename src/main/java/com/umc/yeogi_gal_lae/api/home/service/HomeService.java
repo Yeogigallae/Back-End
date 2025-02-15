@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.home.service;
 
+import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
 import com.umc.yeogi_gal_lae.api.home.converter.HomeConverter;
 import com.umc.yeogi_gal_lae.api.home.dto.HomeResponse;
 import com.umc.yeogi_gal_lae.api.home.repository.HomeRepository;
@@ -30,6 +31,7 @@ public class HomeService {
     private final RoomMemberRepository roomMemberRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final AICourseRepository aiCourseRepository;
 
     public Response<HomeResponse.OngoingVoteRoomList> getOngoingVoteRooms(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -64,7 +66,12 @@ public class HomeService {
         // 완료된 투표방과 연관된 여행 계획 중 종료 날짜가 현재 또는 미래인 여행 필터링
         List<HomeResponse.CompletedVoteRoom> rooms = homeRepository.findCompletedVoteRoomsWithEndDateAfterNow().stream()
             .filter(tripPlan -> userRoomIds.contains(tripPlan.getRoom().getId()))
-            .map(HomeConverter::toCompletedVoteRoom)
+            .map(tripPlan -> {
+                Long aiCourseId = aiCourseRepository.findLatestByTripPlanId(tripPlan.getId())
+                    .map(aiCourse -> aiCourse.getId())
+                    .orElse(null);
+                return HomeConverter.toCompletedVoteRoom(tripPlan, aiCourseId);
+            })
             .collect(Collectors.toList());
 
         return Response.of(SuccessCode.COMPLETED_VOTE_ROOMS_FETCH_OK, new HomeResponse.CompletedVoteRoomList(rooms.size(), rooms));
