@@ -40,7 +40,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     //security
-
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
@@ -60,7 +59,12 @@ dependencies {
     implementation 'com.h2database:h2:2.2.220'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    
+
+    // QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
 
 
@@ -72,3 +76,32 @@ test {
     // 모든 테스트를 스킵하도록 설정 (임시)
     enabled = false
 }
+//
+//// Q타입 클래스 생성 경로
+//
+//configurations.all {
+//    exclude group: "javax.persistence", module: "javax.persistence-api"
+//}
+//
+//tasks.withType(JavaCompile).configureEach {
+//    options.compilerArgs << "-Aquerydsl.jpa.packageSuffix=.jpa"
+//    options.compilerArgs << "-Aquerydsl.jpa.imports=jakarta.persistence.*"
+//}
+//
+//// Q타입 클래스 생성 경로
+//def generated = "$buildDir/generated/sources/annotationProcessor/java/main"
+//
+//// QueryDSL QClass 파일 생성 위치 설정
+//tasks.withType(JavaCompile).configureEach {
+//    options.getGeneratedSourceOutputDirectory().set(file(generated))
+//}
+//
+//// java source set에 QueryDSL QClass 위치 추가
+//sourceSets {
+//    main.java.srcDirs += [generated]
+//}
+//
+//// gradle clean 시 QClass 디렉토리 삭제
+//clean {
+//    delete file(generated)
+//}
