@@ -23,6 +23,7 @@ import com.umc.yeogi_gal_lae.global.oauth.util.KakaoUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,6 +129,25 @@ public class AuthService {
         SecurityContextHolder.clearContext();
 
         return BaseResponse.onSuccess("회원 탈퇴 성공");
+    }
+
+
+    public User getUser() {
+        // SecurityContext에서 Authentication 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // principal을 User로 캐스팅
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof User)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 이미 DB 조회된 User 엔티티
+        User user = (User) principal;
+        return user;
     }
 
 }
