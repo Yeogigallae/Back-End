@@ -7,6 +7,7 @@ import com.umc.yeogi_gal_lae.api.room.repository.RoomRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.user.converter.AuthConverter;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.api.user.dto.response.UserResponseDTO;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
@@ -21,9 +22,7 @@ import com.umc.yeogi_gal_lae.global.oauth.dto.KakaoDTO;
 import com.umc.yeogi_gal_lae.global.oauth.util.CookieUtil;
 import com.umc.yeogi_gal_lae.global.oauth.util.KakaoUtil;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +43,7 @@ public class AuthService {
     private final VoteRepository voteRepository;
 
     @Transactional
-    public User oAuthLogin(String accessCode, String redirectUri, HttpServletResponse httpServletResponse) {
+    public User oAuthLogin(String accessCode, String redirectUri, HttpServletResponse httpServletResponse, boolean isLocal) {
         try {
             KakaoDTO.OAuthToken oAuthToken = kakaoUtil.requestToken(accessCode, redirectUri);
             KakaoDTO.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(oAuthToken);
@@ -66,8 +65,8 @@ public class AuthService {
             userRepository.save(user);
 
             // 쿠키 저장
-            CookieUtil.addCookie(httpServletResponse, "accessToken", accessToken, (int) jwtUtil.getAccessTokenValidity());
-            CookieUtil.addCookie(httpServletResponse, "refreshToken", refreshToken, (int) jwtUtil.getRefreshTokenValidity());
+            CookieUtil.addCookie(httpServletResponse, "accessToken", accessToken, (int) jwtUtil.getAccessTokenValidity(), isLocal);
+            CookieUtil.addCookie(httpServletResponse, "refreshToken", refreshToken, (int) jwtUtil.getRefreshTokenValidity(), isLocal);
 
             httpServletResponse.setHeader("Authorization", accessToken);
 
@@ -89,7 +88,7 @@ public class AuthService {
     }
 
     @Transactional
-    public BaseResponse<String> deleteUser(HttpServletResponse response) {
+    public BaseResponse<String> deleteUser(HttpServletResponse response, boolean isLocal) {
         String email = AuthenticatedUserUtils.getAuthenticatedUserEmail();
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -122,8 +121,8 @@ public class AuthService {
         userRepository.delete(user);
 
         // JWT 쿠키 삭제
-        CookieUtil.deleteCookie(response, "accessToken");
-        CookieUtil.deleteCookie(response, "refreshToken");
+        CookieUtil.deleteCookie(response, "accessToken", isLocal);
+        CookieUtil.deleteCookie(response, "refreshToken", isLocal);
 
         // SecurityContext 초기화
         SecurityContextHolder.clearContext();
@@ -132,22 +131,15 @@ public class AuthService {
     }
 
 
-    public User getUser() {
-        // SecurityContext에서 Authentication 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED);
-        }
+    @Transactional(readOnly = true)
+    public UserResponseDTO.JoinResultDTO getUserInfo(String email) {
+        // 이메일로 사용자 조회
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        // principal을 User로 캐스팅
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // 이미 DB 조회된 User 엔티티
-        User user = (User) principal;
-        return user;
+        // User 엔티티 -> DTO 변환
+        return new UserResponseDTO.JoinResultDTO(user.getEmail(), user.getUsername(), user.getProfileImage());
     }
+
 
 }
