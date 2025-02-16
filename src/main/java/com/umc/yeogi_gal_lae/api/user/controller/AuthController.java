@@ -67,10 +67,13 @@ public class AuthController {
     @Operation(summary = "유저 정보 조회")
     @GetMapping("/user")
     public Response<JoinResultDTO> getUserInfo() {
-        // userService.getUser() -> 현재 로그인한 User 엔티티 반환
-        var user = authService.getUser();
-        // User -> UserInfoResponse 로 변환
-        JoinResultDTO result = UserConverter.toJoinResultDTO(user);
+        // 토큰에서 이메일 가져오기
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
+        // 이메일로 사용자 조회 & DTO 변환 (서비스에서 처리)
+        JoinResultDTO result = authService.getUserInfo(userEmail);
+
         return Response.of(SuccessCode.USER_FETCH_OK, result);
     }
+
 }
