@@ -13,6 +13,7 @@ import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.oauth.util.CookieUtil;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +35,13 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @GetMapping("/login/kakao")
-    public BaseResponse<JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, String redirectUri, HttpServletResponse httpServletResponse) {
-        User user = authService.oAuthLogin(accessCode, redirectUri, httpServletResponse);
+    public BaseResponse<JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, String redirectUri, HttpServletResponse httpServletResponse, boolean isLocal) {
+        User user = authService.oAuthLogin(accessCode, redirectUri, httpServletResponse, isLocal);
         return BaseResponse.onSuccess(UserConverter.toJoinResultDTO(user));
     }
 
     @PostMapping("/logout")
-    public BaseResponse<String> logout(HttpServletResponse response) {
+    public BaseResponse<String> logout(HttpServletResponse response, HttpServletRequest request) {
         String email = AuthenticatedUserUtils.getAuthenticatedUserEmail();
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -49,9 +50,12 @@ public class AuthController {
         user.setRefreshToken(null);
         userRepository.save(user);
 
-        // 쿠키 삭제 (쿠키 만료시간을 0으로 설정)
-        CookieUtil.deleteCookie(response, "accessToken");
-        CookieUtil.deleteCookie(response, "refreshToken");
+        // 환경 판별
+        boolean isLocal = request.getHeader("Referer") != null && request.getHeader("Referer").contains("localhost:5173");
+
+        // 쿠키 삭제
+        CookieUtil.deleteCookie(response, "accessToken", isLocal);
+        CookieUtil.deleteCookie(response, "refreshToken", isLocal);
 
         // SecurityContext 초기화
         SecurityContextHolder.clearContext();
@@ -60,8 +64,8 @@ public class AuthController {
     }
 
     @DeleteMapping("/delete")
-    public BaseResponse<String> deleteUser(HttpServletResponse response) {
-        return authService.deleteUser(response);
+    public BaseResponse<String> deleteUser(HttpServletResponse response, boolean isLocal) {
+        return authService.deleteUser(response, isLocal);
     }
 
     @Operation(summary = "유저 정보 조회")
