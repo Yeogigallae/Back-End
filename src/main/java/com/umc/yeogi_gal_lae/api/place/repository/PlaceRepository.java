@@ -1,12 +1,12 @@
 package com.umc.yeogi_gal_lae.api.place.repository;
 
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
-import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlaceRepository extends JpaRepository<Place, Long> {
-    List<Place> findAllByRoomId(Long roomId);
+    List<Place> findAllByTripPlanId(Long tripPlanId);
 
-    List<Place> findByRoom(Room room);
+    List<Place> findByTripPlan(TripPlan tripPlan);
 }
