@@ -1,6 +1,9 @@
 package com.umc.yeogi_gal_lae.global.jwt;
 
+import com.umc.yeogi_gal_lae.global.error.AuthHandler;
+import com.umc.yeogi_gal_lae.global.error.ErrorStatus;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -24,8 +27,13 @@ public class JwtUtil {
     private long refreshTokenValidity;
 
     public String createAccessToken(String email) {
-        return generateToken(email, accessTokenValidity);
+        try {
+            return generateToken(email, accessTokenValidity);
+        } catch (Exception e) {
+            throw new AuthHandler(ErrorStatus.JWT_GENERATION_FAILED);
+        }
     }
+
 
     public String createRefreshToken(String email) {
         return generateToken(email, refreshTokenValidity);
@@ -35,9 +43,8 @@ public class JwtUtil {
         try {
             byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException e) {
-            // Base64 인코딩 오류 시 일반 문자열로 처리
-            return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        } catch (Exception e) {
+            throw new AuthHandler(ErrorStatus.JWT_GENERATION_FAILED);
         }
     }
 
@@ -56,8 +63,8 @@ public class JwtUtil {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
-            return false;
+        } catch (JwtException e) {
+            throw new AuthHandler(ErrorStatus.JWT_INVALID_TOKEN);
         }
     }
 

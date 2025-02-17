@@ -1,14 +1,14 @@
 package com.umc.yeogi_gal_lae.api.home.converter;
 
+import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
 import com.umc.yeogi_gal_lae.api.home.dto.HomeResponse;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HomeConverter {
@@ -42,8 +42,10 @@ public class HomeConverter {
                 );
     }
 
-    public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan) {
+    public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan, Long aiCourseId) {
+
         return new HomeResponse.CompletedVoteRoom(
+<<<<<<< HEAD
                 tripPlan.getId(),
 <<<<<<< HEAD
 =======
@@ -54,6 +56,16 @@ public class HomeConverter {
                 tripPlan.getStartDate(),
                 tripPlan.getEndDate().format(DATE_FORMATTER),
                 tripPlan.getImageUrl()
+=======
+            tripPlan.getId(),
+            tripPlan.getRoom().getId(),
+            tripPlan.getRoom().getName(),
+            aiCourseId,
+            tripPlan.getLocation(),
+            tripPlan.getStartDate(),
+            tripPlan.getEndDate().format(DATE_FORMATTER),
+            tripPlan.getImageUrl()
+>>>>>>> 1d417f6f749704d04302dc3ce84ad27d7670042d
         );
     }
 

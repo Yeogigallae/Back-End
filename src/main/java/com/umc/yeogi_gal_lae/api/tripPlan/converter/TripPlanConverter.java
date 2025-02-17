@@ -1,13 +1,16 @@
 package com.umc.yeogi_gal_lae.api.tripPlan.converter;
 
+import com.umc.yeogi_gal_lae.api.place.converter.PlaceConverter;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
+import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanDTO;
 import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanRequest;
 import com.umc.yeogi_gal_lae.api.tripPlan.dto.TripPlanResponse;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
-
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TripPlanConverter {
 
@@ -66,5 +69,18 @@ public class TripPlanConverter {
         }
 
         return responseBuilder.build();
+    }
+
+    public static TripPlanDTO toDTO(TripPlan tripPlan) {
+        return TripPlanDTO.builder()
+                .id(tripPlan.getId())
+                .location(tripPlan.getLocation())
+                // 필요한 다른 필드들 설정...
+                .places(tripPlan.getPlaces() == null
+                        ? List.of()
+                        : tripPlan.getPlaces().stream()
+                                .map(PlaceConverter::toDTO)
+                                .collect(Collectors.toList()))
+                .build();
     }
 }
