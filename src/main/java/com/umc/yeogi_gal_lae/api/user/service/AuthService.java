@@ -132,13 +132,13 @@ public class AuthService {
 
 
     @Transactional(readOnly = true)
-    public UserResponseDTO.JoinResultDTO getUserInfo(String email) {
+    public UserResponseDTO.JoinInfoResultDTO getUserInfo(String email) {
         // 이메일로 사용자 조회
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // User 엔티티 -> DTO 변환
-        return new UserResponseDTO.JoinResultDTO(user.getEmail(), user.getUsername(), user.getProfileImage());
+        return new UserResponseDTO.JoinInfoResultDTO(user.getId(), user.getEmail(), user.getUsername(), user.getProfileImage());
     }
 
 

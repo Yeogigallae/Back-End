@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.user.controller;
 
 import com.umc.yeogi_gal_lae.api.user.converter.UserConverter;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
+import com.umc.yeogi_gal_lae.api.user.dto.response.UserResponseDTO;
 import com.umc.yeogi_gal_lae.api.user.dto.response.UserResponseDTO.JoinResultDTO;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.user.service.AuthService;
@@ -79,12 +80,12 @@ public class AuthController {
 
     @Operation(summary = "유저 정보 조회")
     @GetMapping("/user")
-    public Response<JoinResultDTO> getUserInfo() {
+    public Response<UserResponseDTO.JoinInfoResultDTO> getUserInfo() {
         // 토큰에서 이메일 가져오기
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         // 이메일로 사용자 조회 & DTO 변환 (서비스에서 처리)
-        JoinResultDTO result = authService.getUserInfo(userEmail);
+        UserResponseDTO.JoinInfoResultDTO result = authService.getUserInfo(userEmail);
 
         return Response.of(SuccessCode.USER_FETCH_OK, result);
     }
