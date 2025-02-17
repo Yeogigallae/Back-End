@@ -63,8 +63,8 @@ public enum ErrorCode implements BaseStatus {
     VOTE_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "VOTE_400", "이미 존재하는 투표 방입니다."),
 
     // 알림 오류
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION404", "알림을 찾을 수 없습니다.")
-    ;
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION404", "알림을 찾을 수 없습니다."),
+    INVALID_PLACE_FOR_TRIP_PLAN(HttpStatus.NOT_FOUND, "INVALID_PLACE_FOR_TRIP_PLAN", "해당 장소는 지정된 여행 계획에 속하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
