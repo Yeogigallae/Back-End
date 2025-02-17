@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
 import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
-import com.umc.yeogi_gal_lae.api.place.repository.PlaceRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class AICourseService {
 
-    private final PlaceRepository placeRepository;
     private final AICourseRepository aiCourseRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
@@ -34,35 +32,33 @@ public class AICourseService {
     @Value("${openai.api.key}")
     private String apiKey;
 
-    public AICourseService(PlaceRepository placeRepository,
-                           AICourseRepository aiCourseRepository,
+    public AICourseService(AICourseRepository aiCourseRepository,
                            WebClient.Builder webClientBuilder) {
-        this.placeRepository = placeRepository;
         this.aiCourseRepository = aiCourseRepository;
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
         this.objectMapper = new ObjectMapper();
     }
 
     /**
-     * GPT API를 호출하여 TripPlan의 일정(각 일차별 추천 Place 목록)을 생성하고, 새로 AICourse 엔티티로 저장한 후 저장된 엔티티를 반환합니다.
+     * GPT API를 호출하여 TripPlan에 속한 Place들로 일정(각 일차별 추천 Place 목록)을 생성하고, 새 AICourse 엔티티로 저장한 후 저장된 엔티티를 반환합니다.
      *
      * @param tripPlan 여행 계획 엔티티
      * @return 생성된 AICourse 엔티티 (생성 실패 시 null 반환)
      */
     @Transactional
     public AICourse generateAndStoreAICourse(TripPlan tripPlan) {
-        // 1. TripPlan에 속한 Room의 Place 조회
-        List<Place> places = placeRepository.findByRoom(tripPlan.getRoom());
+        // TripPlan에 직접 연결된 Place들을 사용
+        List<Place> places = tripPlan.getPlaces(); // TripPlan에 places 컬렉션이 있다고 가정
         if (places.isEmpty()) {
             return null;
         }
-        // 2. GPT API에 전달할 프롬프트 구성
+        // 프롬프트 구성
         String prompt = buildPrompt(tripPlan, places);
-        // 3. GPT API 호출
+        // GPT API 호출
         String gptApiResponse = callGptApi(prompt);
-        // 4. GPT 응답 파싱 (예: {"1일차": ["Place A", "Place B"], ...})
+        // GPT 응답 파싱 (예: {"1일차": ["Place A", "Place B"], ...})
         Map<String, List<String>> courseByDay = parseGptResponse(gptApiResponse);
-        // 5. GPT 결과를 실제 Place 객체와 매핑
+        // GPT 결과를 실제 Place 객체와 매핑
         Map<String, List<Place>> course = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> entry : courseByDay.entrySet()) {
             String dayLabel = entry.getKey();
@@ -72,7 +68,7 @@ public class AICourseService {
                     .collect(Collectors.toList());
             course.put(dayLabel, dayPlaces);
         }
-        // 6. 저장할 데이터를 위해 각 일차별 Place 이름 목록으로 변환
+        // 저장할 데이터를 위해 각 일차별 Place 이름 목록으로 변환
         Map<String, List<String>> courseByName = new LinkedHashMap<>();
         for (Map.Entry<String, List<Place>> entry : course.entrySet()) {
             List<String> placeNames = entry.getValue().stream()
@@ -82,13 +78,12 @@ public class AICourseService {
         }
         try {
             String courseJson = objectMapper.writeValueAsString(courseByName);
-            // 7. 항상 새 AICourse 엔티티를 생성 (업데이트 없이 새로 insert)
+            // 새로운 AICourse 엔티티 생성 (업데이트 없이 새로 insert)
             AICourse aiCourse = AICourse.builder()
                     .tripPlan(tripPlan)
                     .courseJson(courseJson)
                     .build();
-            AICourse saved = aiCourseRepository.save(aiCourse);
-            return saved;
+            return aiCourseRepository.save(aiCourse);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -111,7 +106,8 @@ public class AICourseService {
             Map<String, List<String>> courseByDay =
                     objectMapper.readValue(courseJson, new TypeReference<Map<String, List<String>>>() {
                     });
-            List<Place> places = placeRepository.findByRoom(aiCourseOpt.get().getTripPlan().getRoom());
+            // TripPlan에 속한 Place들을 직접 사용
+            List<Place> places = aiCourseOpt.get().getTripPlan().getPlaces();
             Map<String, List<Place>> course = new LinkedHashMap<>();
             for (Map.Entry<String, List<String>> entry : courseByDay.entrySet()) {
                 List<Place> dayPlaces = entry.getValue().stream()
@@ -127,7 +123,7 @@ public class AICourseService {
         }
     }
 
-    // --- 기존의 프롬프트 구성, GPT API 호출, 파싱, Place 매칭 메서드 ---
+    // --- 프롬프트 구성, GPT API 호출, 응답 파싱, Place 매칭 메서드 ---
     private String buildPrompt(TripPlan tripPlan, List<Place> places) {
         long totalDays = ChronoUnit.DAYS.between(tripPlan.getStartDate(), tripPlan.getEndDate()) + 1;
         StringBuilder promptBuilder = new StringBuilder();
@@ -155,7 +151,7 @@ public class AICourseService {
 
     private String callGptApi(String prompt) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-4");
+        requestBody.put("model", "gpt-4o-mini");
         Map<String, String> message = new HashMap<>();
         message.put("role", "user");
         message.put("content", prompt);

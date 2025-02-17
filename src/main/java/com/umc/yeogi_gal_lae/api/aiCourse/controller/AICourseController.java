@@ -2,6 +2,8 @@ package com.umc.yeogi_gal_lae.api.aiCourse.controller;
 
 import com.umc.yeogi_gal_lae.api.aiCourse.converter.AICourseConverter;
 import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
+import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseIdResponse;
+import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseItineraryResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.dto.DailyItineraryResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
@@ -12,9 +14,11 @@ import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +38,7 @@ public class AICourseController {
     /**
      * POST /api/ai-course/gpt/{tripPlanId} TripPlan ID를 기반으로 GPT API를 호출하여 AICourse를 생성하고, 생성된 AICourse의 id를 반환합니다.
      */
-    @PostMapping("/tripPln/{tripPlanId}")
+    @PostMapping("/tripPlan/{tripPlanId}")
     public Response<AICourseResponse> generateAndStoreAICourse(@PathVariable Long tripPlanId) {
         Optional<TripPlan> tripPlanOpt = tripPlanRepository.findById(tripPlanId);
         if (tripPlanOpt.isEmpty()) {
@@ -51,33 +55,48 @@ public class AICourseController {
     /**
      * GET /api/ai-course/room/{roomId}/{courseId} Room ID와 courseId를 기반으로 저장된 AICourse를 조회하여 DTO로 반환합니다.
      */
-    @GetMapping("/room/{roomId}/{aiCourseId}")
-    public Response<List<DailyItineraryResponse>> getStoredAICourse(
-            @PathVariable Long roomId,
+    @GetMapping("/tripPlan/{tripPlanId}/{aiCourseId}")
+    public Response<AICourseItineraryResponse> getStoredAICourse(
+            @PathVariable Long tripPlanId,
             @PathVariable Long aiCourseId) {
-        // AICourse 엔티티를 기본키(aiCourseId)로 조회
         Optional<AICourse> aiCourseOpt = aiCourseRepository.findById(aiCourseId);
         if (aiCourseOpt.isEmpty()) {
             return Response.of(ErrorCode.NOT_FOUND, null);
         }
         AICourse aiCourse = aiCourseOpt.get();
-        // 해당 AICourse의 TripPlan에 연결된 Room의 id가 전달받은 roomId와 일치하는지 확인
-        if (!aiCourse.getTripPlan().getRoom().getId().equals(roomId)) {
+        // TripPlan 검증: aiCourse에 연결된 TripPlan의 id와 입력받은 tripPlanId가 동일해야 함
+        if (!aiCourse.getTripPlan().getId().equals(tripPlanId)) {
             return Response.of(ErrorCode.NOT_FOUND, null);
         }
-        // 저장된 AICourse의 기본키를 사용해 일정 데이터를 도메인 모델로 변환
         Map<String, List<Place>> courseMap = aiCourseService.getStoredAICourseById(aiCourseId);
         if (courseMap.isEmpty()) {
             return Response.of(ErrorCode.NOT_FOUND, null);
         }
-        // Room 정보 가져오기
+        // Room 정보
         String roomName = aiCourse.getTripPlan().getRoom().getName();
-        int roomMemberCount = (aiCourse.getTripPlan().getRoom().getRoomMembers() != null)
+        int totalRoomMember = (aiCourse.getTripPlan().getRoom().getRoomMembers() != null)
                 ? aiCourse.getTripPlan().getRoom().getRoomMembers().size() : 0;
-        // Converter에 Room 정보를 추가로 전달하여 DTO 리스트 변환
-        List<DailyItineraryResponse> responseList = AICourseConverter.toDailyItineraryResponseList(
-                courseMap, roomName, roomMemberCount);
-        return Response.of(SuccessCode.OK, responseList);
+        // dailyItineraries 변환
+        List<DailyItineraryResponse> dailyItineraries = AICourseConverter.toDailyItineraryResponseList(courseMap);
+
+        // 전체 응답 DTO 생성
+        AICourseItineraryResponse responseDTO = AICourseItineraryResponse.builder()
+                .roomName(roomName)
+                .totalRoomMember(totalRoomMember)
+                .dailyItineraries(dailyItineraries)
+                .build();
+        return Response.of(SuccessCode.OK, responseDTO);
     }
 
+    @GetMapping("/tripPlan/{tripPlanId}/ids")
+    public Response<List<AICourseIdResponse>> getAICourseIdsByTripPlanId(@PathVariable Long tripPlanId) {
+        List<AICourse> aiCourses = aiCourseRepository.findAllByTripPlanId(tripPlanId);
+        if (aiCourses.isEmpty()) {
+            return Response.of(ErrorCode.NOT_FOUND, Collections.emptyList());
+        }
+        List<AICourseIdResponse> aiCourseIdResponses = aiCourses.stream()
+                .map(aiCourse -> new AICourseIdResponse(aiCourse.getId()))
+                .collect(Collectors.toList());
+        return Response.of(SuccessCode.OK, aiCourseIdResponses);
+    }
 }
