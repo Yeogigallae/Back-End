@@ -23,12 +23,14 @@ import com.umc.yeogi_gal_lae.global.oauth.util.CookieUtil;
 import com.umc.yeogi_gal_lae.global.oauth.util.KakaoUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final KakaoUtil kakaoUtil;
@@ -135,11 +137,25 @@ public class AuthService {
     public UserResponseDTO.JoinInfoResultDTO getUserInfo(String email) {
         // 이메일로 사용자 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseGet(() -> {
+                    log.warn("사용자를 찾을 수 없음, 기본 목업 데이터 반환");
+                    return createMockUser();
+                });
 
         // User 엔티티 -> DTO 변환
         return new UserResponseDTO.JoinInfoResultDTO(user.getId(), user.getEmail(), user.getUsername(), user.getProfileImage());
     }
 
+    /**
+     * 기본 목업 사용자 데이터 생성
+     */
+    private User createMockUser() {
+        return User.builder()
+                .id(0L)
+                .email("mockuser@example.com")
+                .username("Mock User")
+                .profileImage("mock_profile.jpg")
+                .build();
+    }
 
 }
