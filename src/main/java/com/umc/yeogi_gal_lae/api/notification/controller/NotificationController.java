@@ -7,6 +7,8 @@ import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,8 +66,10 @@ public class NotificationController {
     /**
      * 특정 알림 읽음 처리
      */
+    @Operation(summary = "특정 알림 읽음 처리", description = "로그인한 현재 사용자의 읽지 않은 알림을 읽음으로 처리합니다.")
     @PatchMapping("/{id}/read")
     public ResponseEntity<Response<Void>> markNotificationAsRead(
+        @Parameter(description = "읽음 처리할 알림 ID", required = true, example = "1")
         @PathVariable Long id) {
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
         notificationService.markNotificationAsRead(id, userEmail);
