@@ -1,6 +1,6 @@
 package com.umc.yeogi_gal_lae.api.place.domain;
 
-import com.umc.yeogi_gal_lae.api.room.domain.Room;
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,11 +46,11 @@ public class Place {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @JoinColumn(name = "trip_plan_id", nullable = false)
+    private TripPlan tripPlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    
+
 }
