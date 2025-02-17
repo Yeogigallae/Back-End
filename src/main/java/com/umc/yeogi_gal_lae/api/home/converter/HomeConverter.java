@@ -24,11 +24,8 @@ public class HomeConverter {
 
         return new HomeResponse.OngoingVoteRoom(
                 voteRoom.getTripPlan().getId(),
-<<<<<<< HEAD
-=======
                 voteRoom.getTripPlan().getRoom().getId(),
                 voteRoom.getTripPlan().getRoom().getMaster().getId(),
->>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
                 voteRoom.getTripPlan().getRoom().getName(),
                 voteRoom.getTripPlan().getLocation(),
                 voteRoom.getTripPlan().getRoom().getRoomMembers().size(),
@@ -45,27 +42,14 @@ public class HomeConverter {
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan, Long aiCourseId) {
 
         return new HomeResponse.CompletedVoteRoom(
-<<<<<<< HEAD
                 tripPlan.getId(),
-<<<<<<< HEAD
-=======
                 tripPlan.getRoom().getId(),
->>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
                 tripPlan.getRoom().getName(),
+                aiCourseId,
                 tripPlan.getLocation(),
                 tripPlan.getStartDate(),
                 tripPlan.getEndDate().format(DATE_FORMATTER),
                 tripPlan.getImageUrl()
-=======
-            tripPlan.getId(),
-            tripPlan.getRoom().getId(),
-            tripPlan.getRoom().getName(),
-            aiCourseId,
-            tripPlan.getLocation(),
-            tripPlan.getStartDate(),
-            tripPlan.getEndDate().format(DATE_FORMATTER),
-            tripPlan.getImageUrl()
->>>>>>> 1d417f6f749704d04302dc3ce84ad27d7670042d
         );
     }
 

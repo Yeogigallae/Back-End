@@ -12,11 +12,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Optional<Friendship> findById(Long id);
     List<Friendship> findByInviterIdOrInviteeId(Long inviterId, Long inviteeId);
     Optional<Friendship> findByInviterIdAndInviteeId(Long inviterId, Long inviteeId);
-<<<<<<< HEAD
-=======
 
     void deleteByInviterOrInvitee(User inviter, User invitee);
->>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
 
 //     inviter invitee를 user 객체로 바로 조회할 일이 없으면 이 코드 필요 없는 거 아닌지
     @Query("SELECT f FROM Friendship f WHERE f.inviter.id = :userId")

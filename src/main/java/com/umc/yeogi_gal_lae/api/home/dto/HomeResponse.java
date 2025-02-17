@@ -17,11 +17,8 @@ public class HomeResponse {
     @AllArgsConstructor
     public static class OngoingVoteRoom {
         private Long tripPlanId;
-<<<<<<< HEAD
-=======
         private Long roomId;
         private Long masterId;
->>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
         private String roomName;
         private String location;
         private int totalMembers;
@@ -38,10 +35,7 @@ public class HomeResponse {
     @AllArgsConstructor
     public static class CompletedVoteRoom {
         private Long tripPlanId;
-<<<<<<< HEAD
-=======
         private Long roomId;
->>>>>>> 4b4e58c5ccff6fd9a9455a44a02688d41829b861
         private String roomName;
         private Long aiCourseId;
         private String location;
