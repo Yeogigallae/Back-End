@@ -81,7 +81,7 @@ public class AuthController {
     @Operation(summary = "유저 정보 조회")
     @GetMapping("/user")
     public Response<UserResponseDTO.JoinInfoResultDTO> getUserInfo() {
-        // 토큰에서 이메일 가져오기
+
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
         // 이메일로 사용자 조회 & DTO 변환 (서비스에서 처리)
