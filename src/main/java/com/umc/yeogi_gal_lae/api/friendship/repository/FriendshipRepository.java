@@ -11,7 +11,13 @@ import java.util.Optional;
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Optional<Friendship> findById(Long id);
     List<Friendship> findByInviterIdOrInviteeId(Long inviterId, Long inviteeId);
-    Optional<Friendship> findByInviterIdAndInviteeId(Long inviterId, Long inviteeId);
+
+    // inviterId와 inviteeId가 일치하는 Friendship 객체 조회
+    @Query("SELECT f FROM Friendship f WHERE (f.inviter.id = :userId AND f.invitee.id = :friendId) OR (f.inviter.id = :friendId AND f.invitee.id = :userId)")
+    List<Friendship> findByInviterIdAndInviteeIdBothWays(@Param("userId") Long userId, @Param("friendId") Long friendId);
+
+    // 친구 관계가 존재하는지 확인 (양방향)
+    boolean existsByInviterAndInvitee(User inviter, User invitee);
 
     void deleteByInviterOrInvitee(User inviter, User invitee);
 
