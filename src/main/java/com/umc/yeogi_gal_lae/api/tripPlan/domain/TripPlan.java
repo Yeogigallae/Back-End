@@ -102,6 +102,7 @@ public class TripPlan extends BaseEntity {
     private VoteRoom voteRoom;
 
     @OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Place> places = new ArrayList<>();
     
     // 자동 동기
