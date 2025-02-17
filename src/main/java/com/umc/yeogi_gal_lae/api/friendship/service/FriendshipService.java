@@ -55,13 +55,16 @@ public class FriendshipService {
         User invitee = userRepository.findByEmail(inviteeEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Invitee not found"));
 
+        // 자신이 자신을 초대하는 경우 방지
+        if (invite.getInviter().getId().equals(invitee.getId())) {
+            throw new IllegalArgumentException("자신은 친구 추가할 수 없습니다.");
+        }
+
         Friendship friendship = Friendship.builder()
                 .inviter(invite.getInviter()) // User 객체 직접 설정
                 .invitee(invitee) // 초대받은 User 객체 직접 설정
                 .status(FriendshipStatus.ACCEPT)
                 .build();
-
-
 
         friendshipRepository.save(friendship); // 새로운 친구 관계 저장
 
