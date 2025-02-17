@@ -37,6 +37,7 @@ public class VoteController {
     public Response<VoteResponse.VoteInfoDTO> getTripPlanInfoForVote(@RequestParam @NotNull  Long tripId,
                                                                      @RequestParam @NotNull  Long roomId){
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+        log.info("현재 로그인한 사용자 이메일: {}", userEmail);
 
         VoteResponse.VoteInfoDTO result = voteService.getTripPlanInfoForVote(tripId, roomId, userEmail);
 

@@ -42,14 +42,14 @@ public class HomeConverter {
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan, Long aiCourseId) {
 
         return new HomeResponse.CompletedVoteRoom(
-            tripPlan.getId(),
-            tripPlan.getRoom().getId(),
-            tripPlan.getRoom().getName(),
-            aiCourseId,
-            tripPlan.getLocation(),
-            tripPlan.getStartDate(),
-            tripPlan.getEndDate().format(DATE_FORMATTER),
-            tripPlan.getImageUrl()
+                tripPlan.getId(),
+                tripPlan.getRoom().getId(),
+                tripPlan.getRoom().getName(),
+                aiCourseId,
+                tripPlan.getLocation(),
+                tripPlan.getStartDate(),
+                tripPlan.getEndDate().format(DATE_FORMATTER),
+                tripPlan.getImageUrl()
         );
     }
 
