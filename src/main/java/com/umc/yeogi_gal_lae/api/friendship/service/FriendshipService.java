@@ -55,15 +55,27 @@ public class FriendshipService {
         User invitee = userRepository.findByEmail(inviteeEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Invitee not found"));
 
+        // 자신이 자신을 초대하는 경우 방지
+        if (invite.getInviter().getId().equals(invitee.getId())) {
+            throw new IllegalArgumentException("자신은 친구 추가할 수 없습니다.");
+        }
+
+        // 이미 존재하는 친구 관계 확인 (양방향)
+        boolean isAlreadyFriend = friendshipRepository.existsByInviterAndInvitee(invite.getInviter(), invitee)
+                || friendshipRepository.existsByInviterAndInvitee(invitee, invite.getInviter());
+
+        if (isAlreadyFriend) {
+            throw new IllegalArgumentException("이미 친구 관계가 존재합니다.");
+        }
+
+        // 새로운 친구 관계 저장
         Friendship friendship = Friendship.builder()
                 .inviter(invite.getInviter()) // User 객체 직접 설정
                 .invitee(invitee) // 초대받은 User 객체 직접 설정
                 .status(FriendshipStatus.ACCEPT)
                 .build();
 
-
-
-        friendshipRepository.save(friendship); // 새로운 친구 관계 저장
+        friendshipRepository.save(friendship);
 
         // 초대 정보 삭제
         friendshipInviteRepository.delete(invite);
@@ -131,13 +143,15 @@ public class FriendshipService {
 
     @Transactional
     public void deleteFriendship(Long userId, Long friendId) {
-        // 친구 관계 조회 (양방향 확인)
-        Friendship friendship = friendshipRepository.findByInviterIdAndInviteeId(userId, friendId)
-                .or(() -> friendshipRepository.findByInviterIdAndInviteeId(friendId, userId)) // 반대 방향도 확인
-                .orElseThrow(() -> new IllegalArgumentException("친구 관계가 아닙니다. "));
+        // 양방향 친구 관계를 모두 조회
+        List<Friendship> friendships = friendshipRepository.findByInviterIdAndInviteeIdBothWays(userId, friendId);
 
-        // 친구 관계 삭제
-        friendshipRepository.delete(friendship);
+        if (friendships.isEmpty()) {
+            throw new IllegalArgumentException("친구 관계가 아닙니다.");
+        }
+
+        // 모든 친구 관계 삭제
+        friendshipRepository.deleteAll(friendships);
     }
 
 }

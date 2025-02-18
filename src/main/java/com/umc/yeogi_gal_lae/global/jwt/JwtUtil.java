@@ -3,6 +3,7 @@ package com.umc.yeogi_gal_lae.global.jwt;
 import com.umc.yeogi_gal_lae.global.error.AuthHandler;
 import com.umc.yeogi_gal_lae.global.error.ErrorStatus;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -63,6 +64,8 @@ public class JwtUtil {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw new AuthHandler(ErrorStatus.JWT_EXPIRED_TOKEN);
         } catch (JwtException e) {
             throw new AuthHandler(ErrorStatus.JWT_INVALID_TOKEN);
         }

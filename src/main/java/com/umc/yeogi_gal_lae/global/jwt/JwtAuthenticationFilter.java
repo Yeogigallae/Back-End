@@ -26,19 +26,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
-        // 스웨거 및 로그인 관련 URL이면 필터 동작 X
         String requestURI = request.getRequestURI();
+
+        // 인증이 필요 없는 요청이면 필터를 통과시킴
         if (isExcluded(requestURI)) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // JWT 토큰 확인
         String token = resolveToken(request);
 
         if (token != null && jwtUtil.validateToken(token)) {
             String email = jwtUtil.extractEmail(token);
+
+            // 현재 로그인한 사용자 정보 SecurityContext에 저장
             JwtAuthenticationToken authentication = new JwtAuthenticationToken(email);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Authorization 헤더가 없으면 자동으로 추가
+            if (request.getHeader("Authorization") == null) {
+                request.setAttribute("Authorization", "Bearer " + token);
+            }
         }
 
         filterChain.doFilter(request, response);
