@@ -5,7 +5,6 @@ import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
 import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseIdResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseItineraryResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.dto.AICourseResponse;
-import com.umc.yeogi_gal_lae.api.aiCourse.dto.DailyItineraryResponse;
 import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
 import com.umc.yeogi_gal_lae.api.aiCourse.service.AICourseService;
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
@@ -61,30 +60,17 @@ public class AICourseController {
             @PathVariable Long aiCourseId) {
         Optional<AICourse> aiCourseOpt = aiCourseRepository.findById(aiCourseId);
         if (aiCourseOpt.isEmpty()) {
-            return Response.of(ErrorCode.NOT_FOUND, null);
+            return Response.of(ErrorCode.NOT_FOUND);
         }
         AICourse aiCourse = aiCourseOpt.get();
-        // TripPlan 검증: aiCourse에 연결된 TripPlan의 id와 입력받은 tripPlanId가 동일해야 함
         if (!aiCourse.getTripPlan().getId().equals(tripPlanId)) {
-            return Response.of(ErrorCode.NOT_FOUND, null);
+            return Response.of(ErrorCode.NOT_FOUND);
         }
         Map<String, List<Place>> courseMap = aiCourseService.getStoredAICourseById(aiCourseId);
         if (courseMap.isEmpty()) {
-            return Response.of(ErrorCode.NOT_FOUND, null);
+            return Response.of(ErrorCode.NOT_FOUND);
         }
-        // Room 정보
-        String roomName = aiCourse.getTripPlan().getRoom().getName();
-        int totalRoomMember = (aiCourse.getTripPlan().getRoom().getRoomMembers() != null)
-                ? aiCourse.getTripPlan().getRoom().getRoomMembers().size() : 0;
-        // dailyItineraries 변환
-        List<DailyItineraryResponse> dailyItineraries = AICourseConverter.toDailyItineraryResponseList(courseMap);
-
-        // 전체 응답 DTO 생성
-        AICourseItineraryResponse responseDTO = AICourseItineraryResponse.builder()
-                .roomName(roomName)
-                .totalRoomMember(totalRoomMember)
-                .dailyItineraries(dailyItineraries)
-                .build();
+        AICourseItineraryResponse responseDTO = AICourseConverter.toAICourseItineraryResponse(aiCourse, courseMap);
         return Response.of(SuccessCode.OK, responseDTO);
     }
 
