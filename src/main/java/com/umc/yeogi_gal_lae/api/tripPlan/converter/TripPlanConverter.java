@@ -51,6 +51,7 @@ public class TripPlanConverter {
                 .id(tripPlan.getId())
                 .roomId(tripPlan.getRoom().getId())
                 .masterId(tripPlan.getRoom().getMaster().getId())
+                .voteRoomId(tripPlan.getVoteRoom().getId())
                 .location(tripPlan.getLocation())
                 .startDate(tripPlan.getStartDate() != null ? tripPlan.getStartDate().toString() : null)
                 .endDate(tripPlan.getEndDate() != null ? tripPlan.getEndDate().toString() : null)
