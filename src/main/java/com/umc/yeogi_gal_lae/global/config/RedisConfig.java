@@ -1,6 +1,10 @@
 package com.umc.yeogi_gal_lae.global.config;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -28,55 +32,66 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 public class RedisConfig {
 
-    //  Redisson 설정 (분산 락용)
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("redis://redis1:6379") // Docker 컨테이너 이름 사용
-                .setConnectionPoolSize(10)
+                .setAddress("redis://" + redisHost + ":" + redisPort)
+                .setConnectionPoolSize(35)
+                .setConnectionMinimumIdleSize(35)
                 .setRetryAttempts(3)
                 .setRetryInterval(2000);
 
         return Redisson.create(config);
     }
 
-    // Redis 연결 팩토리 (Spring, Redis 연결)
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory("redis1", 6379);     // Docker 컨테이너 이름 사용
+        return new LettuceConnectionFactory(redisHost, redisPort);
     }
 
-    // RedisTemplate 설정 (Redis 캐싱 및 데이터 저장용)
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        // Key, Value 직렬화 설정
+        // Redis에서 LocalDateTime 지원하는 ObjectMapper 사용
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(serializer);
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setHashValueSerializer(serializer);
 
         return redisTemplate;
     }
 
-    //  Spring CacheManager 설정 (Redis 캐싱)
+    // CacheManager에서도 ObjectMapper 적용
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10)) // 캐시 TTL 10분 설정
+                .entryTtl(Duration.ofMinutes(10))
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
 
         return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory))
                 .cacheDefaults(cacheConfig)
                 .build();
     }
 
-    //  캐시 Key 생성 전략 (기본 설정)
     @Bean
     public SimpleKeyGenerator keyGenerator() {
         return new SimpleKeyGenerator();
