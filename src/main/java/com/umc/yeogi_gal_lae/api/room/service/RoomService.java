@@ -167,6 +167,7 @@ public class RoomService {
                         .roomId(room.getId())
                         .roomName(room.getName())
                         .members(room.getRoomMembers().stream()
+                                .filter(member -> !member.getUser().getId().equals(userId)) // 본인 제외
                                 .map(member -> new SimpleRoomMemberResponse(
                                         member.getUser().getId(),
                                         member.getUser().getProfileImage() // 프로필 이미지 추가
