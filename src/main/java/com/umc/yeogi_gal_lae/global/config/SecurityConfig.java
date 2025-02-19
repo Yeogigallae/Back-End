@@ -31,7 +31,9 @@ public class SecurityConfig {
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll()  // 모든 요청 허용 (테스트용)
+                    .requestMatchers("/","/api/health").permitAll() // 인증 없이 접근 허용
+                    .requestMatchers("/", "/index.html", "/static/**", "/favicon.ico").permitAll() // 정적 파일 허용
+                    .requestMatchers("/**").permitAll()  // 모든 요청 허용 (테스트용)
             )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(oAuth2LoginSuccessHandler) // OAuth2 로그인 성공 핸들러 추가
