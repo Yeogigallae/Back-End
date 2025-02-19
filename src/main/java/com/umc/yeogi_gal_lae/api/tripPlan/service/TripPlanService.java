@@ -70,9 +70,16 @@ public class TripPlanService {
     }
 
     /**
-     * 🚀 여행 계획이 생성되면 자동으로 투표방을 생성하는 메서드
+     * 여행 계획이 생성되면 자동으로 투표방을 생성하는 메서드
      */
     private void createVoteRoomForTrip(TripPlan tripPlan) {
+
+        // 코스 계획(COURSE)일 경우 투표방을 만들지 않고 ONGOING으로
+        if (tripPlan.getTripPlanType() == TripPlanType.COURSE) {
+            tripPlan.setStatus(Status.ONGOING);
+            return;
+        }
+
         // 기존에 존재하는 투표방이 있는지 확인 (중복 생성 방지)
         if (voteRoomRepository.findByTripPlanId(tripPlan.getId()).isPresent()) {
             throw new BusinessException(ErrorCode.VOTE_ROOM_ALREADY_EXISTS);
