@@ -1,5 +1,7 @@
 package com.umc.yeogi_gal_lae.api.vote.service;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.room.domain.Room;
 import com.umc.yeogi_gal_lae.api.room.repository.RoomMemberRepository;
@@ -9,12 +11,14 @@ import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import com.umc.yeogi_gal_lae.api.vote.converter.VoteConverter;
+import com.umc.yeogi_gal_lae.api.vote.domain.QVote;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteRoom;
 import com.umc.yeogi_gal_lae.api.vote.domain.VoteType;
 import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 import org.redisson.api.RedissonClient;
 
+import com.umc.yeogi_gal_lae.api.user.domain.QUser;
 
 import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
@@ -25,7 +29,6 @@ import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
-import org.redisson.client.RedisException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -52,6 +55,7 @@ public class VoteService {
 
     private RedissonClient redissonClient;
     private CacheManager cacheManager;
+    private final JPAQueryFactory queryFactory;
 
     @Transactional(readOnly = true)
     public VoteResponse.VoteInfoDTO getTripPlanInfoForVote(Long tripId, Long roomId , String userEmail){
@@ -140,24 +144,36 @@ public class VoteService {
         Long userId = userRepository.findByEmail(userEmail).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND)).getId();
         if (!tripPlanRepository.existsById(tripId)) { throw new BusinessException(TRIP_PLAN_NOT_FOUND);}
 
-        List<User> users = userRepository.findUsersByVoteTripPlanId(tripId);
+        QUser qUser = QUser.user;
+        QVote qVote = QVote.vote;
+        List<Tuple> voteData = queryFactory
+                .select(qUser.id, qVote.type)
+                .from(qUser)
+                .leftJoin(qVote).on(qUser.vote.eq(qVote))
+                .where(qVote.tripPlan.id.eq(tripId))
+                .fetch();
 
-        // 현재 접속한 사용자에 대한 투표 데이터
-        Optional<User> userVote = users.stream()
-                .filter(user -> user.getId().equals(userId))
+        // 사용자 투표 확인
+        Optional<Tuple> userVote = voteData.stream()
+                .filter(tuple -> tuple.get(qUser.id).equals(userId))
                 .findFirst();
 
-        // 투표 데이터를 type 이름 기준('GOOD ','BAD')으로 그룹화, 타입 당 투표 수 계산    // {"GOOD": 3, "BAD": 2}
-        Map<String, Long> groupedVotes = users.stream()
-                .filter(user -> user.getVote() != null && user.getVote().getType() != null)      // 투표한 데이터만 카운팅
-                .map(user -> user.getVote().getType().name())
+        Map<String, Long> groupedVotes = voteData.stream()
+                .map(tuple -> tuple.get(qVote.type)) // type 추출
+                .filter(Objects::nonNull)
+                .map(Enum::name)       // Enum -> String 변환
                 .collect(Collectors.groupingBy(
                         typeName -> typeName,
                         Collectors.counting())
                 );
 
-        VoteResponse.ResultDTO goodResponse = VoteConverter.convert("GOOD", userVote.orElse(null), groupedVotes);
-        VoteResponse.ResultDTO badResponse = VoteConverter.convert("BAD", userVote.orElse(null), groupedVotes);
+        // 사용자 투표 확인 (Tuple -> User)
+        User userVoteData = userVote
+                .map(tuple -> userRepository.findById(tuple.get(qUser.id)).orElse(null))
+                .orElse(null);
+        VoteResponse.ResultDTO goodResponse = VoteConverter.convert("GOOD", userVoteData, groupedVotes);
+        VoteResponse.ResultDTO badResponse = VoteConverter.convert("BAD", userVoteData, groupedVotes);
+
 
         return List.of(goodResponse, badResponse);
     }
