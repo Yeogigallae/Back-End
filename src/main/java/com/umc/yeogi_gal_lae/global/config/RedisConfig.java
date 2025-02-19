@@ -46,7 +46,8 @@ public class RedisConfig {
                 .setConnectionPoolSize(35)
                 .setConnectionMinimumIdleSize(35)
                 .setRetryAttempts(3)
-                .setRetryInterval(2000);
+                .setRetryInterval(2000)
+                .setConnectTimeout(30000); // 락 자동 연장 시간
 
         return Redisson.create(config);
     }
