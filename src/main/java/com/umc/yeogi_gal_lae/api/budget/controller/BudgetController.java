@@ -6,13 +6,11 @@ import com.umc.yeogi_gal_lae.api.budget.dto.AICourseBudgetResponse;
 import com.umc.yeogi_gal_lae.api.budget.dto.BudgetAssignment;
 import com.umc.yeogi_gal_lae.api.budget.dto.BudgetDetailResponse;
 import com.umc.yeogi_gal_lae.api.budget.dto.BudgetResponse;
-import com.umc.yeogi_gal_lae.api.budget.dto.DailyBudgetAssignmentResponse;
 import com.umc.yeogi_gal_lae.api.budget.repository.BudgetRepository;
 import com.umc.yeogi_gal_lae.api.budget.service.BudgetService;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -56,21 +54,7 @@ public class BudgetController {
         }
         Budget budget = budgetOpt.get();
         Map<String, List<BudgetAssignment>> budgetMap = budgetService.getBudgetMapById(budgetId);
-        List<DailyBudgetAssignmentResponse> dailyAssignments = BudgetConverter.toDailyBudgetAssignmentResponseList(
-                budgetMap);
-
-        // AICourse를 통해 TripPlan 정보를 조회 (TripPlan 클래스가 startDate와 endDate를 LocalDate 타입으로 제공한다고 가정)
-        String imageUrl = budget.getAiCourse().getTripPlan().getImageUrl();
-        LocalDate startDate = budget.getAiCourse().getTripPlan().getStartDate();
-        LocalDate endDate = budget.getAiCourse().getTripPlan().getEndDate();
-
-        BudgetDetailResponse detailResponse = BudgetDetailResponse.builder()
-                .dailyAssignments(dailyAssignments)
-                .imageUrl(imageUrl)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-
+        BudgetDetailResponse detailResponse = BudgetConverter.toBudgetDetailResponse(budget, budgetMap);
         return Response.of(SuccessCode.OK, detailResponse);
     }
 

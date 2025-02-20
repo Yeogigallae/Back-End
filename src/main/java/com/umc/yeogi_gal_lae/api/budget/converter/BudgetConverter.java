@@ -2,6 +2,7 @@ package com.umc.yeogi_gal_lae.api.budget.converter;
 
 import com.umc.yeogi_gal_lae.api.budget.domain.Budget;
 import com.umc.yeogi_gal_lae.api.budget.dto.BudgetAssignment;
+import com.umc.yeogi_gal_lae.api.budget.dto.BudgetDetailResponse;
 import com.umc.yeogi_gal_lae.api.budget.dto.BudgetResponse;
 import com.umc.yeogi_gal_lae.api.budget.dto.DailyBudgetAssignmentResponse;
 import java.util.List;
@@ -33,4 +34,17 @@ public class BudgetConverter {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public static BudgetDetailResponse toBudgetDetailResponse(Budget budget,
+                                                              Map<String, List<BudgetAssignment>> budgetMap) {
+        List<DailyBudgetAssignmentResponse> dailyAssignments = toDailyBudgetAssignmentResponseList(budgetMap);
+        return BudgetDetailResponse.builder()
+                .dailyAssignments(dailyAssignments)
+                .location(budget.getAiCourse().getTripPlan().getLocation())
+                .imageUrl(budget.getAiCourse().getTripPlan().getImageUrl())
+                .startDate(budget.getAiCourse().getTripPlan().getStartDate())
+                .endDate(budget.getAiCourse().getTripPlan().getEndDate())
+                .build();
+    }
+
 }
