@@ -1,6 +1,7 @@
 package com.umc.yeogi_gal_lae.api.notification.domain;
 
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,6 +16,10 @@ public class Notification extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ 특정 유저의 알림
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private String roomName; // 방 이름
     private String userName; // 사용자 이름 (시작 알림에만 필요)
