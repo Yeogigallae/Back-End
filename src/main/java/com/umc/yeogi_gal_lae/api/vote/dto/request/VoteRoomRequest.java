@@ -1,12 +1,12 @@
 package com.umc.yeogi_gal_lae.api.vote.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
-@Builder
 @Getter
+@NoArgsConstructor
 public class VoteRoomRequest {
 
     @NotNull
@@ -17,5 +17,4 @@ public class VoteRoomRequest {
 
     @NotNull
     private Long voteRoomId;
-
 }
