@@ -1,5 +1,6 @@
 package com.umc.yeogi_gal_lae.api.vote.repository;
 
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
 import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.vote.domain.Vote;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,11 +20,11 @@ public interface VoteRepository extends JpaRepository<Vote,Long> {
     @Query("SELECT v FROM Vote v WHERE v.tripPlan.id = :tripPlanId")
     List<Vote> findAllVotesByTripPlanId(@Param("tripPlanId") Long tripPlanId);
 
-    // 사용자 ID로 Vote 목록을 조회하는 메서드 추가
-    @Query("SELECT u.vote FROM User u WHERE u.id = :userId")
-    List<Vote> findByUserId(@Param("userId") Long userId);
-
     @Modifying
     @Query("DELETE FROM Vote v WHERE v.voteRoom IN (SELECT vr FROM VoteRoom vr WHERE vr.tripPlan.user = :user)")
     void deleteByVoteRoomUser(@Param("user") User user);
+
+    @Query("SELECT v FROM Vote v WHERE v.tripPlan.id = :tripPlanId AND v.id = (SELECT u.vote.id FROM User u WHERE u.id = :userId)")
+    Optional<Vote> findByUserIdAndTripPlanId(@Param("userId") Long userId, @Param("tripPlanId") Long tripPlanId);
+
 }

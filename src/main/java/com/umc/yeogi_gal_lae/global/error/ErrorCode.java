@@ -42,6 +42,9 @@ public enum ErrorCode implements BaseStatus {
     VOTE_NOT_COMPLETED_YET(HttpStatus.BAD_REQUEST, "VOTE_400", "아직 투표가 종료되지 않았습니다."),
     VOTE_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_401", "요청 하신 투표 방을 찾을 수 없습니다."),
     VOTE_RESULT_FAILED(HttpStatus.BAD_REQUEST, "VOTE_403", "여행 확정에 실패하셨습니다. 이 방은 사라집니다."),
+    DUPLICATE_VOTE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_404", "중복 투표는 불가능합니다."),
+    VOTE_CONCURRENT_UPDATE(HttpStatus.BAD_REQUEST, "VOTE_404", "동시 투표는 이용이 제한 됩니다."),
+    VOTE_NOT_ALLOWED_FOR_COURSE(HttpStatus.BAD_REQUEST, "VOTE_404", "코스는 투표가 허용되지 않습니다."),
 
     // Room Member Error
     ROOM_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "ROOM_MEMBER_404", "방에 멤버가 존재하지 않습니다."),
@@ -63,8 +66,8 @@ public enum ErrorCode implements BaseStatus {
     VOTE_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "VOTE_400", "이미 존재하는 투표 방입니다."),
 
     // 알림 오류
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION404", "알림을 찾을 수 없습니다.")
-    ;
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION404", "알림을 찾을 수 없습니다."),
+    INVALID_PLACE_FOR_TRIP_PLAN(HttpStatus.NOT_FOUND, "INVALID_PLACE_FOR_TRIP_PLAN", "해당 장소는 지정된 여행 계획에 속하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

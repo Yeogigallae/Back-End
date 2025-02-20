@@ -34,4 +34,5 @@ public class AICourse {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_plan_id", nullable = false)
     private TripPlan tripPlan;
+
 }

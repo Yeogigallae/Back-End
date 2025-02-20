@@ -21,7 +21,7 @@ spring:
     enabled: false
   data:
     redis:
-      host: redis
+      host: redis1
       port: 6379
   mvc:
     static-path-pattern: /static/**

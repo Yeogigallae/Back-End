@@ -22,16 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/rooms")
+@RequestMapping("/api/trip-plans")
 public class PlaceController {
 
     private final PlaceService placeService;
 
     @Operation(summary = "여행 장소 추가 (여러 개)")
-    @PostMapping("/{roomId}/places")
-    public Response<List<PlaceResponse>> addPlaces(@PathVariable Long roomId,
+    @PostMapping("/{tripPlanId}/places")
+    public Response<List<PlaceResponse>> addPlaces(@PathVariable Long tripPlanId,
                                                    @RequestBody List<PlaceRequest> requests) {
-        List<Place> places = placeService.addPlaces(roomId, requests);
+        List<Place> places = placeService.addPlaces(tripPlanId, requests);
         List<PlaceResponse> responses = places.stream()
                 .map(PlaceConverter::toPlaceResponse)
                 .collect(Collectors.toList());
@@ -39,28 +39,28 @@ public class PlaceController {
     }
 
     @Operation(summary = "특정 장소 가져오기")
-    @GetMapping("/{roomId}/places/{placeId}")
+    @GetMapping("/{tripPlanId}/places/{placeId}")
     public Response<PlaceResponse> getPlaceById(
-            @PathVariable Long roomId,
+            @PathVariable Long tripPlanId,
             @PathVariable Long placeId) {
-        Place place = placeService.getPlaceById(roomId, placeId);
+        Place place = placeService.getPlaceById(tripPlanId, placeId);
         PlaceResponse response = PlaceConverter.toPlaceResponse(place);
         return Response.of(SuccessCode.PLACES_FETCHED, response);
     }
 
     @Operation(summary = "특정 장소 삭제")
-    @DeleteMapping("/{roomId}/places/{placeId}")
+    @DeleteMapping("/{tripPlanId}/places/{placeId}")
     public Response<Void> deletePlace(
-            @PathVariable Long roomId,
+            @PathVariable Long tripPlanId,
             @PathVariable Long placeId) {
-        placeService.deletePlaceById(roomId, placeId);
+        placeService.deletePlaceById(tripPlanId, placeId);
         return Response.ok(SuccessCode.PLACE_DELETED);
     }
 
     @Operation(summary = "모든 장소 가져오기")
-    @GetMapping("/{roomId}/places")
-    public Response<AllPlaceResponse> getAllPlaces(@PathVariable Long roomId) {
-        List<Place> places = placeService.getAllPlacesByRoomId(roomId);
+    @GetMapping("/{tripPlanId}/places")
+    public Response<AllPlaceResponse> getAllPlaces(@PathVariable Long tripPlanId) {
+        List<Place> places = placeService.getAllPlacesByTripPlanId(tripPlanId);
         AllPlaceResponse response = PlaceConverter.toAllPlaceResponse(places);
         return Response.of(SuccessCode.OK, response);
     }

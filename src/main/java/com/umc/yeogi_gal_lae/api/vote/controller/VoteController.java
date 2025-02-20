@@ -1,5 +1,8 @@
 package com.umc.yeogi_gal_lae.api.vote.controller;
 
+import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
+import com.umc.yeogi_gal_lae.api.tripPlan.repository.TripPlanRepository;
+import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRequest;
 import com.umc.yeogi_gal_lae.api.vote.dto.VoteResponse;
@@ -7,6 +10,7 @@ import com.umc.yeogi_gal_lae.api.vote.dto.request.VoteRoomRequest;
 import com.umc.yeogi_gal_lae.api.vote.service.ValidVoteResultService;
 import com.umc.yeogi_gal_lae.api.vote.service.VoteService;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
+import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,12 +35,14 @@ public class VoteController {
     @Autowired
     private final VoteService voteService;
     private final ValidVoteResultService validVoteResultService;
+    private final TripPlanRepository tripPlanRepository;
 
     @Operation(summary = "투표하고자 하는 여행 계획의 정보 조회 API", description = "현재 투표의 여행 계획 정보에 해당합니다.")
     @GetMapping("/vote/trip-info")
     public Response<VoteResponse.VoteInfoDTO> getTripPlanInfoForVote(@RequestParam @NotNull  Long tripId,
                                                                      @RequestParam @NotNull  Long roomId){
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+        log.info("현재 로그인한 사용자 이메일: {}", userEmail);
 
         VoteResponse.VoteInfoDTO result = voteService.getTripPlanInfoForVote(tripId, roomId, userEmail);
 
@@ -49,6 +55,13 @@ public class VoteController {
     public Response<Void> createVote(@RequestBody @Valid VoteRequest.createVoteReq voteRequest) {
 
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+        TripPlan tripPlan = tripPlanRepository.findById(voteRequest.getTripId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_PLAN_NOT_FOUND));
+
+        // 코스 계획(COURSE)일 경우 투표 불가능
+        if (tripPlan.getTripPlanType() == TripPlanType.COURSE) {
+            throw new BusinessException(ErrorCode.VOTE_NOT_ALLOWED_FOR_COURSE);
+        }
 
         voteRequest.setUserEmail(userEmail);
         voteService.createVote(voteRequest, userEmail);
