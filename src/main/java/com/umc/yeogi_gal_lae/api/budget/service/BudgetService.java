@@ -80,20 +80,21 @@ public class BudgetService {
         prompt.append("Given the following travel schedule in JSON format: ")
                 .append(scheduleJson)
                 .append(", generate budget recommendations for each day. ");
-        prompt.append("For each place, assign exactly one budget type and a recommended amount. ");
+        prompt.append(
+                "For each place, assign exactly one budget type (one of MEAL, ACTIVITY, SHOPPING, TRANSPORT) and a recommended amount. ");
         prompt.append(
                 "Output the result as a JSON object where each key is the day (e.g., '1일차') and each value is an array of objects with the fields: 'placeName', 'budgetType', and 'recommendedAmount'. ");
         prompt.append("Example output:\n");
         prompt.append("{\n");
         prompt.append("  \"1일차\": [\n");
         prompt.append(
-                "    {\"placeName\": \"장소 예시\", \"budgetType\": \"activityBudget\", \"recommendedAmount\": 20000},\n");
+                "    {\"placeName\": \"Example Place\", \"budgetType\": \"ACTIVITY\", \"recommendedAmount\": 20000},\n");
         prompt.append(
-                "    {\"placeName\": \"음식점 예시\", \"budgetType\": \"mealBudget\", \"recommendedAmount\": 15000}\n");
+                "    {\"placeName\": \"Example Restaurant\", \"budgetType\": \"MEAL\", \"recommendedAmount\": 15000}\n");
         prompt.append("  ],\n");
         prompt.append("  \"2일차\": [\n");
         prompt.append(
-                "    {\"placeName\": \"장소 예시\", \"budgetType\": \"activityBudget\", \"recommendedAmount\": 25000}\n");
+                "    {\"placeName\": \"Another Place\", \"budgetType\": \"ACTIVITY\", \"recommendedAmount\": 25000}\n");
         prompt.append("  ]\n");
         prompt.append("}");
         return prompt.toString();
@@ -101,7 +102,7 @@ public class BudgetService {
 
     private String callGptApi(String prompt) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-4");
+        requestBody.put("model", "gpt-4o-mini");
         Map<String, String> message = new HashMap<>();
         message.put("role", "user");
         message.put("content", prompt);

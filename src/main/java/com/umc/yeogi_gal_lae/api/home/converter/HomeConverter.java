@@ -15,28 +15,27 @@ public class HomeConverter {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
-    public static HomeResponse.OngoingVoteRoom toOngoingVoteRoom(VoteRoom voteRoom) {
-
-        List<String> profileImageUrls = voteRoom.getTripPlan().getRoom().getRoomMembers().stream()
-            .map(member -> member.getUser().getProfileImage())
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+    public static HomeResponse.OngoingVoteRoom toOngoingVoteRoom(TripPlan tripPlan) {
+        List<String> profileImageUrls = tripPlan.getRoom().getRoomMembers().stream()
+                .map(member -> member.getUser().getProfileImage())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return new HomeResponse.OngoingVoteRoom(
-                voteRoom.getTripPlan().getId(),
-                voteRoom.getTripPlan().getRoom().getId(),
-                voteRoom.getTripPlan().getRoom().getMaster().getId(),
-                voteRoom.getTripPlan().getRoom().getName(),
-                voteRoom.getTripPlan().getLocation(),
-                voteRoom.getTripPlan().getRoom().getRoomMembers().size(),
-                voteRoom.getTripPlan().getVoteLimitTime(),
-                voteRoom.getTripPlan().getRoom().getRoomMembers().stream().filter(m -> m.getUser().getVote() != null).count(),
+                tripPlan.getId(),
+                tripPlan.getRoom().getId(),
+                tripPlan.getRoom().getMaster().getId(),
+                tripPlan.getRoom().getName(),
+                tripPlan.getLocation(),
+                tripPlan.getRoom().getRoomMembers().size(),
+                tripPlan.getVoteLimitTime(),
+                tripPlan.getRoom().getRoomMembers().stream().filter(m -> m.getUser().getVote() != null).count(),
                 profileImageUrls,
-                voteRoom.getCreatedAt(),
-                voteRoom.getTripPlan().getTripPlanType(),
-                voteRoom.getTripPlan().getLatitude(),
-                voteRoom.getTripPlan().getLongitude()
-                );
+                tripPlan.getCreatedAt(),
+                tripPlan.getTripPlanType(),
+                tripPlan.getLatitude(),
+                tripPlan.getLongitude()
+        );
     }
 
     public static HomeResponse.CompletedVoteRoom toCompletedVoteRoom(TripPlan tripPlan, Long aiCourseId) {
