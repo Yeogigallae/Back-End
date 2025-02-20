@@ -50,6 +50,8 @@ public class NotificationService {
         notification.setRoomName(roomName);
         notification.setUserName(userName);
         notification.setUserEmail(userEmail); // 이메일 저장
+        notification.setUser(userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)));
         notification.setType(type);
         notification.setContent(generateCaption(roomName, userName, type, isStart));
         notification.setTripPlanId(tripPlanId);
@@ -59,19 +61,19 @@ public class NotificationService {
     }
 
     /**
-     * ✅ 특정 유저의 최신 알림 리스트 조회 (타입 필터링 지원)
+     * 특정 유저의 최신 알림 리스트 조회 (타입 필터링 지원)
      */
     @Transactional(readOnly = true)
     public List<NotificationDto> getUserNotifications(String userEmail) {
-        // 🔹 userEmail을 기반으로 User 객체 조회
+        // userEmail을 기반으로 User 객체 조회
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        // 🔹 알림 조회 (필터링이 없으면 모든 알림 조회)
+        // 알림 조회 (필터링이 없으면 모든 알림 조회)
         List<Notification> notifications;
         notifications = notificationRepository.findByUserOrderByCreatedAtDesc(user);
 
-        // 🔹 알림이 없으면 목업 데이터 반환
+        // 알림이 없으면 목업 데이터 반환
         if (notifications.isEmpty()) {
             log.warn("알림 데이터 없음, 기본 목업 데이터 반환");
             return mockNotifications();

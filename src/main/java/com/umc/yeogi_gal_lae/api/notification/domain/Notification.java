@@ -17,7 +17,7 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY) // ✅ 특정 유저의 알림
+    @ManyToOne(fetch = FetchType.LAZY) // 특정 유저의 알림
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
