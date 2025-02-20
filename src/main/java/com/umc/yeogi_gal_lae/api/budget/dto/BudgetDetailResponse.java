@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class BudgetDetailResponse {
+    private String location;
     private String imageUrl;
     private LocalDate startDate;
     private LocalDate endDate;
