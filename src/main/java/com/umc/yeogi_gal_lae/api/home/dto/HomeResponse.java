@@ -39,6 +39,7 @@ public class HomeResponse {
         private String roomName;
         private Long aiCourseId;
         private String location;
+        private TripPlanType tripPlanType;
         private LocalDate startDate;
         private String endDate;
         private String imageUrl;

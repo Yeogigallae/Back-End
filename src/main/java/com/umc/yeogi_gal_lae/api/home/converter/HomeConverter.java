@@ -46,6 +46,7 @@ public class HomeConverter {
                 tripPlan.getRoom().getName(),
                 aiCourseId,
                 tripPlan.getLocation(),
+                tripPlan.getTripPlanType(),
                 tripPlan.getStartDate(),
                 tripPlan.getEndDate().format(DATE_FORMATTER),
                 tripPlan.getImageUrl()
