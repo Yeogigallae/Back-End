@@ -59,12 +59,13 @@ public class NotificationController {
      * 최신 알림 조회 API
      */
     @GetMapping
-    public ResponseEntity<Response<List<NotificationDto>>> getAllNotifications() {
+    public ResponseEntity<Response<List<NotificationDto>>> getUserNotifications() {
 
-        //로그인 없을시 에러냄
+        // 현재 로그인한 사용자의 이메일 가져오기
         String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
 
-        List<NotificationDto> notifications = notificationService.getAllNotifications();
+        List<NotificationDto> notifications = notificationService.getUserNotifications(userEmail);
+
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_FETCH_OK, notifications));
     }
 

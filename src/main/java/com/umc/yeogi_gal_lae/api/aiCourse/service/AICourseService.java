@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.yeogi_gal_lae.api.aiCourse.domain.AICourse;
 import com.umc.yeogi_gal_lae.api.aiCourse.repository.AICourseRepository;
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.place.domain.Place;
 import com.umc.yeogi_gal_lae.api.place.repository.PlaceRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.domain.TripPlan;
@@ -21,11 +22,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 
 @Service
 public class AICourseService {
@@ -35,16 +38,21 @@ public class AICourseService {
     private final PlaceRepository placeRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
 
     @Value("${openai.api.key}")
     private String apiKey;
 
-    public AICourseService(AICourseRepository aiCourseRepository, PlaceRepository placeRepository,
-                           WebClient.Builder webClientBuilder) {
+    public AICourseService(AICourseRepository aiCourseRepository,
+                           PlaceRepository placeRepository,
+                           WebClient.Builder webClientBuilder,
+                           ObjectMapper objectMapper,
+                           NotificationService notificationService) {
         this.aiCourseRepository = aiCourseRepository;
         this.placeRepository = placeRepository;
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -55,6 +63,15 @@ public class AICourseService {
      */
     @Transactional
     public AICourse generateAndStoreAICourse(TripPlan tripPlan) {
+        // 1. "코스 짜기 시작" 알림
+        notificationService.createStartNotification(
+                tripPlan.getRoom().getName(), // 방 이름
+                tripPlan.getUser().getUsername(), // 사용자 이름
+                tripPlan.getUser().getEmail(), // 사용자 이메일
+                NotificationType.COURSE_START, // 알림 타입
+                tripPlan.getId(),
+                tripPlan.getTripPlanType()
+        );
         // TripPlan에 직접 연결된 Place들을 DB에서 명시적으로 조회
         List<Place> places = placeRepository.findAllByTripPlanId(tripPlan.getId());
 
@@ -112,7 +129,16 @@ public class AICourseService {
                     .tripPlan(tripPlan)
                     .courseJson(courseJson)
                     .build();
+            // "코스 짜기 완료" 알림 추가
+            notificationService.createEndNotification(
+                    tripPlan.getRoom().getName(), // 방 이름
+                    tripPlan.getUser().getEmail(), // 사용자 이메일
+                    NotificationType.COURSE_COMPLETE, // 알림 타입
+                    tripPlan.getId(),
+                    tripPlan.getTripPlanType()
+            );
             return aiCourseRepository.save(aiCourse);
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
