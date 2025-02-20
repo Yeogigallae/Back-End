@@ -32,6 +32,12 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setSecure(!isLocal);
 
+        if (!isLocal) {
+            cookie.setAttribute("SameSite", "None");
+        } else {
+            cookie.setAttribute("SameSite", "Lax");
+        }
+
         response.addCookie(cookie);
     }
 
