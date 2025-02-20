@@ -14,11 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 
 @Service
 public class BudgetService {
@@ -27,19 +30,23 @@ public class BudgetService {
     private final AICourseRepository aiCourseRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
+
 
     @Value("${openai.api.key}")
     private String apiKey;
 
     public BudgetService(BudgetRepository budgetRepository,
                          AICourseRepository aiCourseRepository,
-                         WebClient.Builder webClientBuilder) {
+                         WebClient.Builder webClientBuilder,
+                         ObjectMapper objectMapper,
+                         NotificationService notificationService) {
         this.budgetRepository = budgetRepository;
         this.aiCourseRepository = aiCourseRepository;
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
+        this.notificationService = notificationService;
     }
-
     /**
      * 저장된 AICourse의 스케줄 데이터를 기반으로 GPT API를 호출하여, 각 일차별 각 장소에 대해 예산 추천(예: budgetType 및 추천 금액)을 산출하고, 그 결과를 Budget 엔티티에
      * 저장합니다.
@@ -54,6 +61,15 @@ public class BudgetService {
             return null;
         }
         AICourse aiCourse = aiCourseOpt.get();
+        // "예산 정하기 시작" 알림 추가
+        notificationService.createStartNotification(
+                aiCourse.getTripPlan().getRoom().getName(), // 방 이름
+                aiCourse.getTripPlan().getUser().getUsername(), // 사용자 이름
+                aiCourse.getTripPlan().getUser().getEmail(), // 사용자 이메일
+                NotificationType.BUDGET_START, // 알림 타입 (추가 필요)
+                aiCourse.getTripPlan().getId(),
+                aiCourse.getTripPlan().getTripPlanType()
+        );
         // aiCourse에 저장된 courseJson은 이미 일정(일차별 장소 이름 목록)을 포함하고 있음
         String scheduleJson = aiCourse.getCourseJson();
         // 프롬프트 구성: GPT에게 스케줄 정보를 바탕으로 각 장소의 예산 추천을 요청
@@ -62,6 +78,14 @@ public class BudgetService {
         String gptApiResponse = callGptApi(prompt);
         // 응답 파싱: 예시 결과 JSON은 Map<String, List<BudgetAssignment>>
         Map<String, List<BudgetAssignment>> budgetMap = parseBudgetGptResponse(gptApiResponse);
+        // "예산 정하기 완료" 알림 추가
+        notificationService.createEndNotification(
+                aiCourse.getTripPlan().getRoom().getName(), // 방 이름
+                aiCourse.getTripPlan().getUser().getEmail(), // 사용자 이메일
+                NotificationType.BUDGET_COMPLETE, // 알림 타입 (추가 필요)
+                aiCourse.getTripPlan().getId(),
+                aiCourse.getTripPlan().getTripPlanType()
+        );
         try {
             String budgetJson = objectMapper.writeValueAsString(budgetMap);
             Budget budget = Budget.builder()
@@ -69,6 +93,7 @@ public class BudgetService {
                     .budgetJson(budgetJson)
                     .build();
             return budgetRepository.save(budget);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
