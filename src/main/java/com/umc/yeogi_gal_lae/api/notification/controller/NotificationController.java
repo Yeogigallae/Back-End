@@ -4,6 +4,7 @@ import com.umc.yeogi_gal_lae.api.notification.dto.NotificationDto;
 import com.umc.yeogi_gal_lae.api.notification.service.NotificationService;
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.api.vote.AuthenticatedUserUtils;
 import com.umc.yeogi_gal_lae.global.common.response.Response;
 import com.umc.yeogi_gal_lae.global.success.SuccessCode;
@@ -59,6 +60,10 @@ public class NotificationController {
      */
     @GetMapping
     public ResponseEntity<Response<List<NotificationDto>>> getAllNotifications() {
+
+        //로그인 없을시 에러냄
+        String userEmail = AuthenticatedUserUtils.getAuthenticatedUserEmail();
+
         List<NotificationDto> notifications = notificationService.getAllNotifications();
         return ResponseEntity.ok(Response.of(SuccessCode.NOTIFICATION_FETCH_OK, notifications));
     }

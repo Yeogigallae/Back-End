@@ -167,10 +167,9 @@ public class RoomService {
                         .roomId(room.getId())
                         .roomName(room.getName())
                         .members(room.getRoomMembers().stream()
-                                .filter(member -> !member.getUser().getId().equals(userId)) // 본인 제외
                                 .map(member -> new SimpleRoomMemberResponse(
                                         member.getUser().getId(),
-                                        member.getUser().getProfileImage() // 프로필 이미지 추가
+                                        member.getUser().getId().equals(userId) ? null : member.getUser().getProfileImage() // 본인 프로필만 null 처리
                                 ))
                                 .collect(Collectors.toList()))
                         .build())

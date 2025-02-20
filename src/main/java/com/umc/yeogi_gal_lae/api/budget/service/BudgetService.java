@@ -80,6 +80,7 @@ public class BudgetService {
         prompt.append("Given the following travel schedule in JSON format: ")
                 .append(scheduleJson)
                 .append(", generate budget recommendations for each day. ");
+        prompt.append("단, 'placeName' 필드의 값은 반드시 한국어로만 작성되어야 하며, 영어 표현은 사용하지 마세요. ");
         prompt.append(
                 "For each place, assign exactly one budget type (one of MEAL, ACTIVITY, SHOPPING, TRANSPORT) and a recommended amount. ");
         prompt.append(
@@ -125,7 +126,7 @@ public class BudgetService {
             if (jsonStart != -1) {
                 content = content.substring(jsonStart);
             }
-            return objectMapper.readValue(content, new TypeReference<Map<String, List<BudgetAssignment>>>() {
+            return objectMapper.readValue(content, new TypeReference<>() {
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,13 +145,11 @@ public class BudgetService {
         }
         try {
             String budgetJson = budgetOpt.get().getBudgetJson();
-            return objectMapper.readValue(budgetJson, new TypeReference<Map<String, List<BudgetAssignment>>>() {
+            return objectMapper.readValue(budgetJson, new TypeReference<>() {
             });
         } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyMap();
         }
     }
-
-
 }

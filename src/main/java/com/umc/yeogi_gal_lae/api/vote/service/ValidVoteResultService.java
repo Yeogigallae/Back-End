@@ -14,7 +14,6 @@ import com.umc.yeogi_gal_lae.api.vote.repository.VoteRepository;
 import com.umc.yeogi_gal_lae.api.vote.repository.VoteRoomRepository;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,64 +40,52 @@ public class ValidVoteResultService {
     public boolean validResult(VoteRoomRequest voteRoomRequest) {
 
         // 투표 완료 여부 확인
-        if (!checkVoteCompleted(voteRoomRequest)) { throw new BusinessException(ErrorCode.VOTE_NOT_COMPLETED_YET);  }
+        if (!checkVoteCompleted(voteRoomRequest)) {  throw new BusinessException(ErrorCode.VOTE_NOT_COMPLETED_YET);}
 
         VoteRoom voteRoom = findVoteRoomById(voteRoomRequest.getVoteRoomId());
         TripPlan tripPlan = voteRoom.getTripPlan();
+        VoteCounts voteCounts = countVotes(tripPlan.getId());
 
-        if (isVoteTimeExpired(voteRoom, tripPlan)) {
-            voteRoomRepository.delete(voteRoom);
-            return true;      // 재투표
-        }
-
-        // 찬성/반대 투표 집계
-        List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlan.getId());
-        long goodVotes = votes.stream().filter(v -> v.getType() == VoteType.GOOD).count();
-        long badVotes = votes.stream().filter(v -> v.getType() == VoteType.BAD).count();
-
-
-        // 반대표가 더 많을 시, 재투표를 위해 투표 방 삭제
-        if (goodVotes < badVotes) {
-            voteRoomRepository.delete(voteRoom);
-            
-            // roomId를 통해 roomName 가져오기
-            Room room = findRoomById(voteRoomRequest.getRoomId());
-            String roomName = room.getName();
-
-            // 투표 완료 알림 생성
-            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE, tripPlan.getId(), tripPlan.getTripPlanType());
-            return true;
-        }
-        else{
-            tripPlan.setStatus(Status.COMPLETED);   // 여행 계획 '완료'로 상태 변경
+        if (voteCounts.goodVotes > voteCounts.badVotes) {
+            tripPlan.setStatus(Status.COMPLETED);
             tripPlanRepository.save(tripPlan);
-
-            // roomId를 통해 roomName 가져오기
-            Room room = findRoomById(voteRoomRequest.getRoomId());
-            String roomName = room.getName();
-
-            // 투표 완료 알림 생성
-            notificationService.createEndNotification(roomName, tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE, tripPlan.getId(), tripPlan.getTripPlanType());
-            return false;
+        } else {
+            voteRoomRepository.delete(voteRoom);
         }
 
+        Room room = findRoomById(voteRoomRequest.getRoomId());
+        notificationService.createEndNotification(
+                room.getName(), tripPlan.getUser().getEmail(), NotificationType.VOTE_COMPLETE, tripPlan.getId(), tripPlan.getTripPlanType()
+        );
+
+        return voteCounts.goodVotes <= voteCounts.badVotes;
     }
 
     @Transactional(readOnly = true)
     public boolean checkVoteCompleted(VoteRoomRequest voteRoomRequest) {
+        try {
+            VoteRoom voteRoom = findVoteRoomById(voteRoomRequest.getVoteRoomId());
+            TripPlan tripPlan = findTripPlanById(voteRoomRequest.getTripId());
+            VoteCounts voteCounts = countVotes(tripPlan.getId());
 
-        // 반복되는 로직 헬퍼 클래스로 분리
-        VoteRoom voteRoom = findVoteRoomById(voteRoomRequest.getVoteRoomId());
-        TripPlan tripPlan = findTripPlanById(voteRoomRequest.getTripId());
+            // 조건 1. 모든 멤버가 투표했는지 확인
+            boolean allMembersVoted = isAllMembersVoted(voteRoomRequest.getRoomId(), voteCounts.totalVotes);
 
-        // 조건 1. 모든 멤버가 투표 했는지
-        List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlan.getId());  // 여행에 해당하는 모든 투표 리스트
-        boolean allMembersVoted = isAllMembersVoted(voteRoomRequest.getRoomId(), votes);
+            // 조건 2. 투표 제한 시간 초과 확인
+            boolean isTimeExpired = isVoteTimeExpired(voteRoom, tripPlan);
 
-        // 조건 2. 투표 제한 시간 초과
-        boolean isTimeExpired = isVoteTimeExpired(voteRoom, tripPlan);
+            return (isTimeExpired || allMembersVoted) && (voteCounts.goodVotes != voteCounts.badVotes);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-        return isTimeExpired || allMembersVoted;
+    private VoteCounts countVotes(Long tripPlanId) {
+        List<Vote> votes = voteRepository.findAllVotesByTripPlanId(tripPlanId);
+        long goodVotes = votes.stream().filter(v -> v.getType() == VoteType.GOOD).count();
+        long badVotes = votes.stream().filter(v -> v.getType() == VoteType.BAD).count();
+
+        return new VoteCounts(goodVotes, badVotes, votes.size());
     }
 
     private TripPlan findTripPlanById(Long tripId) {
@@ -116,9 +103,9 @@ public class ValidVoteResultService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_ROOM_NOT_FOUND));
     }
 
-    private boolean isAllMembersVoted(Long roomId, List<Vote> votes) {
+    private boolean isAllMembersVoted(Long roomId, long totalVotes) {
         Room room = findRoomById(roomId);
-        return room.getRoomMembers().size() == votes.size();
+        return room.getRoomMembers().size() == totalVotes;
     }
 
     private boolean isVoteTimeExpired(VoteRoom voteRoom, TripPlan tripPlan) {
@@ -126,5 +113,17 @@ public class ValidVoteResultService {
         return LocalDateTime.now().isAfter(
                 voteRoom.getCreatedAt().plusSeconds(tripPlan.getVoteLimitTime().getSeconds())
         );
+    }
+
+    private static class VoteCounts {
+        final long goodVotes;
+        final long badVotes;
+        final long totalVotes;
+
+        public VoteCounts(long goodVotes, long badVotes, long totalVotes) {
+            this.goodVotes = goodVotes;
+            this.badVotes = badVotes;
+            this.totalVotes = totalVotes;
+        }
     }
 }
