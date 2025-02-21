@@ -147,15 +147,15 @@ public class RoomService {
                             .roomId(0L)
                             .roomName("Mock Room 1")
                             .members(List.of(
-                                    new SimpleRoomMemberResponse(0L, "mock_profile1.jpg"),
-                                    new SimpleRoomMemberResponse(1L, "mock_profile2.jpg")
+                                    new SimpleRoomMemberResponse(0L, "https://img1.kakaocdn.net/thumb/R110x110.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg"),
+                                    new SimpleRoomMemberResponse(1L, "https://img1.kakaocdn.net/thumb/R110x110.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg")
                             ))
                             .build(),
                     RoomResponse.builder()
                             .roomId(1L)
                             .roomName("Mock Room 2")
                             .members(List.of(
-                                    new SimpleRoomMemberResponse(2L, "mock_profile3.jpg")
+                                    new SimpleRoomMemberResponse(2L, "https://img1.kakaocdn.net/thumb/R110x110.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg")
                             ))
                             .build()
             ));
