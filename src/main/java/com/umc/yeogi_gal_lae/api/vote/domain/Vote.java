@@ -31,6 +31,7 @@ public class Vote extends BaseEntity {
     @JsonIgnore
     private VoteRoom voteRoom;
 
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VoteType type;

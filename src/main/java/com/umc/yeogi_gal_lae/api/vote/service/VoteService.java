@@ -88,7 +88,7 @@ public class VoteService {
             }
 
             // 기존 투표 여부 확인
-            Optional<Vote> existingVote = voteRepository.findByUserAndTripPlan(user, tripPlan);
+            Optional<Vote> existingVote = voteRepository.findByUserIdAndTripPlanId(user.getId(), tripPlan.getId());
 
             if (existingVote.isPresent()) {
                 Vote currentVote = existingVote.get();

@@ -54,6 +54,11 @@ public class RoomService {
         // 방 멤버 추가
         List<User> users = userRepository.findAllById(request.getUserIds());
 
+        // 방장 추가
+        if (!users.contains(master)) {  // 중복 추가 방지
+            users.add(master);
+        }
+
         List<RoomMember> newRoomMembers = users.stream()
                 .map(user -> RoomMemberConverter.fromRequest(room, user))
                 .toList();

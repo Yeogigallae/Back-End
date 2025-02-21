@@ -5,8 +5,10 @@ import com.umc.yeogi_gal_lae.api.notification.domain.Notification;
 import com.umc.yeogi_gal_lae.api.notification.domain.NotificationType;
 import com.umc.yeogi_gal_lae.api.notification.repository.NotificationRepository;
 import com.umc.yeogi_gal_lae.api.tripPlan.types.TripPlanType;
+import com.umc.yeogi_gal_lae.api.user.domain.User;
 import com.umc.yeogi_gal_lae.global.error.BusinessException;
 import com.umc.yeogi_gal_lae.global.error.ErrorCode;
+import com.umc.yeogi_gal_lae.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     /**
      * 시작 알림 생성 (TripPlan 관련 정보 추가)
@@ -47,6 +50,8 @@ public class NotificationService {
         notification.setRoomName(roomName);
         notification.setUserName(userName);
         notification.setUserEmail(userEmail); // 이메일 저장
+        notification.setUser(userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)));
         notification.setType(type);
         notification.setContent(generateCaption(roomName, userName, type, isStart));
         notification.setTripPlanId(tripPlanId);
@@ -56,24 +61,30 @@ public class NotificationService {
     }
 
     /**
-     * 최신순으로 정렬된 알림 리스트 조회 (TripPlan 정보 포함)
+     * 특정 유저의 최신 알림 리스트 조회 (타입 필터링 지원)
      */
     @Transactional(readOnly = true)
-    public List<NotificationDto> getAllNotifications() {
-        List<Notification> notifications = notificationRepository.findAllByOrderByCreatedAtDesc();
-        // 레포지토리가 비어있으면 목업 데이터 반환
+    public List<NotificationDto> getUserNotifications(String userEmail) {
+        // userEmail을 기반으로 User 객체 조회
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 알림 조회 (필터링이 없으면 모든 알림 조회)
+        List<Notification> notifications;
+        notifications = notificationRepository.findByUserOrderByCreatedAtDesc(user);
+
+        // 알림이 없으면 목업 데이터 반환
         if (notifications.isEmpty()) {
             log.warn("알림 데이터 없음, 기본 목업 데이터 반환");
             return mockNotifications();
         }
+
         return notifications.stream()
                 .map(notification -> new NotificationDto(
                         notification.getId(),
                         notification.getType().getTitle(),
                         generateCaption(notification.getRoomName(), notification.getUserName(), notification.getType(),
-                                notification.getType() == NotificationType.VOTE_START ||
-                                        notification.getType() == NotificationType.COURSE_START ||
-                                        notification.getType() == NotificationType.BUDGET_START),
+                                isStartNotification(notification.getType())),
                         notification.getType().name(),
                         notification.getTripPlanId(),
                         notification.getTripPlanType()
@@ -82,14 +93,23 @@ public class NotificationService {
     }
 
     /**
-     * 목업 알림 데이터 생성
+     * 목업 데이터 반환 메서드
      */
     private List<NotificationDto> mockNotifications() {
         return List.of(
-                new NotificationDto(1L, "투표 시작", "mock에서 투표가 시작되었습니다!", "VOTE_START", 100L, TripPlanType.COURSE),
-                new NotificationDto(2L, "예산 설정 시작", "mock에서 예산 설정이 시작되었습니다!", "BUDGET_START", 101L, TripPlanType.SCHEDULE),
-                new NotificationDto(3L, "코스 선택 시작", "mock에서 코스 선택이 시작되었습니다!", "COURSE_START", 102L, TripPlanType.SCHEDULE)
+                new NotificationDto(1L, "투표 시작", "Mock 투표가 시작되었습니다!", "VOTE_START", 100L, TripPlanType.COURSE),
+                new NotificationDto(2L, "예산 설정 시작", "Mock 예산 설정이 시작되었습니다!", "BUDGET_START", 101L, TripPlanType.SCHEDULE),
+                new NotificationDto(3L, "코스 선택 시작", "Mock 코스 선택이 시작되었습니다!", "COURSE_START", 102L, TripPlanType.SCHEDULE)
         );
+    }
+
+    /**
+     * 특정 알림 타입이 "시작" 알림인지 체크
+     */
+    private boolean isStartNotification(NotificationType type) {
+        return type == NotificationType.VOTE_START ||
+                type == NotificationType.COURSE_START ||
+                type == NotificationType.BUDGET_START;
     }
 
     /**

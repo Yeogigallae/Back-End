@@ -24,6 +24,7 @@ public interface VoteRepository extends JpaRepository<Vote,Long> {
     @Query("DELETE FROM Vote v WHERE v.voteRoom IN (SELECT vr FROM VoteRoom vr WHERE vr.tripPlan.user = :user)")
     void deleteByVoteRoomUser(@Param("user") User user);
 
-    Optional<Vote> findByUserAndTripPlan(User user, TripPlan tripPlan);
+    @Query("SELECT v FROM Vote v WHERE v.tripPlan.id = :tripPlanId AND v.id = (SELECT u.vote.id FROM User u WHERE u.id = :userId)")
+    Optional<Vote> findByUserIdAndTripPlanId(@Param("userId") Long userId, @Param("tripPlanId") Long tripPlanId);
 
 }
