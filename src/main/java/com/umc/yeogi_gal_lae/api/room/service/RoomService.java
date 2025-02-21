@@ -166,6 +166,7 @@ public class RoomService {
             ));
         }
 
+
         // Room을 RoomResponse로 변환하여 리스트 생성
         List<RoomResponse> roomResponses = rooms.stream()
                 .map(room -> RoomResponse.builder()

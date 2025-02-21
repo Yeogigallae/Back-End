@@ -139,6 +139,7 @@ public class FriendshipService {
                     .build());
         }
         return mockFriends;
+
     }
 
     @Transactional
