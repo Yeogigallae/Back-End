@@ -1,7 +1,5 @@
-# Back-End
 
-
-# 여기갈래 | 투표 기반 AI 여행 일정 생성 서비스
+# 여기갈래 | 투표 기반 AI 여행 일정 생성 서비스 ( Back-End ) 
 
 ![Image](https://github.com/user-attachments/assets/effd6ccc-3761-4816-81f7-9b63d7df0aed)
 
